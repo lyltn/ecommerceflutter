@@ -1,3 +1,4 @@
+import 'package:ecommercettl/pages/shopaddproduct.dart';
 import 'package:ecommercettl/pages/shopbottomnav.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
@@ -112,25 +113,39 @@ class _ShopListProductState extends State<ShopListProduct> {
             const SizedBox(height: 20.0),
 
             // Add Product Button
-            Container(
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: const BorderSide(
-                      color: Colors.green, // Đặt màu viền
-                      width: 2.0, // Độ dày của viền
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ShopAddProduct()));
+              },
+              child: Container(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: const BorderSide(
+                        color: Colors.green, // Đặt màu viền
+                        width: 2.0, // Độ dày của viền
+                      ),
                     ),
                   ),
-                ),
-                child: const Text(
-                  'Thêm sản phẩm +',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontFamily: 'Roboto',
-                    fontSize: 16.0,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ShopAddProduct()));
+                    },
+                    child: const Text(
+                      'Thêm sản phẩm +',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontFamily: 'Roboto',
+                        fontSize: 16.0,
+                      ),
+                    ),
                   ),
                 ),
               ),
