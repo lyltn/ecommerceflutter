@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:ecommercettl/pages/shopbottomnav.dart';
+import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -15,6 +16,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
   final TextEditingController brandController = TextEditingController();
   final TextEditingController commissionController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  bool productStatus = true;
   String? categoryValue;
   String? genderValue;
   final List<String> categories = ['Áo khoác jean', 'Áo sơ mi', 'Quần jeans'];
@@ -136,47 +138,66 @@ class _ShopAddProductState extends State<ShopAddProduct> {
               hint: Text('Chọn thương hiệu'),
             ),
             SizedBox(height: 20),
-            Text("Giới tính", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Color(0xFFececf8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Giới tính",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xFFececf8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        value: genderValue,
+                        items: genders
+                            .map((gender) => DropdownMenuItem(
+                                  value: gender,
+                                  child: Text(gender),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            genderValue = value;
+                          });
+                        },
+                        hint: Text('Chọn giới tính'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              value: genderValue,
-              items: genders
-                  .map((gender) => DropdownMenuItem(
-                        value: gender,
-                        child: Text(gender),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  genderValue = value;
-                });
-              },
-              hint: Text('Chọn giới tính'),
-            ),
-            SizedBox(height: 20),
-            Text("Tiền hoa hồng",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            TextField(
-              controller: commissionController,
-              decoration: InputDecoration(
-                hintText: 'Nhập % hoa hồng',
-                filled: true,
-                fillColor: Color(0xFFececf8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+                SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Tiền hoa hồng",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: commissionController,
+                        decoration: InputDecoration(
+                          hintText: 'Nhập % hoa hồng',
+                          filled: true,
+                          fillColor: Color(0xFFececf8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              keyboardType: TextInputType.number,
+              ],
             ),
             SizedBox(height: 20),
             Text("Mô tả sản phẩm",
@@ -227,22 +248,53 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                     ),
                   ),
             SizedBox(height: 30),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                ),
-                child: Text(
-                  'Thêm',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Roboto',
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
+            Row(
+              children: [
+                Container(
+                  child: Row(
+                    children: [
+                      Text('Trạng thái:',
+                          style: AppWiget.LightTextFeildStyle()),
+                      Transform.scale(
+                        scale:
+                            0.8, // Điều chỉnh tỷ lệ để chiều cao gần với 18 (vì Switch mặc định khá lớn)
+                        child: Switch(
+                          value: productStatus,
+                          onChanged: (value) {
+                            setState(() {
+                              productStatus = value;
+                            });
+                          },
+                          activeColor: const Color.fromARGB(
+                              255, 113, 155, 65), // Màu khi bật
+                          inactiveTrackColor: Colors
+                              .lightGreen.shade100, // Màu khi tắt (xanh nhạt)
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+                SizedBox(
+                  width: 70.0,
+                ),
+                Container(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: Text(
+                      'Thêm',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Roboto',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
