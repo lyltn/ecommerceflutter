@@ -2,7 +2,8 @@ import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/client/shopcanceledpage.dart';
 import 'package:ecommercettl/pages/client/shopconfirmpage.dart';
 import 'package:ecommercettl/pages/client/shopdeliveredpage.dart';
-import 'package:ecommercettl/pages/shopplacedPage.dart';
+import 'package:ecommercettl/pages/client/shopplacedpage.dart';
+
 import 'package:ecommercettl/pages/client/shopreturngoods.dart';
 import 'package:ecommercettl/pages/client/shopshippingpage.dart';
 import 'package:ecommercettl/pages/client/shopwaitdelivery.dart';
