@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:ecommercettl/pages/shopbottomnav.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

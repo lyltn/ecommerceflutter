@@ -1,8 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:ecommercettl/pages/home.dart';
-import 'package:ecommercettl/pages/order.dart';
-import 'package:ecommercettl/pages/post.dart';
-import 'package:ecommercettl/pages/profile.dart';
+import 'package:ecommercettl/pages/customer/home.dart';
+import 'package:ecommercettl/pages/customer/order.dart';
+import 'package:ecommercettl/pages/customer/post.dart';
+import 'package:ecommercettl/pages/customer/profile.dart';
 import 'package:flutter/material.dart';
 
 class BottomNav extends StatefulWidget {
