@@ -1,3 +1,4 @@
+import 'package:ecommercettl/pages/client/shoporderdetail.dart';
 import 'package:flutter/material.dart';
 
 class ShopConfirmpage extends StatefulWidget {
@@ -79,26 +80,42 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                 OverflowBar(
                   alignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.all(8.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              5.0), // Set border radius to 5
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ShopOrderDetail()));
+                      },
+                      child: OutlinedButton.icon(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.all(8.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                5.0), // Set border radius to 5
+                          ),
                         ),
-                      ),
-                      label: const Text(
-                        'xem chi tiết đơn hàng',
-                        style: TextStyle(
-                            color: Color.fromARGB(255, 46, 46, 46),
-                            fontSize: 12.0),
-                      ),
-                      icon: const Icon(
-                        Icons.remove_red_eye,
-                        color: Color.fromARGB(
-                            255, 55, 54, 54), // Set icon color to black
-                        size: 15.0,
+                        label: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ShopOrderDetail()));
+                          },
+                          child: const Text(
+                            'xem chi tiết đơn hàng',
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 46, 46, 46),
+                                fontSize: 12.0),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.remove_red_eye,
+                          color: Color.fromARGB(
+                              255, 55, 54, 54), // Set icon color to black
+                          size: 15.0,
+                        ),
                       ),
                     ),
                     ElevatedButton(
