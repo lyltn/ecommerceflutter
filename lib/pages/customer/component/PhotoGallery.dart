@@ -39,31 +39,29 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                 ),
               ),
             ),
-            // Ảnh thu nhỏ bên dưới
-            Expanded(
-              flex: 1,
+            // Thumbnails
+            SizedBox(
+              height: 100, // Set the height for the thumbnails container
               child: Container(
-                color: Colors.white,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: imagePaths.length, // Số lượng ảnh trong danh sách
+                  itemCount: imagePaths.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () {
-                        // Khi người dùng nhấn vào ảnh, cập nhật ảnh chính
                         setState(() {
                           selectedImage = imagePaths[index];
                         });
                       },
                       child: Padding(
-                        padding: const EdgeInsets.all(0),
+                        padding: const EdgeInsets.all(4),
                         child: Container(
-                            child: Image.asset(
-                            imagePaths[index], // Hiển thị ảnh thu nhỏ
-                            fit: BoxFit.cover,
-                            width: 80,
+                          width: 80,
+                          child: Image.asset(
+                            imagePaths[index],
+                            fit: BoxFit.contain,
                           ),
-                        )
+                        ),
                       ),
                     );
                   },
@@ -72,6 +70,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             ),
           ],
         ),
+
       ),
     );
   }

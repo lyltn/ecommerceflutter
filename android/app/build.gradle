@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
@@ -29,6 +32,11 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+    buildscript {
+        dependencies {
+            classpath 'com.google.gms:google-services:4.3.10' // Use the latest version
+        }
+    }
 
     buildTypes {
         release {
@@ -41,4 +49,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+dependencies{
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
 }

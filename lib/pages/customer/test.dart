@@ -1,160 +1,74 @@
 import 'package:flutter/material.dart';
 
-class HomeTest extends StatefulWidget {
-  @override
-  _HomeTestState createState() => _HomeTestState();
-}
-
-class _HomeTestState extends State<HomeTest> {
-  List<String> categories = ['Thời trang nam', 'Thời trang nam', 'Thời trang nam', 'Thời trang nam'];
-  List<String> priceRanges = ['0-100k', '100k-200k', '200k-300k'];
-  bool showAllCategories = false;
-  bool showAllPriceRanges = false;
-
+class ShopHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: Text(
-          'Bộ lọc tìm kiếm',
-          style: TextStyle(color: Colors.black),
+          'MORSELA',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.all(16),
-              children: [
-                Text('Theo danh mục', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ...categories.take(showAllCategories ? categories.length : 4).map((category) => 
-                      Chip(
-                        label: Text(category),
-                        backgroundColor: Colors.grey[200],
-                      )
-                    ),
-                  ],
-                ),
-                if (categories.length > 4)
-                  TextButton(
-                    child: Text(showAllCategories ? 'Thu gọn' : 'Xem thêm'),
-                    onPressed: () => setState(() => showAllCategories = !showAllCategories),
-                  ),
-                Divider(),
-                Text('Khoảng giá (đ)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'TỐI THIỂU',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text('-'),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'TỐI ĐA',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ...priceRanges.take(showAllPriceRanges ? priceRanges.length : 3).map((range) => 
-                      Chip(
-                        label: Text(range),
-                        backgroundColor: Colors.grey[200],
-                      )
-                    ),
-                  ],
-                ),
-                if (priceRanges.length > 3)
-                  TextButton(
-                    child: Text(showAllPriceRanges ? 'Thu gọn' : 'Xem thêm'),
-                    onPressed: () => setState(() => showAllPriceRanges = !showAllPriceRanges),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    child: Text('Thiết lập lại'),
-                    onPressed: () {
-                      // Reset logic here
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.green),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    child: Text('Áp dụng'),
-                    onPressed: () {
-                      // Apply filter logic here
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                  ),
-                ),
-              ],
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Add action for "Xem Shop" button
+            },
+            child: Text(
+              'Xem Shop',
+              style: TextStyle(color: Colors.red),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.green,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withOpacity(.60),
-        selectedFontSize: 14,
-        unselectedFontSize: 14,
-        items: [
-          BottomNavigationBarItem(
-            label: 'Trang chủ',
-            icon: Icon(Icons.home),
-          ),
-          BottomNavigationBarItem(
-            label: 'Danh mục',
-            icon: Icon(Icons.list),
-          ),
-          BottomNavigationBarItem(
-            label: 'Giao hàng',
-            icon: Icon(Icons.local_shipping),
-          ),
-          BottomNavigationBarItem(
-            label: 'Cá nhân',
-            icon: Icon(Icons.person),
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.location_on, size: 16, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  'TP Hồ Chí Minh',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '285 sản phẩm',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.star, size: 16, color: Colors.amber),
+                        SizedBox(width: 4),
+                        Text(
+                          '4.9 Đánh giá',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Add more widgets here for additional shop information
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
