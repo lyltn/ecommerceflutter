@@ -1,13 +1,5 @@
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
-<<<<<<< HEAD
-import 'package:ecommercettl/pages/client/shopcanceledpage.dart';
-import 'package:ecommercettl/pages/client/shopconfirmpage.dart';
-import 'package:ecommercettl/pages/client/shopdeliveredpage.dart';
-import 'package:ecommercettl/pages/client/shopplacedPage.dart';
-import 'package:ecommercettl/pages/client/shopreturngoods.dart';
-import 'package:ecommercettl/pages/client/shopshippingpage.dart';
-import 'package:ecommercettl/pages/client/shopwaitdelivery.dart';
-=======
+
 import 'package:ecommercettl/pages/client/navigaorder/shopcanceledpage.dart';
 import 'package:ecommercettl/pages/client/navigaorder/shopconfirmpage.dart';
 import 'package:ecommercettl/pages/client/navigaorder/shopdeliveredpage.dart';
@@ -16,7 +8,7 @@ import 'package:ecommercettl/pages/client/navigaorder/shopplacedpage.dart';
 import 'package:ecommercettl/pages/client/navigaorder/shopreturngoods.dart';
 import 'package:ecommercettl/pages/client/navigaorder/shopshippingpage.dart';
 import 'package:ecommercettl/pages/client/navigaorder/shopwaitdelivery.dart';
->>>>>>> 3457805 (dddd)
+
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
