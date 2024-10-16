@@ -10,6 +10,6 @@ class HomeShop extends StatefulWidget {
 class _HomeShopState extends State<HomeShop> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return const Scaffold();
   }
 }

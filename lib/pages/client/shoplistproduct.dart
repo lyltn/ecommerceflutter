@@ -1,6 +1,6 @@
-import 'package:ecommercettl/pages/shopaddproduct.dart';
-import 'package:ecommercettl/pages/shopaddsize.dart';
-import 'package:ecommercettl/pages/shopbottomnav.dart';
+import 'package:ecommercettl/pages/client/shopaddproduct.dart';
+import 'package:ecommercettl/pages/client/shopaddsize.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
@@ -154,7 +154,7 @@ class _ShopListProductState extends State<ShopListProduct> {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 20.0,
                     ),
                     Container(

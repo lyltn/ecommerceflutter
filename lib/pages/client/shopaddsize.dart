@@ -1,5 +1,5 @@
-import 'package:ecommercettl/pages/shopaddproduct.dart';
-import 'package:ecommercettl/pages/shopbottomnav.dart';
+import 'package:ecommercettl/pages/client/shopaddproduct.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:flutter/material.dart';
 
 class ShopAddSize extends StatefulWidget {
@@ -25,7 +25,7 @@ class _ShopAddSizeState extends State<ShopAddSize> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              Text('Thêm phân loại SP', style: TextStyle(color: Colors.black)),
+              const Text('Thêm phân loại SP', style: TextStyle(color: Colors.black)),
               const SizedBox(width: 50.0),
               GestureDetector(
                 onTap: () {
@@ -47,23 +47,23 @@ class _ShopAddSizeState extends State<ShopAddSize> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Sản phẩm", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const Text("Sản phẩm", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -81,56 +81,56 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                   categoryValue = value;
                 });
               },
-              hint: Text('Chọn sản phẩm'),
+              hint: const Text('Chọn sản phẩm'),
             ),
-            SizedBox(height: 20),
-            Text("Kích cỡ (Phân loại)",
+            const SizedBox(height: 20),
+            const Text("Kích cỡ (Phân loại)",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: sizeController,
               decoration: InputDecoration(
                 hintText: 'vd: XL',
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text("Màu (Phân loại)",
+            const SizedBox(height: 20),
+            const Text("Màu (Phân loại)",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: colorController,
               decoration: InputDecoration(
                 hintText: 'vd: trắng',
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Số lượng",
+                      const Text("Số lượng",
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: quantityController,
                         decoration: InputDecoration(
                           hintText: 'vd: 70',
                           filled: true,
-                          fillColor: Color(0xFFececf8),
+                          fillColor: const Color(0xFFececf8),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -140,20 +140,20 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                     ],
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Giá",
+                      const Text("Giá",
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: priceController,
                         decoration: InputDecoration(
                           hintText: 'vd: 100.000',
                           filled: true,
-                          fillColor: Color(0xFFececf8),
+                          fillColor: const Color(0xFFececf8),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -165,7 +165,7 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                 )
               ],
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -174,7 +174,7 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                   ),
-                  child: Text(
+                  child: const Text(
                     'Thêm',
                     style: TextStyle(
                       color: Colors.white,
@@ -186,7 +186,7 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(context,
@@ -202,7 +202,7 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                   ),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 'Danh sách phân loại',
                 style: TextStyle(
                   color: Colors.green,

@@ -1,7 +1,17 @@
-import 'package:ecommercettl/pages/shopaddproduct.dart';
-import 'package:ecommercettl/pages/shopbottomnav.dart';
-import 'package:ecommercettl/pages/shoplistproduct.dart';
+import 'package:ecommercettl/pages/authen/login.dart';
+import 'package:ecommercettl/pages/client/shopaddproduct.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/pages/client/shoplistproduct.dart';
+import 'package:ecommercettl/pages/customer/component/FilterAction.dart';
+import 'package:ecommercettl/pages/customer/component/PhotoGallery.dart';
+import 'package:ecommercettl/pages/customer/component/PriceRange.dart';
+import 'package:ecommercettl/pages/customer/component/SearchScreen.dart';
+import 'package:ecommercettl/pages/customer/component/SearchProduct.dart';
+import 'package:ecommercettl/pages/customer/home.dart';
+import 'package:ecommercettl/pages/customer/productDetail.dart';
+import 'package:ecommercettl/pages/customer/test.dart';
 import 'package:flutter/material.dart';
+import 'package:ecommercettl/pages/customer/bottomnav.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,6 +24,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      routes: {
+        '/search' : (context) => SearchScreen(),
+        '/searchProduct' : (context) => SearchProduct(),
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -34,7 +48,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: BottomnavShop(),
+      home: BottomNav(),
     );
   }
 }

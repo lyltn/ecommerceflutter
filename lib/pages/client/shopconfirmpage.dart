@@ -36,8 +36,8 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Row(
-                    children: const [
+                  subtitle: const Row(
+                    children: [
                       Text('màu trắng, size s'),
                       SizedBox(width: 8.0),
                       Text(
@@ -49,18 +49,18 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     ],
                   ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                   thickness: 1,
                   indent: 10, // Padding from the left
                   endIndent: 10, // Padding from the right
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('3 sản phẩm'),
+                      Text('3 sản phẩm'),
                       Row(
                         children: [
                           Text('Tổng tiền: '),
@@ -76,7 +76,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     ],
                   ),
                 ),
-                ButtonBar(
+                OverflowBar(
                   alignment: MainAxisAlignment.spaceBetween,
                   children: [
                     OutlinedButton.icon(
@@ -118,7 +118,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
               ],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Card(
             elevation: 5,
             shape: RoundedRectangleBorder(
@@ -141,8 +141,8 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Row(
-                    children: const [
+                  subtitle: const Row(
+                    children: [
                       Text('màu trắng, size s'),
                       SizedBox(width: 8.0),
                       Text(
@@ -154,18 +154,18 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     ],
                   ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                   thickness: 1,
                   indent: 10, // Padding from the left
                   endIndent: 10, // Padding from the right
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('3 sản phẩm'),
+                      Text('3 sản phẩm'),
                       Row(
                         children: [
                           Text('Tổng tiền: '),
@@ -181,7 +181,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     ],
                   ),
                 ),
-                ButtonBar(
+                OverflowBar(
                   alignment: MainAxisAlignment.spaceBetween,
                   children: [
                     OutlinedButton.icon(
@@ -223,7 +223,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
               ],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Card(
             elevation: 5,
             shape: RoundedRectangleBorder(
@@ -246,8 +246,8 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Row(
-                    children: const [
+                  subtitle: const Row(
+                    children: [
                       Text('màu trắng, size s'),
                       SizedBox(width: 8.0),
                       Text(
@@ -259,18 +259,18 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     ],
                   ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                   thickness: 1,
                   indent: 10, // Padding from the left
                   endIndent: 10, // Padding from the right
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('3 sản phẩm'),
+                      Text('3 sản phẩm'),
                       Row(
                         children: [
                           Text('Tổng tiền: '),
@@ -286,7 +286,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                     ],
                   ),
                 ),
-                ButtonBar(
+                OverflowBar(
                   alignment: MainAxisAlignment.spaceBetween,
                   children: [
                     OutlinedButton.icon(
@@ -328,7 +328,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
               ],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       ),
     );

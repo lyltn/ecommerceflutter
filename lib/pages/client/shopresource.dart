@@ -1,4 +1,4 @@
-import 'package:ecommercettl/pages/shoplistproduct.dart';
+import 'package:ecommercettl/pages/client/shoplistproduct.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 
@@ -131,7 +131,7 @@ class _ResourceShopState extends State<ResourceShop> {
                             title: Text('Danh sách danh mục',
                                 style: AppWiget.boldTextFeildStyle()),
                             content: SingleChildScrollView(
-                              child: Container(
+                              child: SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.5,
                                 child: Column(
@@ -152,7 +152,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                             borderRadius: BorderRadius.circular(
                                                 4.0), // Tùy chọn: góc viền bo tròn
                                           ),
-                                          padding: EdgeInsets.all(4.0),
+                                          padding: const EdgeInsets.all(4.0),
                                           child: Text(
                                             'Danh mục 1Danh mục 1Danh mục 1',
                                             style: AppWiget.TextFeildStyle(),
@@ -182,7 +182,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                             borderRadius: BorderRadius.circular(
                                                 4.0), // Tùy chọn: góc viền bo tròn
                                           ),
-                                          padding: EdgeInsets.all(4.0),
+                                          padding: const EdgeInsets.all(4.0),
                                           child: Text(
                                             'Danh mục 1Danh mục 1Danh mục 1',
                                             style: AppWiget.TextFeildStyle(),
@@ -317,7 +317,7 @@ class _ResourceShopState extends State<ResourceShop> {
                               title: Text('Danh sách thương hiệu',
                                   style: AppWiget.boldTextFeildStyle()),
                               content: SingleChildScrollView(
-                                child: Container(
+                                child: SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height * 0.5,
                                   child: Column(
@@ -338,7 +338,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                               borderRadius: BorderRadius.circular(
                                                   4.0), // Tùy chọn: góc viền bo tròn
                                             ),
-                                            padding: EdgeInsets.all(4.0),
+                                            padding: const EdgeInsets.all(4.0),
                                             child: Text(
                                               'Danh mục 1Danh mục 1Danh mục 1',
                                               style: AppWiget.TextFeildStyle(),
@@ -355,7 +355,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                               borderRadius: BorderRadius.circular(
                                                   4.0), // Tùy chọn: góc viền bo tròn
                                             ),
-                                            padding: EdgeInsets.all(4.0),
+                                            padding: const EdgeInsets.all(4.0),
                                             child: Text(
                                               'Việt nam',
                                               style: AppWiget.TextFeildStyle(),
@@ -383,7 +383,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                               borderRadius: BorderRadius.circular(
                                                   4.0), // Tùy chọn: góc viền bo tròn
                                             ),
-                                            padding: EdgeInsets.all(4.0),
+                                            padding: const EdgeInsets.all(4.0),
                                             child: Text(
                                               'Danh mục 1Danh mục 1Danh mục 1',
                                               style: AppWiget.TextFeildStyle(),
@@ -400,7 +400,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                               borderRadius: BorderRadius.circular(
                                                   4.0), // Tùy chọn: góc viền bo tròn
                                             ),
-                                            padding: EdgeInsets.all(4.0),
+                                            padding: const EdgeInsets.all(4.0),
                                             child: Text(
                                               'Việt nam',
                                               style: AppWiget.TextFeildStyle(),

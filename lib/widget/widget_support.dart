@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppWiget {
   static TextStyle boldTextFeildStyle() {
-    return TextStyle(
+    return const TextStyle(
         color: Colors.black,
         fontSize: 20.0,
         fontWeight: FontWeight.bold,
@@ -10,7 +10,7 @@ class AppWiget {
   }
 
   static TextStyle HeadlineTextFeildStyle() {
-    return TextStyle(
+    return const TextStyle(
         color: Colors.black,
         fontSize: 24.0,
         fontWeight: FontWeight.bold,
@@ -18,7 +18,7 @@ class AppWiget {
   }
 
   static TextStyle LightTextFeildStyle() {
-    return TextStyle(
+    return const TextStyle(
         color: Colors.black38,
         fontSize: 15.0,
         fontWeight: FontWeight.w400,
@@ -26,7 +26,7 @@ class AppWiget {
   }
 
   static TextStyle SemiBoldTextFeildStyle() {
-    return TextStyle(
+    return const TextStyle(
         color: Colors.black,
         fontSize: 16.0,
         fontWeight: FontWeight.w500,
@@ -34,6 +34,6 @@ class AppWiget {
   }
 
   static TextStyle TextFeildStyle() {
-    return TextStyle(color: Colors.black, fontSize: 15.0, fontFamily: 'Roboto');
+    return const TextStyle(color: Colors.black, fontSize: 15.0, fontFamily: 'Roboto');
   }
 }

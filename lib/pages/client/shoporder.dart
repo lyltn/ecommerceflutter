@@ -1,11 +1,11 @@
-import 'package:ecommercettl/pages/shopbottomnav.dart';
-import 'package:ecommercettl/pages/shopcanceledpage.dart';
-import 'package:ecommercettl/pages/shopconfirmpage.dart';
-import 'package:ecommercettl/pages/shopdeliveredpage.dart';
-import 'package:ecommercettl/pages/shopplacedPage.dart';
-import 'package:ecommercettl/pages/shopreturngoods.dart';
-import 'package:ecommercettl/pages/shopshippingpage.dart';
-import 'package:ecommercettl/pages/shopwaitdelivery.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/pages/client/shopcanceledpage.dart';
+import 'package:ecommercettl/pages/client/shopconfirmpage.dart';
+import 'package:ecommercettl/pages/client/shopdeliveredpage.dart';
+import 'package:ecommercettl/pages/client/shopplacedPage.dart';
+import 'package:ecommercettl/pages/client/shopreturngoods.dart';
+import 'package:ecommercettl/pages/client/shopshippingpage.dart';
+import 'package:ecommercettl/pages/client/shopwaitdelivery.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
@@ -146,13 +146,13 @@ class _OrderShopState extends State<OrderShop> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 17),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 17),
         decoration: BoxDecoration(
           color: currentTabIndex == index
-              ? Color(0xFFE1F5E6)
+              ? const Color(0xFFE1F5E6)
               : Colors.white, // Màu nền cho tab được chọn và không được chọn
           border: Border.all(
-            color: Color(0xFF00A962), // Màu viền xanh cho tất cả các ô
+            color: const Color(0xFF00A962), // Màu viền xanh cho tất cả các ô
             width: 1, // Độ dày viền
           ),
           borderRadius: BorderRadius.circular(3.0), // Bo góc 3
@@ -161,13 +161,13 @@ class _OrderShopState extends State<OrderShop> {
               color: Colors.black.withOpacity(0.1), // Màu đổ bóng nhẹ
               spreadRadius: 2, // Độ lan của bóng
               blurRadius: 3, // Độ mờ của bóng
-              offset: Offset(0, 2), // Vị trí bóng (x, y)
+              offset: const Offset(0, 2), // Vị trí bóng (x, y)
             ),
           ],
         ),
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFF00A962), // Màu xanh cho tất cả văn bản
             fontWeight: FontWeight.bold, // In đậm cho văn bản
           ),

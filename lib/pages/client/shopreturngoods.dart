@@ -36,8 +36,8 @@ class _ShopreturngoodsState extends State<Shopreturngoods> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Row(
-                    children: const [
+                  subtitle: const Row(
+                    children: [
                       Text('màu trắng, size s'),
                       SizedBox(width: 8.0),
                       Text(
@@ -49,18 +49,18 @@ class _ShopreturngoodsState extends State<Shopreturngoods> {
                     ],
                   ),
                 ),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                   thickness: 1,
                   indent: 10, // Padding from the left
                   endIndent: 10, // Padding from the right
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('3 sản phẩm'),
+                      Text('3 sản phẩm'),
                       Row(
                         children: [
                           Text('Tổng tiền: '),
@@ -76,7 +76,7 @@ class _ShopreturngoodsState extends State<Shopreturngoods> {
                     ],
                   ),
                 ),
-                ButtonBar(
+                OverflowBar(
                   alignment: MainAxisAlignment.spaceBetween,
                   children: [
                     OutlinedButton.icon(
@@ -104,7 +104,7 @@ class _ShopreturngoodsState extends State<Shopreturngoods> {
                     ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF5D6778),
+                        backgroundColor: const Color(0xFF5D6778),
                         padding: const EdgeInsets.only(
                             top: 8.0, bottom: 8.0, left: 10.0, right: 10.0),
                       ),
@@ -118,7 +118,7 @@ class _ShopreturngoodsState extends State<Shopreturngoods> {
               ],
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       ),
     );

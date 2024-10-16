@@ -1,8 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:ecommercettl/pages/shophome.dart';
-import 'package:ecommercettl/pages/shoporder.dart';
-import 'package:ecommercettl/pages/shopprofile.dart';
-import 'package:ecommercettl/pages/shopresource.dart';
+import 'package:ecommercettl/pages/client/shophome.dart';
+import 'package:ecommercettl/pages/client/shoporder.dart';
+import 'package:ecommercettl/pages/client/shopprofile.dart';
+import 'package:ecommercettl/pages/client/shopresource.dart';
 import 'package:flutter/material.dart';
 
 class BottomnavShop extends StatefulWidget {
@@ -41,15 +41,15 @@ class _BottomnavShopState extends State<BottomnavShop> {
           CurvedNavigationBar(
             height: 50,
             backgroundColor: Colors.white,
-            color: Color(0xFF15A362),
+            color: const Color(0xFF15A362),
             animationDuration:
-                Duration(milliseconds: 500), // Đổi thành milliseconds
+                const Duration(milliseconds: 500), // Đổi thành milliseconds
             onTap: (int index) {
               setState(() {
                 currentTabIndex = index;
               });
             },
-            items: [
+            items: const [
               Icon(Icons.home_outlined, color: Colors.white),
               Icon(Icons.category_outlined, color: Colors.white),
               Icon(Icons.receipt_long_outlined, color: Colors.white),

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:ecommercettl/pages/shopbottomnav.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -39,12 +39,12 @@ class _ShopAddProductState extends State<ShopAddProduct> {
       appBar: AppBar(
         title: Row(
           children: [
-            Text('Thêm sản phẩm', style: TextStyle(color: Colors.black)),
+            const Text('Thêm sản phẩm', style: TextStyle(color: Colors.black)),
             const SizedBox(width: 50.0),
             GestureDetector(
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => BottomnavShop()));
+                    MaterialPageRoute(builder: (context) => const BottomnavShop()));
               },
               child: Container(
                 decoration: const BoxDecoration(
@@ -60,38 +60,38 @@ class _ShopAddProductState extends State<ShopAddProduct> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tên sản phẩm", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const Text("Tên sản phẩm", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
             TextField(
               controller: nameController,
               decoration: InputDecoration(
                 hintText: 'Nhập tên sản phẩm',
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text("Danh mục", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const SizedBox(height: 20),
+            const Text("Danh mục", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -109,15 +109,15 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                   categoryValue = value;
                 });
               },
-              hint: Text('Chọn danh mục'),
+              hint: const Text('Chọn danh mục'),
             ),
-            SizedBox(height: 20),
-            Text("Thương hiệu", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const SizedBox(height: 20),
+            const Text("Thương hiệu", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -135,22 +135,22 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                   categoryValue = value;
                 });
               },
-              hint: Text('Chọn thương hiệu'),
+              hint: const Text('Chọn thương hiệu'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Giới tính",
+                      const Text("Giới tính",
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Color(0xFFececf8),
+                          fillColor: const Color(0xFFececf8),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -168,25 +168,25 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                             genderValue = value;
                           });
                         },
-                        hint: Text('Chọn giới tính'),
+                        hint: const Text('Chọn giới tính'),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Tiền hoa hồng",
+                      const Text("Tiền hoa hồng",
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: commissionController,
                         decoration: InputDecoration(
                           hintText: 'Nhập % hoa hồng',
                           filled: true,
-                          fillColor: Color(0xFFececf8),
+                          fillColor: const Color(0xFFececf8),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -199,27 +199,27 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            Text("Mô tả sản phẩm",
+            const SizedBox(height: 20),
+            const Text("Mô tả sản phẩm",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextField(
               controller: descriptionController,
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'Nhập mô tả sản phẩm',
                 filled: true,
-                fillColor: Color(0xFFececf8),
+                fillColor: const Color(0xFFececf8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text("Thêm hình ảnh",
+            const SizedBox(height: 20),
+            const Text("Thêm hình ảnh",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             selectedImage == null
                 ? Center(
                     child: GestureDetector(
@@ -231,7 +231,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                           border: Border.all(color: Colors.black, width: 1.5),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.camera_alt_outlined,
+                        child: const Icon(Icons.camera_alt_outlined,
                             color: Colors.black),
                       ),
                     ),
@@ -247,7 +247,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                       child: Image.file(selectedImage!, fit: BoxFit.cover),
                     ),
                   ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               children: [
                 Container(
@@ -274,7 +274,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 70.0,
                 ),
                 Container(
@@ -283,7 +283,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
-                    child: Text(
+                    child: const Text(
                       'Thêm',
                       style: TextStyle(
                         color: Colors.white,
