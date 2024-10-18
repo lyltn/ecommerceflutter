@@ -68,6 +68,7 @@ class _ShopListProductState extends State<ShopListProduct> {
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('products')
+                    .where('userid', isEqualTo: 'ly')
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {

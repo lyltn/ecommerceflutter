@@ -1,6 +1,8 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/services/brand_service.dart';
+import 'package:ecommercettl/services/category_service.dart';
 import 'package:ecommercettl/services/product_service.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,8 @@ class ShopAddProduct extends StatefulWidget {
 
 class _ShopAddProductState extends State<ShopAddProduct> {
   final ProductService productService = ProductService();
+  final BrandService brandService = BrandService();
+  final CategoryService categoryService = CategoryService();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -27,8 +31,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
   String? categoryValue;
   String? genderValue;
   String? brandValue;
-  final List<String> categories = ['Áo khoác jean', 'Áo sơ mi', 'Quần jeans'];
-  final List<String> brands = ['ccc', 'guci', 'LYLy'];
+
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
   File? _image;
@@ -41,6 +44,23 @@ class _ShopAddProductState extends State<ShopAddProduct> {
         _image = File(pickedFile.path);
       }
     });
+  }
+
+  List<String> categories = [];
+  List<String> brands = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    categories = await categoryService.getnameCategories();
+    brands = await brandService.getnameBrands();
+
+    // Trigger a rebuild to update the UI with the fetched data.
+    setState(() {});
   }
 
   @override

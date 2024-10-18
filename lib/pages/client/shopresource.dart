@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/client/shoplistproduct.dart';
+import 'package:ecommercettl/services/brand_service.dart';
+import 'package:ecommercettl/services/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 
@@ -10,9 +13,8 @@ class ResourceShop extends StatefulWidget {
 }
 
 class _ResourceShopState extends State<ResourceShop> {
-  bool categoryStatus = true;
   bool brandStatus = true;
-
+  bool categoryStatus = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,6 +98,11 @@ class _ResourceShopState extends State<ResourceShop> {
   }
 
   Widget _buildCategoryForm(BuildContext context) {
+    final CategoryService categoryService = CategoryService();
+    final TextEditingController nameController = TextEditingController();
+    // Initialize with default status
+    String? editingCateId; // Track the category being edited
+
     return Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(20),
@@ -134,76 +141,93 @@ class _ResourceShopState extends State<ResourceShop> {
                               child: SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.5,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Wrap(
-                                      spacing:
-                                          8.0, // Khoảng cách giữa các widget ngang
-                                      runSpacing:
-                                          2.0, // Khoảng cách giữa các widget dọc
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.green,
-                                                width:
-                                                    1.0), // Đường viền màu xanh
-                                            borderRadius: BorderRadius.circular(
-                                                4.0), // Tùy chọn: góc viền bo tròn
-                                          ),
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: Text(
-                                            'Danh mục 1Danh mục 1Danh mục 1',
+                                child: StreamBuilder<QuerySnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('categorys')
+                                      .where('userid',
+                                          isEqualTo: 'ly') // Correct field
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+
+                                    if (snapshot.hasError) {
+                                      return const Text('Lỗi khi lấy dữ liệu.');
+                                    }
+
+                                    if (!snapshot.hasData ||
+                                        snapshot.data!.docs.isEmpty) {
+                                      return const Text(
+                                          'Không có danh mục nào.');
+                                    }
+
+                                    var categoryDocs = snapshot.data!.docs;
+
+                                    return ListView.builder(
+                                      itemCount: categoryDocs.length,
+                                      itemBuilder: (context, index) {
+                                        var category = categoryDocs[index]
+                                            .data() as Map<String, dynamic>;
+                                        var categoryId = categoryDocs[index].id;
+
+                                        return ListTile(
+                                          title: Text(
+                                            category['name'] ?? 'No Name',
                                             style: AppWiget.TextFeildStyle(),
-                                            softWrap:
-                                                true, // Cho phép xuống dòng
                                           ),
-                                        ),
-                                        const Icon(
-                                          Icons.visibility_outlined,
-                                          color: Colors.green,
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 20),
-                                    Wrap(
-                                      spacing:
-                                          8.0, // Khoảng cách giữa các widget ngang
-                                      runSpacing:
-                                          2.0, // Khoảng cách giữa các widget dọc
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Colors.green,
-                                                width:
-                                                    1.0), // Đường viền màu xanh
-                                            borderRadius: BorderRadius.circular(
-                                                4.0), // Tùy chọn: góc viền bo tròn
+                                          subtitle: Text(
+                                              category['status'] ?? 'Unknown'),
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                    Icons.edit_outlined,
+                                                    color: Colors.blue),
+                                                onPressed: () {
+                                                  // Set the fields with the current category data for editing
+                                                  nameController.text =
+                                                      category['name'] ?? '';
+                                                  categoryStatus =
+                                                      category['status'] ==
+                                                          'active';
+                                                  editingCateId = categoryId;
+                                                  Navigator.of(context)
+                                                      .pop(); // Store the editing ID
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.delete,
+                                                    color: Colors.red),
+                                                onPressed: () async {
+                                                  await categoryService
+                                                      .deleteCategory(
+                                                          categoryId);
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Text(
+                                                            'Danh mục đã được xoá')),
+                                                  );
+                                                },
+                                              ),
+                                            ],
                                           ),
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: Text(
-                                            'Danh mục 1Danh mục 1Danh mục 1',
-                                            style: AppWiget.TextFeildStyle(),
-                                            softWrap:
-                                                true, // Cho phép xuống dòng
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.visibility_off_outlined,
-                                          color: Colors.red,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        );
+                                      },
+                                    );
+                                  },
                                 ),
                               ),
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(); // Đóng dialog
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
                                 },
                                 child: const Text('Đóng'),
                               ),
@@ -217,6 +241,7 @@ class _ResourceShopState extends State<ResourceShop> {
               ),
               const SizedBox(height: 20.0),
               TextFormField(
+                controller: nameController,
                 decoration: const InputDecoration(
                   hintText: 'tên danh mục...',
                   hintStyle: TextStyle(
@@ -240,30 +265,68 @@ class _ResourceShopState extends State<ResourceShop> {
                       Text('Trạng thái:',
                           style: AppWiget.SemiBoldTextFeildStyle()),
                       Transform.scale(
-                        scale:
-                            0.8, // Điều chỉnh tỷ lệ để chiều cao gần với 18 (vì Switch mặc định khá lớn)
+                        scale: 0.8, // Adjust scale for Switch size
                         child: Switch(
                           value: categoryStatus,
                           onChanged: (value) {
                             setState(() {
-                              categoryStatus = value;
+                              categoryStatus =
+                                  value; // Update the category status
                             });
                           },
                           activeColor: const Color.fromARGB(
-                              255, 113, 155, 65), // Màu khi bật
-                          inactiveTrackColor: Colors
-                              .lightGreen.shade100, // Màu khi tắt (xanh nhạt)
+                              255, 113, 155, 65), // Active color
+                          inactiveTrackColor:
+                              Colors.lightGreen.shade100, // Inactive color
                         ),
                       ),
                     ],
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      if (nameController.text.isNotEmpty) {
+                        if (editingCateId != null) {
+                          // Update the existing category
+                          await categoryService.updateCategory(
+                            editingCateId!,
+                            nameController.text,
+                            'ly', // User ID
+                            categoryStatus ? 'active' : 'inactive',
+                          );
+
+                          // Clear the editing category ID
+                          editingCateId = null;
+                        } else {
+                          // Add a new category
+                          await categoryService.addCategory(
+                            nameController.text,
+                            'ly', // User ID
+                            categoryStatus ? 'active' : 'inactive',
+                          );
+                        }
+
+                        // Clear the text fields after submission
+                        nameController.clear();
+
+                        // Show a success message using a SnackBar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Danh mục đã được thêm hoặc cập nhật')),
+                        );
+                      } else {
+                        // Show an error message if any field is empty
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Vui lòng nhập đầy đủ thông tin')),
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
                     child: const Text(
-                      'Thêm',
+                      'Lưu',
                       style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Roboto',
@@ -280,7 +343,14 @@ class _ResourceShopState extends State<ResourceShop> {
     );
   }
 
+  // To keep track of the brand being edited
+
   Widget _buildBrandForm(BuildContext context) {
+    final BrandService brandService = BrandService();
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController nationController = TextEditingController();
+    // Initialize with default status
+    String? editingBrandId;
     return SingleChildScrollView(
       child: Material(
         elevation: 5.0,
@@ -320,106 +390,98 @@ class _ResourceShopState extends State<ResourceShop> {
                                 child: SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height * 0.5,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Wrap(
-                                        spacing:
-                                            8.0, // Khoảng cách giữa các widget ngang
-                                        runSpacing:
-                                            2.0, // Khoảng cách giữa các widget dọc
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.green,
-                                                  width:
-                                                      1.0), // Đường viền màu xanh
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Tùy chọn: góc viền bo tròn
-                                            ),
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              'Danh mục 1Danh mục 1Danh mục 1',
-                                              style: AppWiget.TextFeildStyle(),
-                                              softWrap:
-                                                  true, // Cho phép xuống dòng
-                                            ),
-                                          ),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.green,
-                                                  width:
-                                                      1.0), // Đường viền màu xanh
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Tùy chọn: góc viền bo tròn
-                                            ),
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              'Việt nam',
+                                  child: StreamBuilder<QuerySnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('brands')
+                                        .where('userid', isEqualTo: 'ly')
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      }
+
+                                      if (snapshot.hasError) {
+                                        return const Text(
+                                            'Lỗi khi lấy dữ liệu.');
+                                      }
+
+                                      if (!snapshot.hasData ||
+                                          snapshot.data!.docs.isEmpty) {
+                                        return const Text(
+                                            'Không có thương hiệu nào.');
+                                      }
+
+                                      var brandDocs = snapshot.data!.docs;
+
+                                      return ListView.builder(
+                                        itemCount: brandDocs.length,
+                                        itemBuilder: (context, index) {
+                                          var brand = brandDocs[index].data()
+                                              as Map<String, dynamic>;
+                                          var brandId = brandDocs[index].id;
+
+                                          return ListTile(
+                                            title: Text(
+                                              brand['name'] ?? 'No Name',
                                               style: AppWiget.TextFeildStyle(),
                                             ),
-                                          ),
-                                          const Icon(
-                                            Icons.visibility_outlined,
-                                            color: Colors.green,
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 20),
-                                      Wrap(
-                                        spacing:
-                                            8.0, // Khoảng cách giữa các widget ngang
-                                        runSpacing:
-                                            2.0, // Khoảng cách giữa các widget dọc
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.green,
-                                                  width:
-                                                      1.0), // Đường viền màu xanh
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Tùy chọn: góc viền bo tròn
+                                            subtitle: Text(
+                                                brand['nation'] ?? 'Unknown'),
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  ),
+                                                  onPressed: () async {
+                                                    await brandService
+                                                        .deleteBrand(brandId);
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                          content: Text(
+                                                              'Thương hiệu đã được xoá')),
+                                                    );
+                                                  },
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.edit_outlined,
+                                                    color: Colors.red,
+                                                  ),
+                                                  onPressed: () {
+                                                    // Populate form with the brand's data
+                                                    nameController.text =
+                                                        brand['name'] ?? '';
+                                                    nationController.text =
+                                                        brand['nation'] ?? '';
+                                                    brandStatus = brand[
+                                                            'status'] ==
+                                                        'active'; // Assuming status is saved as 'active' or 'inactive'
+                                                    editingBrandId = brandId;
+                                                    Navigator.of(context)
+                                                        .pop(); // Set the brand ID being edited
+                                                  },
+                                                ),
+                                              ],
                                             ),
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              'Danh mục 1Danh mục 1Danh mục 1',
-                                              style: AppWiget.TextFeildStyle(),
-                                              softWrap:
-                                                  true, // Cho phép xuống dòng
-                                            ),
-                                          ),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.green,
-                                                  width:
-                                                      1.0), // Đường viền màu xanh
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Tùy chọn: góc viền bo tròn
-                                            ),
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text(
-                                              'Việt nam',
-                                              style: AppWiget.TextFeildStyle(),
-                                            ),
-                                          ),
-                                          const Icon(
-                                            Icons.visibility_off_outlined,
-                                            color: Colors.red,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                          );
+                                        },
+                                      );
+                                    },
                                   ),
                                 ),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.of(context).pop(); // Đóng dialog
+                                    Navigator.of(context)
+                                        .pop(); // Close the dialog
                                   },
                                   child: const Text('Đóng'),
                                 ),
@@ -428,11 +490,12 @@ class _ResourceShopState extends State<ResourceShop> {
                           },
                         );
                       },
-                    ),
+                    )
                   ],
                 ),
                 const SizedBox(height: 8.0),
                 TextFormField(
+                  controller: nameController,
                   decoration: const InputDecoration(
                     hintText: 'tên thương hiệu...',
                     hintStyle: TextStyle(
@@ -449,6 +512,7 @@ class _ResourceShopState extends State<ResourceShop> {
                 ),
                 const SizedBox(height: 20.0),
                 TextFormField(
+                  controller: nationController,
                   decoration: const InputDecoration(
                     hintText: 'tên quốc gia...',
                     hintStyle: TextStyle(
@@ -472,30 +536,73 @@ class _ResourceShopState extends State<ResourceShop> {
                         Text('Trạng thái:',
                             style: AppWiget.SemiBoldTextFeildStyle()),
                         Transform.scale(
-                          scale:
-                              0.8, // Điều chỉnh tỷ lệ để chiều cao gần với 18 (vì Switch mặc định khá lớn)
+                          scale: 0.8, // Adjust scale for Switch size
                           child: Switch(
                             value: brandStatus,
+
                             onChanged: (value) {
                               setState(() {
                                 brandStatus = value;
                               });
                             },
                             activeColor: const Color.fromARGB(
-                                255, 113, 155, 65), // Màu khi bật
-                            inactiveTrackColor: Colors
-                                .lightGreen.shade100, // Màu khi tắt (xanh nhạt)
+                                255, 113, 155, 65), // Active color
+                            inactiveTrackColor:
+                                Colors.lightGreen.shade100, // Inactive color
                           ),
                         ),
                       ],
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        if (nameController.text.isNotEmpty &&
+                            nationController.text.isNotEmpty) {
+                          if (editingBrandId != null) {
+                            // Update the existing brand
+                            await brandService.updateBrand(
+                              editingBrandId!,
+                              nameController.text,
+                              nationController.text,
+                              'ly',
+                              brandStatus ? 'active' : 'inactive',
+                            );
+
+                            // Clear the editing brand ID
+                            editingBrandId = null;
+                          } else {
+                            // Add a new brand
+                            await brandService.addBrand(
+                              nameController.text,
+                              nationController.text,
+                              'ly',
+                              brandStatus ? 'active' : 'inactive',
+                            );
+                          }
+
+                          // Clear the text fields after submission
+                          nameController.clear();
+                          nationController.clear();
+
+                          // Show a success message using a SnackBar
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Thương hiệu đã được thêm hoặc cập nhật')),
+                          );
+                        } else {
+                          // Show an error message if any field is empty
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Vui lòng nhập đầy đủ thông tin')),
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                       ),
                       child: const Text(
-                        'Thêm',
+                        'Lưu',
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Roboto',
