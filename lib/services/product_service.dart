@@ -4,39 +4,85 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class ProductService {
-
-  // Fetch all products --added by zungcao
   final CollectionReference products =
       FirebaseFirestore.instance.collection('products');
 
-  // Create a new product --added by zungcao
-  Future<void> addProduct(String userId, String name, String description,
-      String imageUrl, int price) {
+  Future<void> addProduct(
+    String name,
+    String des,
+    String brand,
+    String cate,
+    String sex,
+    double affialte,
+    double price,
+    String? imageUrl,
+    String userid,
+    String status,
+  ) {
     return products.add({
-      'userId': userId,
       'name': name,
-      'description': description,
-      'imageUrl': imageUrl,
+      'description': des,
+      'brandid': brand,
+      'categoryid': cate,
+      'sex': sex,
+      'affiliate': affialte,
       'price': price,
-      'timestamp': Timestamp.now(),
+      'imageUrl': imageUrl,
+      'userid': userid,
+      'status': status,
     });
   }
 
-  // Read --added by zungcao
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<Map<String, dynamic>?> getProductById(String productId) async {
+    try {
+      DocumentSnapshot doc =
+          await _firestore.collection('products').doc(productId).get();
+
+      if (doc.exists) {
+        // Trả về dữ liệu của sản phẩm dưới dạng Map
+        return doc.data() as Map<String, dynamic>;
+      } else {
+        print('Sản phẩm không tồn tại.');
+        return null;
+      }
+    } catch (e) {
+      print('Lỗi khi lấy dữ liệu sản phẩm: $e');
+      return null;
+    }
+  }
+
   Stream<QuerySnapshot> getProductsStream() {
     final productsStream =
         products.orderBy('timestamp', descending: true).snapshots();
     return productsStream;
   }
 
-  // Update --added by zungcao
-  Future<void> updateProduct(String docId, String newName,
-      String newDescription, String newImageUrl, int newPrice) {
+  Future<void> updateProduct(
+    String docId,
+    String name,
+    String des,
+    String brand,
+    String cate,
+    String sex,
+    double affialte,
+    double price,
+    String? imageUrl,
+    String userid,
+    String status,
+  ) {
     return products.doc(docId).update({
-      'name': newName,
-      'description': newDescription,
-      'imageUrl': newImageUrl,
-      'price': newPrice,
+      'name': name,
+      'description': des,
+      'brandid': brand,
+      'categoryid': cate,
+      'sex': sex,
+      'affiliate': affialte,
+      'price': price,
+      'imageUrl': imageUrl,
+      'userid': userid,
+      'status': status,
     });
   }
 
@@ -53,6 +99,7 @@ class ProductService {
       await storageRef.putFile(image);
       return await storageRef.getDownloadURL();
     } catch (e) {
+      print('Failed to upload image: $e');
       return '';
     }
   }
