@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/services/product_service.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'dart:io';
 
 class ShopAddProduct extends StatefulWidget {
   const ShopAddProduct({super.key});
@@ -13,24 +16,27 @@ class ShopAddProduct extends StatefulWidget {
 
 class _ShopAddProductState extends State<ShopAddProduct> {
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController brandController = TextEditingController();
+
   final TextEditingController commissionController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   bool productStatus = true;
   String? categoryValue;
   String? genderValue;
+  String? brandValue;
   final List<String> categories = ['Áo khoác jean', 'Áo sơ mi', 'Quần jeans'];
+  final List<String> brands = ['ccc', 'guci', 'LYLy'];
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
-  final ImagePicker _picker = ImagePicker();
-  File? selectedImage;
 
-  Future getImage() async {
-    var image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        selectedImage = File(image.path);
-      });
-    }
+  File? _image;
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
   }
 
   @override
@@ -43,8 +49,10 @@ class _ShopAddProductState extends State<ShopAddProduct> {
             const SizedBox(width: 50.0),
             GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const BottomnavShop()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const BottomnavShop()));
               },
               child: Container(
                 decoration: const BoxDecoration(
@@ -71,7 +79,8 @@ class _ShopAddProductState extends State<ShopAddProduct> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Tên sản phẩm", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text("Tên sản phẩm",
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             TextField(
               controller: nameController,
@@ -86,7 +95,8 @@ class _ShopAddProductState extends State<ShopAddProduct> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text("Danh mục", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text("Danh mục",
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
@@ -112,7 +122,8 @@ class _ShopAddProductState extends State<ShopAddProduct> {
               hint: const Text('Chọn danh mục'),
             ),
             const SizedBox(height: 20),
-            const Text("Thương hiệu", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text("Thương hiệu",
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
@@ -123,8 +134,8 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              value: categoryValue,
-              items: categories
+              value: brandValue,
+              items: brands
                   .map((category) => DropdownMenuItem(
                         value: category,
                         child: Text(category),
@@ -132,7 +143,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                   .toList(),
               onChanged: (value) {
                 setState(() {
-                  categoryValue = value;
+                  brandValue = value;
                 });
               },
               hint: const Text('Chọn thương hiệu'),
@@ -217,36 +228,33 @@ class _ShopAddProductState extends State<ShopAddProduct> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text("Thêm hình ảnh",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            selectedImage == null
-                ? Center(
-                    child: GestureDetector(
-                      onTap: getImage,
-                      child: Container(
+            Center(
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: _image == null
+                    ? Container(
                         width: 150,
                         height: 150,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black, width: 1.5),
-                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[200],
+                          border: Border.all(color: Colors.green, width: 2),
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        child: const Icon(Icons.camera_alt_outlined,
-                            color: Colors.black),
+                        child: Icon(Icons.camera_alt,
+                            color: Colors.green, size: 40),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.file(_image!,
+                            width: 150, height: 150, fit: BoxFit.cover),
                       ),
-                    ),
-                  )
-                : Center(
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Image.file(selectedImage!, fit: BoxFit.cover),
-                    ),
-                  ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Text(
+              'Tên sản phẩm',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 30),
             Row(
               children: [
@@ -279,7 +287,68 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                 ),
                 Container(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      if (nameController.text.isEmpty ||
+                          descriptionController.text.isEmpty ||
+                          commissionController.text.isEmpty) {
+                        // Display a message to fill all fields
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Vui lòng điền tất cả các trường bắt buộc.')),
+                        );
+                        return;
+                      }
+
+                      // Show a loading indicator
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) =>
+                            Center(child: CircularProgressIndicator()),
+                      );
+
+                      String? imageUrl;
+                      if (_image != null) {
+                        imageUrl = await uploadImage(_image!);
+                      }
+
+                      try {
+                        await addProduct(
+                          nameController.text,
+                          descriptionController.text,
+                          brandValue ?? '',
+                          categoryValue ?? '',
+                          genderValue ?? '',
+                          double.parse(commissionController.text),
+                          nameController.text,
+                          imageUrl,
+                          productStatus,
+                        );
+
+                        Navigator.pop(context, {
+                          'name': nameController,
+                          'des': descriptionController,
+                          'brandid': brandValue,
+                          'cateid': categoryValue,
+                          'sex': genderValue,
+                          'affialte': commissionController,
+                          'usreid': nameController,
+                          'imageUrl': imageUrl,
+                          'status': productStatus,
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Thêm sản phẩm thành công!')),
+                        );
+                        Navigator.pop(context);
+                      } catch (e) {
+                        // Handle error and close the loading indicator
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Có lỗi xảy ra: $e')),
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
