@@ -34,37 +34,65 @@ class _ShopEditProductState extends State<ShopEditProduct> {
 
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
+  List<String> categories = [];
+  List<String> brands = [];
+
   @override
   void initState() {
     super.initState();
     loadProductData();
-    _fetchData(); // Gọi hàm tải dữ liệu sản phẩm
+    _fetchData();
   }
 
-  List<String> categories = [];
-  List<String> brands = [];
-
   Future<void> _fetchData() async {
+    // Fetch categories and brands
     categories = await categoryService.getnameCategories();
     brands = await brandService.getnameBrands();
 
-    // Trigger a rebuild to update the UI with the fetched data.
-    setState(() {});
+    // Only update state if the lists are not empty
+    if (categories.isNotEmpty && brands.isNotEmpty) {
+      // Set initial values for dropdowns based on the fetched data
+      // Ensure the category and brand exist in the lists
+      setState(() {
+        // Ensure selected value exists in the fetched categories
+        if (categories.contains(categoryValue)) {
+          categoryValue = categoryValue;
+        } else {
+          categoryValue = categories.isNotEmpty
+              ? categories[0]
+              : null; // Default to first category if not found
+        }
+
+        // Ensure selected value exists in the fetched brands
+        if (brands.contains(brandValue)) {
+          brandValue = brandValue;
+        } else {
+          brandValue = brands.isNotEmpty
+              ? brands[0]
+              : null; // Default to first brand if not found
+        }
+      });
+    } else {
+      // If no categories or brands fetched, handle the case accordingly
+      setState(() {
+        categoryValue = null;
+        brandValue = null;
+      });
+    }
   }
 
   Future<void> loadProductData() async {
     final product = await productService.getProductById(widget.productId);
-
     setState(() {
-      nameController.text = product?['name'];
-      descriptionController.text = product?['description'];
-      priceController.text = product!['price'].toString();
-      affialteController.text = product['affiliate'].toString();
-      categoryValue = product['categoryid'];
-      brandValue = product['brandid'];
-      genderValue = product['sex'];
-      productStatus = product['status'] == 'active';
-      imageUrl = product['imageUrl'];
+      nameController.text = product?['name'] ?? '';
+      descriptionController.text = product?['description'] ?? '';
+      priceController.text = product?['price']?.toString() ?? '';
+      affialteController.text = product?['affiliate']?.toString() ?? '';
+      categoryValue = product?['categoryid'];
+      brandValue = product?['brandid'];
+      genderValue = product?['sex'];
+      productStatus = product?['status'] == 'active';
+      imageUrl = product?['imageUrl'];
     });
   }
 
@@ -96,9 +124,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
               },
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Color(0xFF15A362),
-                  shape: BoxShape.circle,
-                ),
+                    color: Color(0xFF15A362), shape: BoxShape.circle),
                 padding: const EdgeInsets.all(8),
                 child: const Icon(Icons.home_outlined, color: Colors.white),
               ),
@@ -145,7 +171,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                   categoryValue = value;
                 });
               },
-              hint: Text(categoryValue ?? 'chọn danh mục'),
+              hint: const Text('Chọn danh mục'),
             ),
             const SizedBox(height: 20),
             const Text("Thương hiệu",
@@ -162,9 +188,9 @@ class _ShopEditProductState extends State<ShopEditProduct> {
               ),
               value: brandValue,
               items: brands
-                  .map((category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
+                  .map((brand) => DropdownMenuItem(
+                        value: brand,
+                        child: Text(brand),
                       ))
                   .toList(),
               onChanged: (value) {
@@ -172,7 +198,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                   brandValue = value;
                 });
               },
-              hint: Text(brandValue ?? 'chọn thương hiệu'),
+              hint: const Text('Chọn thương hiệu'),
             ),
             const SizedBox(height: 20),
             Row(
@@ -205,7 +231,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                             genderValue = value;
                           });
                         },
-                        hint: Text(genderValue ?? 'Chọn giới tính'),
+                        hint: const Text('Chọn giới tính'),
                       ),
                     ],
                   ),
@@ -333,8 +359,21 @@ class _ShopEditProductState extends State<ShopEditProduct> {
     );
   }
 
+  Widget buildImagePlaceholder() {
+    return Container(
+      width: 150,
+      height: 150,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        border: Border.all(color: Colors.green, width: 2),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: const Icon(Icons.camera_alt, color: Colors.green, size: 40),
+    );
+  }
+
   Widget buildTextField(
-      String label, TextEditingController controller, String hint,
+      String label, TextEditingController controller, String hintText,
       {int maxLines = 1, TextInputType keyboardType = TextInputType.text}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,7 +385,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
           maxLines: maxLines,
           keyboardType: keyboardType,
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: hintText,
             filled: true,
             fillColor: const Color(0xFFececf8),
             border: OutlineInputBorder(
@@ -356,19 +395,6 @@ class _ShopEditProductState extends State<ShopEditProduct> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget buildImagePlaceholder() {
-    return Container(
-      width: 150,
-      height: 150,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        border: Border.all(color: Colors.green, width: 2),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: const Icon(Icons.camera_alt, color: Colors.green, size: 40),
     );
   }
 }
