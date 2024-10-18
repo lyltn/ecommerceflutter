@@ -15,19 +15,66 @@ class ShopAddProduct extends StatefulWidget {
 }
 
 class _ShopAddProductState extends State<ShopAddProduct> {
-  final TextEditingController nameController = TextEditingController();
+  final ProductService productService = ProductService();
 
-  final TextEditingController commissionController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  bool productStatus = true;
-  String? categoryValue;
-  String? genderValue;
-  String? brandValue;
-  final List<String> categories = ['Áo khoác jean', 'Áo sơ mi', 'Quần jeans'];
-  final List<String> brands = ['ccc', 'guci', 'LYLy'];
-  final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
+  final TextEditingController imageUrlController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  // final TextEditingController commissionController = TextEditingController();
+  // bool productStatus = true;
+  // String? categoryValue;
+  // String? genderValue;
+  // String? brandValue;
+  // final List<String> categories = ['Áo khoác jean', 'Áo sơ mi', 'Quần jeans'];
+  // final List<String> brands = ['ccc', 'guci', 'LYLy'];
+  // final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
   File? _image;
+
+  void openProductBox() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Column(
+          children: [
+            TextField(
+              controller: nameController,
+            ),
+            TextField(
+              controller: descriptionController,
+            ),
+            TextField(
+              controller: imageUrlController,
+            ),
+            TextField(
+              controller: priceController,
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                productService.addProduct(
+                    "1",
+                    nameController.text,
+                    descriptionController.text,
+                    imageUrlController.text,
+                    int.parse(priceController.text));
+
+                // clear input fields
+                nameController.clear();
+                descriptionController.clear();
+                imageUrlController.clear();
+                priceController.clear();
+
+                Navigator.pop(context);
+              },
+              child: Text('Add'))
+        ],
+      ),
+    );
+  }
 
   Future<void> _pickImage() async {
     final pickedFile =
@@ -98,56 +145,56 @@ class _ShopAddProductState extends State<ShopAddProduct> {
             const Text("Danh mục",
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFececf8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              value: categoryValue,
-              items: categories
-                  .map((category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  categoryValue = value;
-                });
-              },
-              hint: const Text('Chọn danh mục'),
-            ),
+            // DropdownButtonFormField<String>(
+            //   decoration: InputDecoration(
+            //     filled: true,
+            //     fillColor: const Color(0xFFececf8),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(10),
+            //       borderSide: BorderSide.none,
+            //     ),
+            //   ),
+            //   value: categoryValue,
+            //   items: categories
+            //       .map((category) => DropdownMenuItem(
+            //             value: category,
+            //             child: Text(category),
+            //           ))
+            //       .toList(),
+            //   onChanged: (value) {
+            //     setState(() {
+            //       categoryValue = value;
+            //     });
+            //   },
+            //   hint: const Text('Chọn danh mục'),
+            // ),
             const SizedBox(height: 20),
             const Text("Thương hiệu",
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFececf8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              value: brandValue,
-              items: brands
-                  .map((category) => DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  brandValue = value;
-                });
-              },
-              hint: const Text('Chọn thương hiệu'),
-            ),
+            // DropdownButtonFormField<String>(
+            //   decoration: InputDecoration(
+            //     filled: true,
+            //     fillColor: const Color(0xFFececf8),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(10),
+            //       borderSide: BorderSide.none,
+            //     ),
+            //   ),
+            //   value: brandValue,
+            //   items: brands
+            //       .map((category) => DropdownMenuItem(
+            //             value: category,
+            //             child: Text(category),
+            //           ))
+            //       .toList(),
+            //   onChanged: (value) {
+            //     setState(() {
+            //       brandValue = value;
+            //     });
+            //   },
+            //   hint: const Text('Chọn thương hiệu'),
+            // ),
             const SizedBox(height: 20),
             Row(
               children: [
@@ -158,56 +205,56 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                       const Text("Giới tính",
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFececf8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        value: genderValue,
-                        items: genders
-                            .map((gender) => DropdownMenuItem(
-                                  value: gender,
-                                  child: Text(gender),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            genderValue = value;
-                          });
-                        },
-                        hint: const Text('Chọn giới tính'),
-                      ),
+                      // DropdownButtonFormField<String>(
+                      //   decoration: InputDecoration(
+                      //     filled: true,
+                      //     fillColor: const Color(0xFFececf8),
+                      //     border: OutlineInputBorder(
+                      //       borderRadius: BorderRadius.circular(10),
+                      //       borderSide: BorderSide.none,
+                      //     ),
+                      //   ),
+                      //   value: genderValue,
+                      //   items: genders
+                      //       .map((gender) => DropdownMenuItem(
+                      //             value: gender,
+                      //             child: Text(gender),
+                      //           ))
+                      //       .toList(),
+                      //   onChanged: (value) {
+                      //     setState(() {
+                      //       genderValue = value;
+                      //     });
+                      //   },
+                      //   hint: const Text('Chọn giới tính'),
+                      // ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Tiền hoa hồng",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: commissionController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập % hoa hồng',
-                          filled: true,
-                          fillColor: const Color(0xFFececf8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ],
-                  ),
-                ),
+                // Expanded(
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       const Text("Tiền hoa hồng",
+                //           style: TextStyle(fontWeight: FontWeight.bold)),
+                //       const SizedBox(height: 10),
+                //       TextField(
+                //         controller: commissionController,
+                //         decoration: InputDecoration(
+                //           hintText: 'Nhập % hoa hồng',
+                //           filled: true,
+                //           fillColor: const Color(0xFFececf8),
+                //           border: OutlineInputBorder(
+                //             borderRadius: BorderRadius.circular(10),
+                //             borderSide: BorderSide.none,
+                //           ),
+                //         ),
+                //         keyboardType: TextInputType.number,
+                //       ),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
             const SizedBox(height: 20),
@@ -259,29 +306,29 @@ class _ShopAddProductState extends State<ShopAddProduct> {
             Row(
               children: [
                 Container(
-                  child: Row(
-                    children: [
-                      Text('Trạng thái:',
-                          style: AppWiget.LightTextFeildStyle()),
-                      Transform.scale(
-                        scale:
-                            0.8, // Điều chỉnh tỷ lệ để chiều cao gần với 18 (vì Switch mặc định khá lớn)
-                        child: Switch(
-                          value: productStatus,
-                          onChanged: (value) {
-                            setState(() {
-                              productStatus = value;
-                            });
-                          },
-                          activeColor: const Color.fromARGB(
-                              255, 113, 155, 65), // Màu khi bật
-                          inactiveTrackColor: Colors
-                              .lightGreen.shade100, // Màu khi tắt (xanh nhạt)
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    // child: Row(
+                    //   children: [
+                    //     Text('Trạng thái:',
+                    //         style: AppWiget.LightTextFeildStyle()),
+                    //     Transform.scale(
+                    //       scale:
+                    //           0.8, // Điều chỉnh tỷ lệ để chiều cao gần với 18 (vì Switch mặc định khá lớn)
+                    //       child: Switch(
+                    //         value: productStatus,
+                    //         onChanged: (value) {
+                    //           setState(() {
+                    //             productStatus = value;
+                    //           });
+                    //         },
+                    //         activeColor: const Color.fromARGB(
+                    //             255, 113, 155, 65), // Màu khi bật
+                    //         inactiveTrackColor: Colors
+                    //             .lightGreen.shade100, // Màu khi tắt (xanh nhạt)
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    ),
                 const SizedBox(
                   width: 70.0,
                 ),
@@ -289,8 +336,9 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (nameController.text.isEmpty ||
-                          descriptionController.text.isEmpty ||
-                          commissionController.text.isEmpty) {
+                              descriptionController.text.isEmpty
+                          // || commissionController.text.isEmpty
+                          ) {
                         // Display a message to fill all fields
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -308,39 +356,13 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                             Center(child: CircularProgressIndicator()),
                       );
 
-                      String? imageUrl;
-                      if (_image != null) {
-                        imageUrl = await uploadImage(_image!);
-                      }
+                      // String? imageUrl;
+                      // if (_image != null) {
+                      //   imageUrl = await uploadImage(_image!);
+                      // }
 
                       try {
-                        await addProduct(
-                          nameController.text,
-                          descriptionController.text,
-                          brandValue ?? '',
-                          categoryValue ?? '',
-                          genderValue ?? '',
-                          double.parse(commissionController.text),
-                          nameController.text,
-                          imageUrl,
-                          productStatus,
-                        );
-
-                        Navigator.pop(context, {
-                          'name': nameController,
-                          'des': descriptionController,
-                          'brandid': brandValue,
-                          'cateid': categoryValue,
-                          'sex': genderValue,
-                          'affialte': commissionController,
-                          'usreid': nameController,
-                          'imageUrl': imageUrl,
-                          'status': productStatus,
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Thêm sản phẩm thành công!')),
-                        );
-                        Navigator.pop(context);
+                        openProductBox();
                       } catch (e) {
                         // Handle error and close the loading indicator
                         Navigator.of(context).pop();

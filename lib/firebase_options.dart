@@ -51,19 +51,21 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD6MzREIj-Au8-6qqIpJRtW74buQh74QxU',
-    appId: '1:81762041969:android:6bc8c73ae39f7b7d845bd0',
-    messagingSenderId: '81762041969',
-    projectId: 'ecommerceflutter-61f6d',
-    storageBucket: 'ecommerceflutter-61f6d.appspot.com',
+    apiKey: 'AIzaSyDfgy7x1oYMMH8QcxCn0zMosFM7fEj2ffk',
+    appId: '1:999344200783:android:6f7ce362a700d1cfc29e3a',
+    messagingSenderId: '999344200783',
+    projectId: 'appecommerce-d6bc7',
+    databaseURL: 'https://appecommerce-d6bc7-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'appecommerce-d6bc7.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCnnYfL-wtBwqaDqe_lBTEImy3t5pE5a9c',
-    appId: '1:81762041969:ios:6d2c53e17261d165845bd0',
-    messagingSenderId: '81762041969',
-    projectId: 'ecommerceflutter-61f6d',
-    storageBucket: 'ecommerceflutter-61f6d.appspot.com',
+    apiKey: 'AIzaSyDNA3fATEzVxcuUv-8ZBdfdCZVTCzEQxn0',
+    appId: '1:999344200783:ios:c05b5864c9a3ff26c29e3a',
+    messagingSenderId: '999344200783',
+    projectId: 'appecommerce-d6bc7',
+    databaseURL: 'https://appecommerce-d6bc7-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'appecommerce-d6bc7.appspot.com',
     iosBundleId: 'com.example.ecommercettl',
   );
 

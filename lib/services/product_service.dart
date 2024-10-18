@@ -1,76 +1,59 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
-Future<void> addProduct(
-    String name,
-    String des,
-    String brandid,
-    String cateid,
-    String sex,
-    double affialte,
-    String userid,
-    String? imageUrl,
-    bool status) async {
-  CollectionReference products =
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+class ProductService {
+
+  // Fetch all products --added by zungcao
+  final CollectionReference products =
       FirebaseFirestore.instance.collection('products');
 
-  await products.add({
-    'name': name,
-    'des': des,
-    'brandid': brandid,
-    'cateid': cateid,
-    'sex': sex,
-    'affialte': affialte,
-    'usreid': userid,
-    'imageUrl': imageUrl,
-    'status': status,
-  });
-}
-
-Future<String> uploadImage(File image) async {
-  try {
-    final storageRef = FirebaseStorage.instance
-        .ref()
-        .child('product_images/${DateTime.now().toString()}');
-    await storageRef.putFile(image);
-    return await storageRef.getDownloadURL();
-  } catch (e) {
-    print('Failed to upload image: $e');
-    return '';
+  // Create a new product --added by zungcao
+  Future<void> addProduct(String userId, String name, String description,
+      String imageUrl, int price) {
+    return products.add({
+      'userId': userId,
+      'name': name,
+      'description': description,
+      'imageUrl': imageUrl,
+      'price': price,
+      'timestamp': Timestamp.now(),
+    });
   }
-}
 
-Future<void> updateProduct(
-    String docId,
-    String name,
-    String des,
-    String brandid,
-    String cateid,
-    String sex,
-    double affialte,
-    String userid,
-    String? imageUrl,
-    bool status) async {
-  CollectionReference products =
-      FirebaseFirestore.instance.collection('products');
+  // Read --added by zungcao
+  Stream<QuerySnapshot> getProductsStream() {
+    final productsStream =
+        products.orderBy('timestamp', descending: true).snapshots();
+    return productsStream;
+  }
 
-  await products.doc(docId).update({
-    'name': name,
-    'des': des,
-    'brandid': brandid,
-    'cateid': cateid,
-    'sex': sex,
-    'affialte': affialte,
-    'usreid': userid,
-    'imageUrl': imageUrl,
-    'status': status,
-  });
-}
+  // Update --added by zungcao
+  Future<void> updateProduct(String docId, String newName,
+      String newDescription, String newImageUrl, int newPrice) {
+    return products.doc(docId).update({
+      'name': newName,
+      'description': newDescription,
+      'imageUrl': newImageUrl,
+      'price': newPrice,
+    });
+  }
 
-Future<void> deleteProduct(String docId) async {
-  CollectionReference products =
-      FirebaseFirestore.instance.collection('products');
+  // Delete --added by zungcao
+  Future<void> deleteProduct(String docId) {
+    return products.doc(docId).delete();
+  }
 
-  await products.doc(docId).delete();
+  Future<String> uploadImage(File image) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('product_images/${DateTime.now().toString()}');
+      await storageRef.putFile(image);
+      return await storageRef.getDownloadURL();
+    } catch (e) {
+      return '';
+    }
+  }
 }

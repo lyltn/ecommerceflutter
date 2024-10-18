@@ -3,7 +3,7 @@ import 'package:ecommercettl/pages/customer/component/FilterAction.dart';
 import 'package:ecommercettl/pages/customer/component/FindBar.dart';
 import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
 import 'package:ecommercettl/pages/customer/component/FilterPanel.dart'; // Import the FilterPanel
-import 'package:ecommercettl/pages/customer/ProductDetail.dart'; // Import your ProductDetail page
+import 'package:ecommercettl/pages/customer/productDetail.dart'; // Import your ProductDetail page
 
 class SearchProduct extends StatefulWidget {
   const SearchProduct({super.key});
