@@ -1,3 +1,4 @@
+import 'package:ecommercettl/pages/authen/forgot_pw.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import trang chính
@@ -8,6 +9,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool _rememberMe = false;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -130,6 +132,34 @@ class _LoginPageState extends State<LoginPage> {
             },
           ),
           SizedBox(height: 20),
+          // Remember me checkbox and forgot password
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children: [
+                  Checkbox(
+                    value: _rememberMe,
+                    onChanged: (value) {
+                      setState(() {
+                        _rememberMe = value!;
+                      });
+                    },
+                  ),
+                  Text('Nhớ tôi'),
+                ],
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
+                  );
+                },
+                child: Text('Quên mật khẩu'),
+              ),
+            ],
+          ),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 40),
             child: ElevatedButton(
