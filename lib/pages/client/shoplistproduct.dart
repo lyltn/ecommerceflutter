@@ -3,6 +3,8 @@ import 'package:ecommercettl/pages/client/shopaddproduct.dart';
 import 'package:ecommercettl/pages/client/shopaddsize.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/client/shopeditproduct.dart';
+import 'package:ecommercettl/pages/client/shoplistclassify.dart';
+import 'package:ecommercettl/services/classify_service.dart';
 import 'package:ecommercettl/services/product_service.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,9 @@ class ShopListProduct extends StatefulWidget {
 }
 
 class _ShopListProductState extends State<ShopListProduct> {
+  final ClassifyService classifyService = ClassifyService();
+  String id = '';
+
   @override
   final ProductService productService = ProductService();
   Widget build(BuildContext context) {
@@ -159,6 +164,31 @@ class _ShopListProductState extends State<ShopListProduct> {
                                 ),
                                 onTap: () {
                                   productService.deleteProduct(doc.id);
+                                  classifyService
+                                      .deleteClassifiesByProductId(doc.id);
+                                },
+                              ),
+                              PopupMenuItem(
+                                child: GestureDetector(
+                                  onLongPress: () {
+                                    productService.deleteProduct(doc.id);
+                                  },
+                                  child: Text(
+                                    'Thêm  phân loại',
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontFamily: 'Roboto',
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ShopAddSize(
+                                                proId: doc.id,
+                                              )));
                                 },
                               ),
                             ],
@@ -235,10 +265,10 @@ class _ShopListProductState extends State<ShopListProduct> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ShopAddSize()));
+                                    builder: (context) => ShopListClassify()));
                           },
                           child: const Text(
-                            'Thêm phân loại +',
+                            'Danh sách phân loại',
                             style: TextStyle(
                               color: Colors.green,
                               fontFamily: 'Roboto',
