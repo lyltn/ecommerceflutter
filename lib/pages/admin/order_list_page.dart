@@ -16,26 +16,8 @@ class _OrderListPage extends State<OrderListPage> {
   Widget build(BuildContext context) {
     final OrderService orderService = OrderService();
 
-    void addOrder() {
-      orderService.addOrder(
-        'ORD12345', // orderCode
-        1, // orderStatusId (e.g., 1 for 'pending', 2 for 'shipped', etc.)
-        'VOUCHER50', // voucherCode
-        99.99, // total (order total)
-        'John Doe', // Fixed name issue
-        '+1234567890', // phone
-        '123 Main St, City', // address
-        'pending', // status (pending, shipped, delivered, etc.)
-        'John Doe', // useri
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Order List')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: addOrder,
-        child: const Icon(Icons.add),
-      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: orderService.getOrderStream(),
         builder: (context, snapshot) {
