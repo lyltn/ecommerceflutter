@@ -1,8 +1,8 @@
-import 'package:ecommercettl/pages/admin/post_detail_page.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ecommercettl/services/post_services.dart';
-import 'Components/post_card.dart';
+import '/models/post.dart';
+import '/services/post_service.dart';
+import 'components/post_dialog.dart';
+import 'post_detail_page.dart';
 
 class PostListPage extends StatefulWidget {
   const PostListPage({super.key});
@@ -14,63 +14,70 @@ class PostListPage extends StatefulWidget {
 class _PostListPageState extends State<PostListPage> {
   final PostService postService = PostService();
 
+  void _showAddPostDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return PostDialog(postService: postService);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Posts')),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: postService
-            .getPostsStream(), // Make sure this stream is implemented in PostService
+      appBar: AppBar(
+        title: const Center(child: Text('Posts')),
+      ),
+      body: StreamBuilder<List<Post>>(
+        stream: postService.getPosts(), // Fetch the posts stream directly
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-            List<DocumentSnapshot> postList = snapshot.data!.docs;
-
-            return ListView.builder(
-              itemCount: postList.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot post = postList[index];
-                Map<String, dynamic> data =
-                    post.data() as Map<String, dynamic>;
-
-                String username = data['userId'];
-                // String imageUrl =
-                //     data['postImgUrl'] != null && data['postImgUrl'].isNotEmpty
-                //         ? data['postImgUrl'][0] // Get the first image
-                //         : ''; // Default or placeholder image
-                String imageUrl = data['postImgUrl'];
-                String postText = data['postTitle'];
-
-                return PostCard(
-                  username: username,
-                  imageUrl: imageUrl,
-                  postText: postText,
-                  onDelete: () {
-                    postService.deletePost(post
-                        .id); // Call your delete method from PostService
-                  },
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PostDetailPage(post: post),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          } else {
-            return const Center(child: Text('No posts found'));
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
+
+          final posts = snapshot.data ?? [];
+
+          if (posts.isEmpty) {
+            return const Center(child: Text('No posts available.'));
+          }
+
+          return ListView.builder(
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index];
+              return ListTile(
+                title: Text(post.content),
+                subtitle: Text('Posted by: ${post.userId}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    await postService
+                        .deletePost(post.id); // Directly delete the post
+                  },
+                ),
+                onTap: () {
+                  // Navigate to post details or another page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PostDetailPage(post: post),
+                    ),
+                  );
+                },
+              );
+            },
+          );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddPostDialog(context);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ecommercettl/pages/admin/Components/shop_item.dart';
+import 'components/shop_item.dart';
 import 'package:ecommercettl/services/product_service.dart';
 import 'package:flutter/material.dart';
 import 'product_detail_page.dart';
