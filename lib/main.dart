@@ -1,5 +1,4 @@
 import 'package:ecommercettl/pages/admin/order_list_page.dart';
-import 'package:ecommercettl/pages/admin/post_list_page.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/login.dart';
 import 'package:ecommercettl/pages/authen/register.dart';
@@ -53,7 +52,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const PostListPage(),
+      home: AuthPage(),
+      // home: const ProductListPage(),
     );
   }
 }
