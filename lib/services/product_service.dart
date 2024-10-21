@@ -56,7 +56,7 @@ class ProductService {
 
   Stream<QuerySnapshot> getProductsStream() {
     final productsStream =
-        products.orderBy('timestamp', descending: true).snapshots();
+        products.orderBy('name', descending: true).snapshots();
     return productsStream;
   }
 
