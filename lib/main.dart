@@ -18,7 +18,6 @@ import 'package:ecommercettl/pages/customer/test.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -50,19 +49,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-<<<<<<< HEAD
-      home: const ShopPanel(),
-=======
-<<<<<<< HEAD
-      home: BottomNav(),
-=======
-<<<<<<< HEAD
-      home: const BottomNav(),
-=======
-      home: BottomnavShop(),
->>>>>>> 7f5ad103fb4f594f53d5f17938d49f12711ac994
->>>>>>> f05fd4c79c2bba55a3ce0502760e443bf643447e
->>>>>>> e9f68f17b95ba8635441f05abfbac648bb8c9b88
+      home: AuthPage(),
     );
   }
 }

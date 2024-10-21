@@ -1,60 +1,89 @@
 import 'package:ecommercettl/pages/customer/component/PhotoGallery.dart';
 import 'package:ecommercettl/pages/customer/component/ProductReview.dart';
+import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/models/Product.dart';
 
+
 class Productdetail extends StatefulWidget {
   final Product newProduct;
+
   const Productdetail({
-    Key ? key,
+    Key? key,
     required this.newProduct
-  });
- 
+  }) : super(key: key);
 
   @override
   State<Productdetail> createState() => ProductdetailState();
 }
 
+class ProductdetailState extends State<Productdetail>
+    with SingleTickerProviderStateMixin {
+  bool showGuarantee = false;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
 
-class ProductdetailState extends State<Productdetail> {
+  void _toggleGuaranteeCard() {
+    setState(() {
+      showGuarantee = !showGuarantee;
+      if (showGuarantee) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack( // Use Stack to layer widgets
+        child: Stack(
           children: [
             SingleChildScrollView(
-              // Wrap content in SingleChildScrollView
               child: Container(
                 color: Colors.white,
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(5.0), // Add 5px padding
+                      padding: const EdgeInsets.all(5.0),
                       child: Row(
                         children: [
                           Expanded(
                             child: Container(
                               height: MediaQuery.of(context).size.height * 0.8,
                               decoration: const BoxDecoration(
-                                // You can set decoration properties here
-                                color: Colors.white, // Background color
+                                color: Colors.white,
                               ),
-                              child: PhotoGallery(imagePaths: widget.newProduct.imageUrls ), // Assuming PhotoGallery is the intended widget to display
+                              child: PhotoGallery(imagePaths: widget.newProduct.imageUrls),
                             ),
                           ),
                         ],
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 0,
-                        bottom: 0,
-                        right: 0,
-                        left: 15,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -73,54 +102,75 @@ class ProductdetailState extends State<Productdetail> {
                                   fontSize: 32,
                                   color: Colors.red,
                                 ),
-                              )
+                              ),
                             ],
                           ),
-                          Column(
-                            children: [
-                              Text(
-                                '${widget.newProduct.name}',
-                                style: const TextStyle(
-                                  fontSize: 16,
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.newProduct.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          const Divider(),
+                          GestureDetector(
+                            onTap: _toggleGuaranteeCard,
+                            child: const Row(
+                              children: [
+                                Icon(
+                                  Icons.verified_user_outlined,
+                                  color: Color(0xFF015A362),
                                 ),
-                              ),
-                              const Divider(
-                                color: Colors.black,
-                                thickness: 0.5,
-                                indent: 0,
-                                endIndent: 0,
-                              ),
-                              const Row(
-                                children: [
-                                  Icon(
-                                    Icons.verified_user_outlined,
-                                    color: Color(0xFF015A362),
+                                Expanded(
+                                  child: Text(
+                                    'Đổi ý miễn phí 15 ngày - Chính hãng 100% - .... ',
+                                    style: TextStyle(fontSize: 16),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  Expanded( // Add Expanded here to prevent overflow
-                                    child: Text(
-                                      'Đổi ý miễn phí 15 ngày - Chính hãng 100% - .... ',
-                                      style: TextStyle(fontSize: 16),
-                                      overflow: TextOverflow.ellipsis, // Avoid text overflow
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Divider(
-                                color: Colors.black,
-                                thickness: 0.5,
-                                indent: 0,
-                                endIndent: 0,
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
+                          const Divider(),
                         ],
                       ),
                     ),
-                    ProductReview()
+                    ProductReview(),
                   ],
                 ),
               ),
             ),
+
+            // Overlay for the GuaranteeCard
+            if (showGuarantee)
+              GestureDetector(
+                onTap: _toggleGuaranteeCard,
+                child: AnimatedOpacity(
+                  opacity: showGuarantee ? 0.7 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    color: Colors.black.withOpacity(1),
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
+
+            // Animated GuaranteeCard
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              left: 0,
+              right: 0,
+              bottom: showGuarantee ? 1 : -MediaQuery.of(context).size.height * 0.5,
+              child: Container(
+                height: MediaQuery.of(context).size.height *0.5 ,
+                child: GuaranteeCard(
+                  onAgree: _toggleGuaranteeCard,
+                ),
+              ),
+            ),
+
             // Positioned buttons at the bottom
             Positioned(
               left: 0,
@@ -128,41 +178,41 @@ class ProductdetailState extends State<Productdetail> {
               bottom: 0,
               child: Container(
                 padding: const EdgeInsets.all(10.0),
-                color: Colors.white, // Background color for buttons
+                color: Colors.white,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded( // Use Expanded to control width
+                    Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // White background
-                          foregroundColor: Color(0xFF15A362), // Blue text
-                          side: const BorderSide(color: Color(0xFF15A362)), // Blue border
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF15A362),
+                          side: const BorderSide(color: Color(0xFF15A362)),
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero, // No border radius
+                            borderRadius: BorderRadius.zero,
                           ),
                         ),
                         onPressed: () {
                           // Action for button 1
                         },
-                        child: Text('Button 1'),
+                        child: const Text('Button 1'),
                       ),
                     ),
-                    SizedBox(width: 10), // Add space between buttons
-                    Expanded( // Use Expanded to control width
+                    const SizedBox(width: 10),
+                    Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF15A362), // Blue background
-                          foregroundColor: Colors.white, // White text
-                          side: const BorderSide(color: Color(0xFF15A362)), // Blue border
+                          backgroundColor: const Color(0xFF15A362),
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFF15A362)),
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero, // No border radius
+                            borderRadius: BorderRadius.zero,
                           ),
                         ),
                         onPressed: () {
                           // Action for button 2
                         },
-                        child: Text('Button 2'),
+                        child: const Text('Button 2'),
                       ),
                     ),
                   ],
