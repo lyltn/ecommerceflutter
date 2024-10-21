@@ -29,7 +29,7 @@ class ProductCard extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 2 / 3,
-            child: Image.asset(
+            child: Image.network(
               imagePath,
               fit: BoxFit.cover,
             ),
