@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class ShopItem extends StatelessWidget {
+class ShopItem extends StatefulWidget {
   final String shopName;
   final String productName;
-  final double price; // Change type to double
+  final double price;
   final String imageUrl;
-  final VoidCallback? onTap; // Callback for item tap
-  final VoidCallback? onDelete; // Callback for delete action
+  final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   const ShopItem({
     Key? key,
@@ -14,14 +14,21 @@ class ShopItem extends StatelessWidget {
     required this.productName,
     required this.price,
     required this.imageUrl,
-    this.onTap, // Add onTap parameter
-    this.onDelete, // Add onDelete parameter
+    this.onTap,
+    this.onDelete,
   }) : super(key: key);
+
+  @override
+  _ShopItemState createState() => _ShopItemState();
+}
+
+class _ShopItemState extends State<ShopItem> {
+  bool _isConfirmingDelete = false; // State variable to manage delete confirmation
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap, // Trigger onTap when the item is tapped
+      onTap: widget.onTap,
       child: Container(
         margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -45,15 +52,40 @@ class ShopItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    shopName,
+                    widget.shopName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
-                  IconButton(
+                  _isConfirmingDelete // Check state to determine which button to show
+                      ? Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.check, color: Colors.green),
+                        onPressed: () {
+                          if (widget.onDelete != null) {
+                            widget.onDelete!(); // Call delete action
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.red),
+                        onPressed: () {
+                          setState(() {
+                            _isConfirmingDelete = false; // Return to delete button
+                          });
+                        },
+                      ),
+                    ],
+                  )
+                      : IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                    onPressed: onDelete, // Handle delete action
+                    onPressed: () {
+                      setState(() {
+                        _isConfirmingDelete = true; // Show confirmation buttons
+                      });
+                    },
                   ),
                 ],
               ),
@@ -64,7 +96,7 @@ class ShopItem extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
                     child: Image.network(
-                      imageUrl,
+                      widget.imageUrl,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
@@ -76,14 +108,14 @@ class ShopItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          productName,
+                          widget.productName,
                           style: const TextStyle(fontSize: 14),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${price.toStringAsFixed(2)}', // Format price as string
+                          '\đ${widget.price.toStringAsFixed(2)}', // Format price as string
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
