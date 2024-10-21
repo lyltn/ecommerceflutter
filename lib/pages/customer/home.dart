@@ -5,6 +5,7 @@ import 'package:ecommercettl/pages/customer/component/HomeAppBar.dart';
 import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
 import 'package:ecommercettl/pages/customer/component/SliderBanner.dart';
 import 'package:ecommercettl/pages/customer/component/Trending.dart';
+import 'package:ecommercettl/pages/customer/productDetail.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/models/Product.dart';
@@ -62,26 +63,38 @@ class _HomeState extends State<Home> {
 
               // Display products in a GridView
               return GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.4,
-                physics: NeverScrollableScrollPhysics(),
-                children: products.map((product) {
-                  return ProductCard(
-                    imagePath: product.imageUrls.isNotEmpty
-                        ? product.imageUrls[0] // Use first image from imageUrl list
-                        : 'images/dress.png', // Fallback image
-                    name: product.name,
-                    description: product.description,
-                    price: product.price,
-                    discountPercentage: 20, // Example discount
-                    rating: 4.5, // Example rating
-                    reviewCount: 100, // Example review count
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.4,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      for (var product in products)
+                        GestureDetector(
+                          onTap: () {
+                            // Navigate to ProductDetail page on tap
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Productdetail(newProduct: product,),
+                              ),
+                            );
+                          },
+                          child: ProductCard(
+                            imagePath: product.imageUrls.isNotEmpty
+                                ? product.imageUrls[0] // Use the first image from imageUrl list
+                                : 'images/dress.png', // Fallback image
+                            name: product.name,
+                            description: product.description,
+                            price: product.price,
+                            discountPercentage: 20, // Ensure this is a String
+                            rating: 5, // Ensure this is a double
+                            reviewCount: 4, // Ensure this is an int
+                          ),
+                        ),
+                    ],
                   );
-                }).toList(),
-              );
             },
           ),
           Container(

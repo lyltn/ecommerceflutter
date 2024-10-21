@@ -1,13 +1,21 @@
 import 'package:ecommercettl/pages/customer/component/PhotoGallery.dart';
 import 'package:ecommercettl/pages/customer/component/ProductReview.dart';
 import 'package:flutter/material.dart';
+import 'package:ecommercettl/models/Product.dart';
 
 class Productdetail extends StatefulWidget {
-  const Productdetail({super.key});
+  final Product newProduct;
+  const Productdetail({
+    Key ? key,
+    required this.newProduct
+  });
+ 
 
   @override
   State<Productdetail> createState() => ProductdetailState();
 }
+
+
 
 class ProductdetailState extends State<Productdetail> {
   @override
@@ -29,18 +37,18 @@ class ProductdetailState extends State<Productdetail> {
                           Expanded(
                             child: Container(
                               height: MediaQuery.of(context).size.height * 0.8,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 // You can set decoration properties here
                                 color: Colors.white, // Background color
                               ),
-                              child: PhotoGallery(), // Assuming PhotoGallery is the intended widget to display
+                              child: PhotoGallery(imagePaths: widget.newProduct.imageUrls ), // Assuming PhotoGallery is the intended widget to display
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(
+                    Padding(
+                      padding: const EdgeInsets.only(
                         top: 0,
                         bottom: 0,
                         right: 0,
@@ -50,7 +58,7 @@ class ProductdetailState extends State<Productdetail> {
                         children: [
                           Row(
                             children: [
-                              Text(
+                              const Text(
                                 'đ',
                                 style: TextStyle(
                                   fontSize: 26,
@@ -60,8 +68,8 @@ class ProductdetailState extends State<Productdetail> {
                                 ),
                               ),
                               Text(
-                                '223.479',
-                                style: TextStyle(
+                                '${widget.newProduct.price.toStringAsFixed(0)}',
+                                style: const TextStyle(
                                   fontSize: 32,
                                   color: Colors.red,
                                 ),
@@ -70,19 +78,19 @@ class ProductdetailState extends State<Productdetail> {
                           ),
                           Column(
                             children: [
-                              const Text(
-                                'MORSELA chính hãng - Áo thun croptop nữ kiểu tay ngắn xẻ tà NOTE phong cách dân gian đương đại',
-                                style: TextStyle(
+                              Text(
+                                '${widget.newProduct.name}',
+                                style: const TextStyle(
                                   fontSize: 16,
                                 ),
                               ),
-                              Divider(
+                              const Divider(
                                 color: Colors.black,
                                 thickness: 0.5,
                                 indent: 0,
                                 endIndent: 0,
                               ),
-                              Row(
+                              const Row(
                                 children: [
                                   Icon(
                                     Icons.verified_user_outlined,
@@ -129,8 +137,8 @@ class ProductdetailState extends State<Productdetail> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white, // White background
                           foregroundColor: Color(0xFF15A362), // Blue text
-                          side: BorderSide(color: Color(0xFF15A362)), // Blue border
-                          shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Color(0xFF15A362)), // Blue border
+                          shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero, // No border radius
                           ),
                         ),
@@ -146,8 +154,8 @@ class ProductdetailState extends State<Productdetail> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF15A362), // Blue background
                           foregroundColor: Colors.white, // White text
-                          side: BorderSide(color: Color(0xFF15A362)), // Blue border
-                          shape: RoundedRectangleBorder(
+                          side: const BorderSide(color: Color(0xFF15A362)), // Blue border
+                          shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero, // No border radius
                           ),
                         ),

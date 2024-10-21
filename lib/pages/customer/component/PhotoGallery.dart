@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 
 class PhotoGallery extends StatefulWidget {
-  const PhotoGallery({Key? key}) : super(key: key);
+  final List<String> imagePaths;
+
+  const PhotoGallery({Key? key, required this.imagePaths}) : super(key: key);
 
   @override
   _PhotoGalleryState createState() => _PhotoGalleryState();
 }
 
 class _PhotoGalleryState extends State<PhotoGallery> {
-  // Danh sách các đường dẫn ảnh khác nhau
-  final List<String> imagePaths = [
-    'images/imageProduct.png',
-    'images/image 47.png',
-    'images/image 47 (1).png',
-    'images/image 47 (2).png',
-    'images/image 47 (3).png',
-    'images/image 47 (4).png',
-  ];
-
   // Ảnh chính được hiển thị ban đầu
-  String selectedImage = 'images/imageProduct.png';
+  late String selectedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set the initial selected image to the first image in the list
+    selectedImage = widget.imagePaths.isNotEmpty ? widget.imagePaths[0] : ''; // Initialize selected image
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             Expanded(
               flex: 3,
               child: Container(
-                child: Image.asset(
+                child: Image.network(
                   selectedImage, // Sử dụng ảnh được chọn
                   fit: BoxFit.cover,
                 ),
@@ -45,20 +44,20 @@ class _PhotoGalleryState extends State<PhotoGallery> {
               child: Container(
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: imagePaths.length,
+                  itemCount: widget.imagePaths.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          selectedImage = imagePaths[index];
+                          selectedImage = widget.imagePaths[index];
                         });
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(4),
                         child: Container(
                           width: 80,
-                          child: Image.asset(
-                            imagePaths[index],
+                          child: Image.network(
+                            widget.imagePaths[index],
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -70,7 +69,6 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             ),
           ],
         ),
-
       ),
     );
   }
