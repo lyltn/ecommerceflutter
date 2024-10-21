@@ -1,3 +1,4 @@
+import 'package:ecommercettl/pages/admin/order_list_page.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/login.dart';
 import 'package:ecommercettl/pages/authen/register.dart';
@@ -49,7 +50,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+<<<<<<< HEAD
       home: const BottomNav(),
+=======
+      home: BottomnavShop(),
+>>>>>>> 7f5ad103fb4f594f53d5f17938d49f12711ac994
     );
   }
 }
