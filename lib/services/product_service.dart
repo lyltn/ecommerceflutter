@@ -16,7 +16,7 @@ class ProductService {
     String sex,
     double affialte,
     double price,
-    String? imageUrl,
+    List<String> imageUrls,
     String userid,
     String status,
   ) {
@@ -28,7 +28,7 @@ class ProductService {
       'sex': sex,
       'affiliate': affialte,
       'price': price,
-      'imageUrl': imageUrl,
+      'imageUrl': imageUrls,
       'userid': userid,
       'status': status,
     });
@@ -69,7 +69,7 @@ class ProductService {
     String sex,
     double affialte,
     double price,
-    String? imageUrl,
+    List<String> imageUrls,
     String userid,
     String status,
   ) {
@@ -81,7 +81,7 @@ class ProductService {
       'sex': sex,
       'affiliate': affialte,
       'price': price,
-      'imageUrl': imageUrl,
+      'imageUrl': imageUrls,
       'userid': userid,
       'status': status,
     });
@@ -92,16 +92,73 @@ class ProductService {
     return products.doc(docId).delete();
   }
 
-  Future<String> uploadImage(File image) async {
+
+  Future<List<String>> updateProductImages(String productId, List<File> newImages) async {
+    List<String> uploadedUrls = [];
+    
     try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('product_images/${DateTime.now().toString()}');
-      await storageRef.putFile(image);
-      return await storageRef.getDownloadURL();
+      // Step 1: Fetch the old image URLs from Firestore
+      DocumentSnapshot productSnapshot = await FirebaseFirestore.instance.collection('products').doc(productId).get();
+      if (productSnapshot.exists && productSnapshot['imageUrl'] != null) {
+        List<String> oldImageUrls = List<String>.from(productSnapshot['imageUrl']);
+        
+        // Step 2: Delete the old images from Firebase Storage
+        for (String imageUrl in oldImageUrls) {
+          try {
+            Reference storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
+            await storageRef.delete();
+            print('Deleted old image: $imageUrl');
+          } catch (e) {
+            print('Error deleting old image: $e');
+          }
+        }
+      }
+      
+      // Step 3: Upload the new images
+      for (var image in newImages) {
+        try {
+          Reference storageRef = FirebaseStorage.instance
+              .ref()
+              .child('product_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
+
+          UploadTask uploadTask = storageRef.putFile(image);
+
+          TaskSnapshot snapshot = await uploadTask;
+          String downloadUrl = await snapshot.ref.getDownloadURL();
+          uploadedUrls.add(downloadUrl);
+          print('Uploaded new image: $downloadUrl');
+        } catch (e) {
+          print('Error uploading image: $e');
+        }
+      }
+      
+      // Return the list of new image URLs
+      return uploadedUrls;
     } catch (e) {
-      print('Failed to upload image: $e');
-      return '';
+      print('Error updating product images: $e');
+      return [];
     }
+  }
+
+
+  Future<List<String>> uploadImages( List<File> _images) async {
+    List<String> uploadedUrls = [];
+    for (var image in _images) {
+      try {
+        Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('product_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
+
+        UploadTask uploadTask = storageRef.putFile(image);
+
+        TaskSnapshot snapshot = await uploadTask;
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        uploadedUrls.add(downloadUrl);
+        print('addne');
+      } catch (e) {
+        print('Error uploading image: $e');
+      }
+    }
+    return uploadedUrls;
   }
 }

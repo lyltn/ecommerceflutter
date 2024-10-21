@@ -29,9 +29,11 @@ class _ShopEditProductState extends State<ShopEditProduct> {
   String? categoryValue;
   String? genderValue;
   String? brandValue;
-  String? imageUrl;
-  File? _image;
+  List<String> imageUrls = [];
+  List<File> _images = [];
 
+  final ImagePicker _picker = ImagePicker();
+  
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
   List<String> categories = [];
@@ -92,19 +94,52 @@ class _ShopEditProductState extends State<ShopEditProduct> {
       brandValue = product?['brandid'];
       genderValue = product?['sex'];
       productStatus = product?['status'] == 'active';
-      imageUrl = product?['imageUrl'];
+      imageUrls = product?['imageUrl'];
     });
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  Future<void> pickImages() async {
+    final List<XFile>? selectedImages = await _picker.pickMultiImage();
+    if (selectedImages != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images = selectedImages.map((image) => File(image.path)).toList();
       });
     }
   }
+
+
+  Widget buildImagePlaceholder() {
+    return Container(
+      width: 150,
+      height: 150,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        border: Border.all(color: Colors.green, width: 2),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Icon(Icons.camera_alt, color: Colors.green, size: 40),
+    );
+  }
+
+  Widget _buildGridView() {
+    // Gộp danh sách ảnh cũ (URL) và ảnh mới (File) lại
+    final combinedImages = [...imageUrls.map((url) => Image.network(url)), 
+                            ..._images.map((file) => Image.file(file))];
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 4.0,
+        mainAxisSpacing: 4.0,
+      ),
+      itemCount: combinedImages.length,
+      itemBuilder: (context, index) {
+        return combinedImages[index];
+      },
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -272,14 +307,13 @@ class _ShopEditProductState extends State<ShopEditProduct> {
             const SizedBox(height: 20),
             Center(
               child: GestureDetector(
-                onTap: _pickImage,
-                child: _image == null && imageUrl != null
-                    ? Image.network(imageUrl!,
-                        width: 150, height: 150, fit: BoxFit.cover)
-                    : _image != null
-                        ? Image.file(_image!,
-                            width: 150, height: 150, fit: BoxFit.cover)
-                        : buildImagePlaceholder(),
+                onTap: pickImages,
+                child: _images == null && imageUrls != null
+                      ?Container(
+                        height: 300,
+                        child: _buildGridView(),
+                      )
+                    : buildImagePlaceholder(),
               ),
             ),
             const SizedBox(height: 30),
@@ -315,10 +349,9 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                 Container(
                   child: ElevatedButton(
                     onPressed: () async {
-                      String? uploadedImageUrl;
-                      if (_image != null) {
-                        uploadedImageUrl =
-                            await productService.uploadImage(_image!);
+                      if (_images != null) {
+                        imageUrls =
+                             await productService.updateProductImages(widget.productId,_images);
                       }
 
                       await productService.updateProduct(
@@ -330,7 +363,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                         genderValue!,
                         double.parse(affialteController.text),
                         double.parse(priceController.text),
-                        uploadedImageUrl ?? imageUrl,
+                        imageUrls ?? imageUrls,
                         'ly',
                         productStatus ? 'active' : 'inactive',
                       );
@@ -341,7 +374,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                       backgroundColor: Colors.green,
                     ),
                     child: const Text(
-                      'Thêm',
+                      'Sửa',
                       style: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Roboto',
@@ -359,18 +392,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
     );
   }
 
-  Widget buildImagePlaceholder() {
-    return Container(
-      width: 150,
-      height: 150,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        border: Border.all(color: Colors.green, width: 2),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: const Icon(Icons.camera_alt, color: Colors.green, size: 40),
-    );
-  }
+ 
 
   Widget buildTextField(
       String label, TextEditingController controller, String hintText,
