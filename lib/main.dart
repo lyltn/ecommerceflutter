@@ -11,6 +11,7 @@ import 'package:ecommercettl/pages/customer/component/PhotoGallery.dart';
 import 'package:ecommercettl/pages/customer/component/PriceRange.dart';
 import 'package:ecommercettl/pages/customer/component/ProductReview.dart';
 import 'package:ecommercettl/pages/customer/component/SearchScreen.dart';
+import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:ecommercettl/pages/customer/component/searchProduct.dart';
 import 'package:ecommercettl/pages/customer/home.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
@@ -20,6 +21,7 @@ import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'pages/admin/product_list_page.dart';
 
 void main() async {
   // Ensure widget binding is initialized
@@ -50,11 +52,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-<<<<<<< HEAD
       home: const BottomNav(),
-=======
-      home: BottomnavShop(),
->>>>>>> 7f5ad103fb4f594f53d5f17938d49f12711ac994
+      // home: const ProductListPage(),
     );
   }
 }

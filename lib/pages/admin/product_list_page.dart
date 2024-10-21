@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommercettl/pages/admin/Components/shop_item.dart';
 import 'package:ecommercettl/services/product_service.dart';
 import 'package:flutter/material.dart';
 import 'product_detail_page.dart';
@@ -37,19 +38,19 @@ class _ProductListPageState extends State<ProductListPage> {
                 DocumentSnapshot product = productList[index];
                 Map<String, dynamic> data = product.data() as Map<String, dynamic>;
 
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                  leading: data['imageUrl'] != null && data['imageUrl'].isNotEmpty
-                      ? Image.network(
-                    data['imageUrl'][0], // Get the first image
-                    height: 50, // Adjust height as needed
-                    width: 50, // Adjust width as needed
-                    fit: BoxFit.cover, // Ensure the image covers the given dimensions
-                  )
-                      : const SizedBox(width: 50, height: 50), // Placeholder if no image
+                // Extract necessary fields from Firestore document
+                String shopName = data['userid'] ?? 'Unknown Shop';
+                String productName = data['name'] ?? 'Unnamed Product';
+                double price = data['price']?.toDouble() ?? 0.0; // Ensure price is a double
+                String imageUrl = data['imageUrl'] != null && data['imageUrl'].isNotEmpty
+                    ? data['imageUrl'][0] // Get the first image
+                    : ''; // Default or placeholder image
 
-                  title: Text(data['name']),
-                  subtitle: Text('\$${data['price']}'),
+                return ShopItem(
+                  shopName: shopName,
+                  productName: productName,
+                  price: price,
+                  imageUrl: imageUrl,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -58,12 +59,8 @@ class _ProductListPageState extends State<ProductListPage> {
                       ),
                     );
                   },
-                  trailing: IconButton(
-                    onPressed: () => productService.deleteProduct(product.id),
-                    icon: const Icon(Icons.delete),
-                  ),
+                  onDelete: () => productService.deleteProduct(product.id), // Handle delete action
                 );
-
               },
             );
           } else {
