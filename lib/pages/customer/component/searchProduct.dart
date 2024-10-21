@@ -4,6 +4,8 @@ import 'package:ecommercettl/pages/customer/component/FindBar.dart';
 import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
 import 'package:ecommercettl/pages/customer/component/FilterPanel.dart'; // Import the FilterPanel
 import 'package:ecommercettl/pages/customer/productDetail.dart'; // Import your ProductDetail page
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:ecommercettl/models/Product.dart';
 
 class SearchProduct extends StatefulWidget {
   const SearchProduct({super.key});
@@ -84,37 +86,62 @@ class SearchProductState extends State<SearchProduct> with SingleTickerProviderS
                   ),
                 ),
               ),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.4,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  for (int i = 0; i < 5; i++)
-                    GestureDetector(
-                      onTap: () {
-                        // Navigate to ProductDetail page on tap
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Productdetail(
-                            ),
+              // Display products based on searchQuery
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('products').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  // Filter products based on searchQuery
+                  final products = snapshot.data!.docs.map((doc) {
+                    var data = doc.data() as Map<String, dynamic>;
+                    return Product.fromFirestore(data, doc.id);
+                  }).toList();
+
+                  final filteredProducts = products.where((product) {
+                    return product.name.toLowerCase().contains(searchQuery?.toLowerCase() ?? '');
+                  }).toList();
+
+                  // Display filtered products
+                  return GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.4,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      for (var product in filteredProducts)
+                        GestureDetector(
+                          onTap: () {
+                            // Navigate to ProductDetail page on tap
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Productdetail(),
+                              ),
+                            );
+                          },
+                          child: ProductCard(
+                            imagePath: product.imageUrls.isNotEmpty
+                                ? product.imageUrls[0] // Use the first image from imageUrl list
+                                : 'images/dress.png', // Fallback image
+                            name: product.name,
+                            description: product.description,
+                            price: product.price,
+                            discountPercentage: 20, // Ensure this is a String
+                            rating: 5, // Ensure this is a double
+                            reviewCount: 4, // Ensure this is an int
                           ),
-                        );
-                      },
-                      child: ProductCard(
-                        imagePath: 'images/dress.png',
-                        name: 'Test Product',
-                        description: 'This is a test product description.',
-                        price: 100.0,
-                        discountPercentage: 20,
-                        rating: 4.5,
-                        reviewCount: 100,
-                      ),
-                    ),
-                ],
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
