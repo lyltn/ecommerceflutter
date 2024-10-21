@@ -96,7 +96,7 @@ class _ShopListProductState extends State<ShopListProduct> {
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
                                     data[
-                                        'imageUrl'], // Use actual image URL from Firestore
+                                        'imageUrl'][0], // Use actual image URL from Firestore
                                     width: 50,
                                     height: 50,
                                     fit: BoxFit.cover,

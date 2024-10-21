@@ -34,16 +34,17 @@ class _ShopAddProductState extends State<ShopAddProduct> {
 
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
-  File? _image;
+  List<File> _images = [];
+  final ImagePicker _picker = ImagePicker();
+  List<String> imageUrls = [];
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
-    });
+  Future<void> pickImages() async {
+    final List<XFile>? selectedImages = await _picker.pickMultiImage();
+    if (selectedImages != null) {
+      setState(() {
+        _images = selectedImages.map((image) => File(image.path)).toList();
+      });
+    }
   }
 
   List<String> categories = [];
@@ -62,6 +63,28 @@ class _ShopAddProductState extends State<ShopAddProduct> {
     // Trigger a rebuild to update the UI with the fetched data.
     setState(() {});
   }
+
+  Widget _buildGridView(List<File> imageFiles) {
+    if (imageFiles.isNotEmpty) {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // Hiển thị 3 ảnh mỗi hàng
+          crossAxisSpacing: 4.0,
+          mainAxisSpacing: 4.0,
+        ),
+        itemCount: imageFiles.length,
+        itemBuilder: (context, index) {
+          return Image.file(
+            imageFiles[index],
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    } else {
+      return Center(child: Text('No images available'));
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -271,8 +294,8 @@ class _ShopAddProductState extends State<ShopAddProduct> {
             const SizedBox(height: 20),
             Center(
               child: GestureDetector(
-                onTap: _pickImage,
-                child: _image == null
+                onTap: pickImages,
+                child: _images.isEmpty
                     ? Container(
                         width: 150,
                         height: 150,
@@ -284,11 +307,10 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                         child: Icon(Icons.camera_alt,
                             color: Colors.green, size: 40),
                       )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.file(_image!,
-                            width: 150, height: 150, fit: BoxFit.cover),
-                      ),
+                    : SizedBox(
+                      height: 150, // Chiều cao để giới hạn GridView
+                      child: _buildGridView(_images),
+          ),
               ),
             ),
             const SizedBox(height: 30),
@@ -324,9 +346,8 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                 Container(
                   child: ElevatedButton(
                     onPressed: () async {
-                      String? imageUrl;
-                      if (_image != null) {
-                        imageUrl = await productService.uploadImage(_image!);
+                      if (_images != null) {
+                        imageUrls = await productService.uploadImages(_images);
                       }
 
                       await productService.addProduct(
@@ -337,7 +358,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                         genderValue!,
                         double.parse(commissionController.text),
                         double.parse(priceController.text),
-                        imageUrl,
+                        imageUrls,
                         'ly',
                         productStatus ? 'active' : 'inactive',
                       );
