@@ -1,5 +1,6 @@
 import 'package:ecommercettl/pages/authen/forgot_pw.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import trang chính
 
@@ -32,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
         // Đăng nhập thành công, chuyển hướng đến trang chính
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomnavShop()),
+          MaterialPageRoute(builder: (context) => BottomNav()),
         );
       } on FirebaseAuthException catch (e) {
         String errorMessage;
