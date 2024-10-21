@@ -95,8 +95,8 @@ class _ShopListProductState extends State<ShopListProduct> {
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    data[
-                                        'imageUrl'][0], // Use actual image URL from Firestore
+                                    data['imageUrl'][
+                                        0], // Use actual image URL from Firestore
                                     width: 50,
                                     height: 50,
                                     fit: BoxFit.cover,
@@ -118,9 +118,13 @@ class _ShopListProductState extends State<ShopListProduct> {
                           ),
                           subtitle: Row(
                             children: [
-                              Text(
-                                '${data['price'] ?? '0'} VND', // Dynamic price
-                                style: TextStyle(color: Colors.green),
+                              Expanded(
+                                child: Text(
+                                  '${data['price'] ?? '0'} VND', // Dynamic price
+                                  style: TextStyle(color: Colors.green),
+                                  overflow: TextOverflow
+                                      .ellipsis, // Cắt ngắn nếu tràn
+                                ),
                               ),
                               SizedBox(width: 10.0),
                               Icon(Icons.star, color: Colors.yellow, size: 16),

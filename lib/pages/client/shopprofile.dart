@@ -111,6 +111,9 @@ class _ProfileShopState extends State<ProfileShop> {
   Widget _buildMenuItems() {
     return Column(
       children: [
+        _buildMenuItem(Icons.card_giftcard, 'Voucher shop', () {
+          // Handle navigation to "Voucher shop"
+        }),
         _buildMenuItem(Icons.account_balance_wallet_outlined, 'Ví của tôi', () {
           // Handle navigation to "Ví của tôi"
         }),
