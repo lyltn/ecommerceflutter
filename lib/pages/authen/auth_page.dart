@@ -72,6 +72,10 @@ class _AuthPageState extends State<AuthPage> {
                     ),
                   ],
                 ),
+                SizedBox(height: 20),
+                Center(
+                  child: SizedBox.shrink(),
+                ),
               ],
             ),
           ),
