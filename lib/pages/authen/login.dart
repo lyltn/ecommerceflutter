@@ -35,6 +35,10 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(builder: (context) => BottomNav()),
         );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Đăng nhập thành công")),
+        );
       } on FirebaseAuthException catch (e) {
         String errorMessage;
         if (e.code == 'user-not-found') {
