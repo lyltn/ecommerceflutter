@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '/models/post.dart';
 import '/services/post_service.dart';
-import 'components/post_dialog.dart';
+import 'components/add_post_page.dart';
 import 'post_detail_page.dart';
 
 class PostListPage extends StatefulWidget {
@@ -14,12 +14,11 @@ class PostListPage extends StatefulWidget {
 class _PostListPageState extends State<PostListPage> {
   final PostService postService = PostService();
 
-  void _showAddPostDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return PostDialog(postService: postService);
-      },
+  void _navigateToAddPostPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddPostPage(postService: postService),
+      ),
     );
   }
 
@@ -61,8 +60,8 @@ class _PostListPageState extends State<PostListPage> {
                 ),
                 onTap: () {
                   // Navigate to post details or another page
-                  Navigator.push(
-                    context,
+                  // _navigateToAddPostPage(context);
+                  Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => PostDetailPage(post: post),
                     ),
@@ -75,7 +74,7 @@ class _PostListPageState extends State<PostListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _showAddPostDialog(context);
+          _navigateToAddPostPage(context);
         },
         child: const Icon(Icons.add),
       ),
