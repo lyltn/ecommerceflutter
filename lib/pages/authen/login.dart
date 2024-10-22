@@ -1,5 +1,6 @@
 import 'package:ecommercettl/pages/authen/forgot_pw.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import trang chính
 
@@ -10,6 +11,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = false;
+  bool _isLoading = false; // Flag to indicate loading state
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -24,15 +26,24 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true; // Start loading
+      });
+
       try {
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
+
         // Đăng nhập thành công, chuyển hướng đến trang chính
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomnavShop()),
+          MaterialPageRoute(builder: (context) => BottomNav()),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Đăng nhập thành công")),
         );
       } on FirebaseAuthException catch (e) {
         String errorMessage;
@@ -47,6 +58,10 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
+      } finally {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
       }
     }
   }
@@ -55,7 +70,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
+      child: _isLoading
+          ? Center(child: CircularProgressIndicator()) // Show loading indicator if _isLoading is true
+          : Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Hàng cho Email
@@ -77,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30), // Bo tròn 30px
                 ),
-                hintText: 'Nhập email...',// Placeholder
+                hintText: 'Nhập email...', // Placeholder
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
