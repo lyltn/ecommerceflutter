@@ -50,15 +50,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-<<<<<<< HEAD
       home: BottomNav(),
-=======
-<<<<<<< HEAD
-      home: const BottomNav(),
-=======
-      home: BottomnavShop(),
->>>>>>> 7f5ad103fb4f594f53d5f17938d49f12711ac994
->>>>>>> f05fd4c79c2bba55a3ce0502760e443bf643447e
     );
   }
 }
