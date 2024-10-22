@@ -31,6 +31,15 @@ class _ProfileState extends State<Profile> {
       print('Error fetching user profile: $e');
     }
   }
+  // load data khi sang trang
+  Future<void> navigation() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+    ).then((_) {
+      _loadUserProfile();
+    });
+  }
 
 
   Widget build(BuildContext context) {
@@ -72,16 +81,13 @@ class _ProfileState extends State<Profile> {
         children: [
           GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => UpdateProfilePage()),
-              );
+              navigation();
             },
             child: CircleAvatar(
               radius: 30,
               backgroundImage: userModel!.imgAvatar != null
                   ? NetworkImage(userModel!.imgAvatar)
-                  : AssetImage('assets/default_avatar.png') as ImageProvider, // fallback if image is null
+                  : AssetImage('assets/default_avatar.png') as ImageProvider,
             ),
           ),
           SizedBox(width: 16),

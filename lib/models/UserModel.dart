@@ -23,7 +23,7 @@ class UserModel {
     this.address = "",
     this.dob = "",
     this.fullName = "",
-    this.role = "",
+    this.role = "CUSTOMER",
     this.imgAvatar = "",
   });
 
@@ -38,7 +38,7 @@ class UserModel {
       address: data['address'] ?? '',
       dob: data['dob'] ?? '',
       fullName: data['fullName'] ?? '',
-      role: data['role'] ?? '',
+      role: data['role'] ?? 'CUSTOMER',
       imgAvatar: data['imgAvatar'] ?? '',
     );
   }
