@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ecommercettl/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
 import 'package:intl/intl.dart';
 
 class UpdateProfilePage extends StatefulWidget {
@@ -34,12 +33,16 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
   Future<void> _selectImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedFile != null) {
+    if (pickedFile != null) {
+      setState(() {
         _avatarImage = File(pickedFile.path);
-      }
-    });
+      });
+      print('Image selected: ${pickedFile.path}'); // Debug print
+    } else {
+      print('No image selected.'); // Debug print
+    }
   }
+
 
   Future<void> _loadUserData() async {
     try {
@@ -52,7 +55,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         _addressController.text = userModel.address ?? '';
         _dobController.text = userModel.dob ?? '';
         imageUrl = userModel.imgAvatar;
-
       });
     } catch (e) {
       print(e);
@@ -65,18 +67,26 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
       try {
+        String? uploadedImageUrl;
+        if (_avatarImage != null) {
+          uploadedImageUrl = await _authService.uploadImage(_avatarImage!);
+        } else {
+          uploadedImageUrl = imageUrl; // Keep the old image if no new image is selected
+        }
+
         UserModel dataUpdate = UserModel(
-            id: FirebaseAuth.instance.currentUser!.uid ,
-            username : _usernameController.text,
-            fullName : _fullNameController.text,
-            email : _emailController.text,
-            phone : _phoneController.text,
-            address : _addressController.text,
-            dob : _dobController.text,
-            imgAvatar: await _authService.uploadImage(_avatarImage!),
+          id: FirebaseAuth.instance.currentUser!.uid,
+          username: _usernameController.text,
+          fullName: _fullNameController.text,
+          email: _emailController.text,
+          phone: _phoneController.text,
+          address: _addressController.text,
+          dob: _dobController.text,
+          imgAvatar: uploadedImageUrl,
         );
+
         bool check = await _authService.updateUserProfile(dataUpdate);
-        if(check) {
+        if (check) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Cập nhật thông tin thành công.')),
           );
@@ -128,12 +138,18 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
           child: ListView(
             children: [
               GestureDetector(
-                onTap: _selectImage,
+                onTap: _selectImage, // This should trigger the image picker
                 child: CircleAvatar(
                   radius: 50,
-                    backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+                  backgroundImage: _avatarImage != null
+                      ? FileImage(_avatarImage!)
+                      : imageUrl.isNotEmpty
+                      ? NetworkImage(imageUrl)
+                      : AssetImage('assets/default_avatar.png') as ImageProvider,
                 ),
               ),
+
+
               SizedBox(height: 20),
               TextFormField(
                 controller: _usernameController,
