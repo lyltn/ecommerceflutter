@@ -53,6 +53,7 @@ class UserModel {
       'dob': dob,
       'fullName': fullName,
       'imgAvatar': imgAvatar,
+      'role': role,
     };
   }
 }
