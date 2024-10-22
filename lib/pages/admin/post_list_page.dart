@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '/models/post.dart';
 import '/services/post_service.dart';
 import 'components/add_post_page.dart';
+import 'components/post_card.dart';
 import 'post_detail_page.dart';
 
 class PostListPage extends StatefulWidget {
@@ -26,42 +27,36 @@ class _PostListPageState extends State<PostListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(child: Text('Posts')),
+        title: const Text('Posts'),
       ),
       body: StreamBuilder<List<Post>>(
-        stream: postService.getPosts(), // Fetch the posts stream directly
+        stream: postService.getPosts(), // Stream of posts
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Error loading posts'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No posts available'));
           }
 
-          final posts = snapshot.data ?? [];
-
-          if (posts.isEmpty) {
-            return const Center(child: Text('No posts available.'));
-          }
+          final posts = snapshot.data!; // Get the posts
 
           return ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) {
               final post = posts[index];
-              return ListTile(
-                title: Text(post.content),
-                subtitle: Text('Posted by: ${post.userId}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () async {
-                    await postService
-                        .deletePost(post.id); // Directly delete the post
-                  },
-                ),
+
+              return PostCard(
+                post: post, // Pass the post to the PostCard widget
+                onDelete: () {
+                  // Handle delete logic
+                  postService.deletePost(post.id);
+                },
                 onTap: () {
-                  // Navigate to post details or another page
-                  // _navigateToAddPostPage(context);
-                  Navigator.of(context).push(
+                  // Navigate to post details page
+                  Navigator.push(
+                    context,
                     MaterialPageRoute(
                       builder: (context) => PostDetailPage(post: post),
                     ),
