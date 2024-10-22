@@ -11,6 +11,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = false;
+  bool _isLoading = false; // Flag to indicate loading state
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -25,11 +26,16 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true; // Start loading
+      });
+
       try {
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
+
         // Đăng nhập thành công, chuyển hướng đến trang chính
         Navigator.pushReplacement(
           context,
@@ -52,6 +58,10 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
+      } finally {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
       }
     }
   }
@@ -60,7 +70,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
+      child: _isLoading
+          ? Center(child: CircularProgressIndicator()) // Show loading indicator if _isLoading is true
+          : Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Hàng cho Email
@@ -82,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30), // Bo tròn 30px
                 ),
-                hintText: 'Nhập email...',// Placeholder
+                hintText: 'Nhập email...', // Placeholder
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
