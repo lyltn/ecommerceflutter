@@ -1,8 +1,8 @@
-import 'package:ecommercettl/services/user_service.dart';
+import 'package:ecommercettl/models/UserModel.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ecommercettl/services/auth_service.dart'; // Import service
+import 'package:ecommercettl/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -21,17 +21,19 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  final AuthService _authService = AuthService(); // Khởi tạo service
+  final AuthService _authService = AuthService();
   File? _avatarImage;
+  late UserModel userModel;
+  String imageUrl = "";
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
+
   Future<void> _selectImage() async {
-    final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
       if (pickedFile != null) {
         _avatarImage = File(pickedFile.path);
@@ -41,15 +43,17 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
   Future<void> _loadUserData() async {
     try {
-      Map<String, dynamic>? userData = await _authService.getUserProfile();
-      if (userData != null) {
-        _usernameController.text = userData['username'] ?? '';
-        _fullNameController.text = userData['fullName'] ?? '';
-        _emailController.text = userData['email'] ?? '';
-        _phoneController.text = userData['phone'] ?? '';
-        _addressController.text = userData['address'] ?? '';
-        _dobController.text = userData['dob'] ?? '';
-      }
+      userModel = (await _authService.getUserProfile(FirebaseAuth.instance.currentUser!.uid))!;
+      setState(() {
+        _usernameController.text = userModel.username;
+        _fullNameController.text = userModel.fullName ?? '';
+        _emailController.text = userModel.email ?? '';
+        _phoneController.text = userModel.phone ?? '';
+        _addressController.text = userModel.address ?? '';
+        _dobController.text = userModel.dob ?? '';
+        imageUrl = userModel.imgAvatar;
+
+      });
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,41 +62,29 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     }
   }
 
-
-
-
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
       try {
-        String? imageUrl;
-        imageUrl = await UserService().uploadImage(_avatarImage!);
-
-      // You can store this URL to Firestore or use it in your app
-    } catch (e) {
-      print('Error uploading image: $e');
-    }
-      try {
-        await _authService.updateUserProfile(
-          username: _usernameController.text,
-          fullName: _fullNameController.text,
-          dob: _dobController.text,
-          email: _emailController.text,
-          phone: _phoneController.text,
-          address: _addressController.text,
-          avatarImage: _avatarImage,
+        UserModel dataUpdate = UserModel(
+            id: FirebaseAuth.instance.currentUser!.uid ,
+            username : _usernameController.text,
+            fullName : _fullNameController.text,
+            email : _emailController.text,
+            phone : _phoneController.text,
+            address : _addressController.text,
+            dob : _dobController.text,
+            imgAvatar: await _authService.uploadImage(_avatarImage!),
         );
-
-        // Hiển thị thông báo cập nhật thành công
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cập nhật thông tin thành công.')),
-        );
-
-        // Quay lại trang trước đó
-        Navigator.pop(context);
+        bool check = await _authService.updateUserProfile(dataUpdate);
+        if(check) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cập nhật thông tin thành công.')),
+          );
+        }
       } catch (e) {
         print(e);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text('Cập nhật thông tin thất bại.')),
         );
       }
     }
@@ -108,15 +100,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     if (picked != null) {
       setState(() {
         _dobController.text = DateFormat('dd/MM/yyyy').format(picked);
-      });
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _avatarImage = File(pickedFile.path);
       });
     }
   }
@@ -148,7 +131,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 onTap: _selectImage,
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: _avatarImage != null ? FileImage(_avatarImage!) : AssetImage('assets/images/default_avatar.png') as ImageProvider,
+                    backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
                 ),
               ),
               SizedBox(height: 20),

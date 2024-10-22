@@ -1,11 +1,34 @@
+import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/register_shop.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart'; // Import trang cập nhật thông tin cá nhân
+import 'package:ecommercettl/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   @override
+  _ProfileState createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+
+  late AuthService auth = AuthService();
+  late UserModel userModel;
+  @override
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    userModel = (await auth.getUserProfile(FirebaseAuth.instance.currentUser!.uid))!;
+    setState(() {}); // Update the state after fetching user data
+  }
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
@@ -48,7 +71,7 @@ class Profile extends StatelessWidget {
             },
             child: CircleAvatar(
               radius: 30,
-              backgroundImage: AssetImage('assets/images/kuta.png'),
+              backgroundImage:  userModel.imgAvatar != null ? NetworkImage(userModel.imgAvatar) : null,
             ),
           ),
           SizedBox(width: 16),
@@ -58,7 +81,7 @@ class Profile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Nguyễn Văn A',
+                    userModel.fullName,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -74,7 +97,7 @@ class Profile extends StatelessWidget {
               ),
               SizedBox(height: 4),
               Text(
-                'a@gmail.com',
+                userModel.email,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
