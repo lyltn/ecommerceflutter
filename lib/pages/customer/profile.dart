@@ -1,8 +1,11 @@
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/register_shop.dart';
+import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart';
 import 'package:ecommercettl/services/auth_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
+import 'package:ecommercettl/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,25 +15,38 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  // Call this method to retrieve and store the userId asynchronously
 
+  String? uid;
   late AuthService auth = AuthService();
   UserModel? userModel; // Change to nullable
-  @override
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    getCurrentUserId();
+  }
+
+  Future<void> getCurrentUserId() async {
+    uid = await ShopService.getCurrentUserId();
+    if (uid != null) {
+      print('User ID: $uid');
+    } else {
+      print('No user is signed in.');
+    }
   }
 
   Future<void> _loadUserProfile() async {
     try {
-      userModel = await auth.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
+      userModel =
+          await auth.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
       setState(() {}); // Update the UI once the data is fetched
     } catch (e) {
       print('Error fetching user profile: $e');
     }
   }
+
   // load data khi sang trang
   Future<void> navigation() async {
     Navigator.push(
@@ -40,7 +56,6 @@ class _ProfileState extends State<Profile> {
       _loadUserProfile();
     });
   }
-
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,6 +162,17 @@ class _ProfileState extends State<Profile> {
             MaterialPageRoute(builder: (context) => RegisterShopPage()),
           );
         }),
+        _buildMenuItem(
+          Icons.store_mall_directory_outlined,
+          'chuyển sang shop',
+          () {
+            getCurrentUserId();
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BottomnavShop()),
+            );
+          },
+        ),
       ],
     );
   }

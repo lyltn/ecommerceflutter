@@ -1,3 +1,6 @@
+import 'package:ecommercettl/pages/authen/auth_page.dart';
+import 'package:ecommercettl/pages/customer/bottomnav.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProfileShop extends StatefulWidget {
@@ -121,7 +124,8 @@ class _ProfileShopState extends State<ProfileShop> {
           // Handle navigation to "Cài đặt"
         }),
         _buildMenuItem(Icons.switch_account, 'Chuyển tư cách người dùng', () {
-          // Handle navigation to "Chuyển tư cách người dùng"
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => BottomNav()));
         }),
       ],
     );
@@ -140,8 +144,12 @@ class _ProfileShopState extends State<ProfileShop> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ElevatedButton.icon(
-        onPressed: () {
-          // Handle log out
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AuthPage()),
+          );
         },
         icon: Icon(Icons.logout, color: Colors.green),
         label: Text('Log Out'),

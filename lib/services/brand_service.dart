@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-// shop phải đỗ dữ liệu ra theo userid
+// Shop must load data based on userid
 class BrandService {
   final CollectionReference brands =
       FirebaseFirestore.instance.collection('brands');
@@ -17,39 +18,47 @@ class BrandService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<Map<String, dynamic>?> getBrandById(String BrandId) async {
+  Future<Map<String, dynamic>?> getBrandById(String brandId) async {
     try {
       DocumentSnapshot doc =
-          await _firestore.collection('brands').doc(BrandId).get();
+          await _firestore.collection('brands').doc(brandId).get();
 
       if (doc.exists) {
-        // Trả về dữ liệu của sản phẩm dưới dạng Map
+        // Return brand data as a Map
         return doc.data() as Map<String, dynamic>;
       } else {
-        print('Sản phẩm không tồn tại.');
+        print('Brand does not exist.');
         return null;
       }
     } catch (e) {
-      print('Lỗi khi lấy dữ liệu sản phẩm: $e');
+      print('Error retrieving brand data: $e');
       return null;
     }
   }
 
-  Stream<QuerySnapshot> getbrandsStream() {
+  Stream<QuerySnapshot> getBrandsStream() {
     final brandsStream =
         brands.orderBy('timestamp', descending: true).snapshots();
     return brandsStream;
   }
 
-  Future<List<String>> getnameBrands() async {
+  Future<List<String>> getNameBrands() async {
     try {
-      QuerySnapshot snapshot = await _firestore
-          .collection('brands')
-          .where('userid', isEqualTo: 'ly')
-          .get();
-      return snapshot.docs.map((doc) => doc['name'] as String).toList();
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        String uid = user.uid;
+
+        QuerySnapshot snapshot = await _firestore
+            .collection('brands')
+            .where('userid', isEqualTo: uid)
+            .get();
+
+        return snapshot.docs.map((doc) => doc['name'] as String).toList();
+      } else {
+        return [];
+      }
     } catch (e) {
-      // Handle errors silently
+      print('Error retrieving brand names: $e');
       return [];
     }
   }

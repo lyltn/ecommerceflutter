@@ -3,6 +3,8 @@ import 'package:ecommercettl/pages/client/shopaddproduct.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/client/shoplistclassify.dart';
 import 'package:ecommercettl/services/classify_service.dart';
+import 'package:ecommercettl/services/product_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 import 'package:flutter/material.dart';
 
 class ShopAddSize extends StatefulWidget {
@@ -20,6 +22,8 @@ class _ShopAddSizeState extends State<ShopAddSize> {
   final TextEditingController colorController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
 
+  String? uid;
+
   String? productValue;
 
   @override
@@ -27,6 +31,11 @@ class _ShopAddSizeState extends State<ShopAddSize> {
     super.initState();
     // Set the passed productId if not null
     productValue = widget.proId.isNotEmpty ? widget.proId : null;
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
   }
 
   @override
@@ -77,7 +86,7 @@ class _ShopAddSizeState extends State<ShopAddSize> {
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('products')
-                  .where('userid', isEqualTo: 'ly')
+                  .where('userid', isEqualTo: uid!)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {

@@ -31,4 +31,9 @@ class ShopService {
       throw Exception('Đăng ký shop thất bại. Vui lòng thử lại.');
     }
   }
+
+  static Future<String?> getCurrentUserId() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    return user?.uid; // If user is null, return null; otherwise return uid
+  }
 }

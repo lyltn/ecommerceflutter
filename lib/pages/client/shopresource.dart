@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/client/shoplistproduct.dart';
 import 'package:ecommercettl/services/brand_service.dart';
 import 'package:ecommercettl/services/category_service.dart';
+import 'package:ecommercettl/services/product_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 
@@ -15,6 +17,22 @@ class ResourceShop extends StatefulWidget {
 class _ResourceShopState extends State<ResourceShop> {
   bool brandStatus = true;
   bool categoryStatus = true;
+  final ProductService productService = ProductService();
+
+  String? uid;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Anonymous async function inside initState
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +163,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                   stream: FirebaseFirestore.instance
                                       .collection('categorys')
                                       .where('userid',
-                                          isEqualTo: 'ly') // Correct field
+                                          isEqualTo: uid!) // Correct field
                                       .snapshots(),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
@@ -290,7 +308,7 @@ class _ResourceShopState extends State<ResourceShop> {
                           await categoryService.updateCategory(
                             editingCateId!,
                             nameController.text,
-                            'ly', // User ID
+                            uid!, // User ID
                             categoryStatus ? 'active' : 'inactive',
                           );
 
@@ -300,7 +318,7 @@ class _ResourceShopState extends State<ResourceShop> {
                           // Add a new category
                           await categoryService.addCategory(
                             nameController.text,
-                            'ly', // User ID
+                            uid!, // User ID
                             categoryStatus ? 'active' : 'inactive',
                           );
                         }
@@ -393,7 +411,7 @@ class _ResourceShopState extends State<ResourceShop> {
                                   child: StreamBuilder<QuerySnapshot>(
                                     stream: FirebaseFirestore.instance
                                         .collection('brands')
-                                        .where('userid', isEqualTo: 'ly')
+                                        .where('userid', isEqualTo: uid!)
                                         .snapshots(),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
@@ -563,7 +581,7 @@ class _ResourceShopState extends State<ResourceShop> {
                               editingBrandId!,
                               nameController.text,
                               nationController.text,
-                              'ly',
+                              uid!,
                               brandStatus ? 'active' : 'inactive',
                             );
 
@@ -574,7 +592,7 @@ class _ResourceShopState extends State<ResourceShop> {
                             await brandService.addBrand(
                               nameController.text,
                               nationController.text,
-                              'ly',
+                              uid!,
                               brandStatus ? 'active' : 'inactive',
                             );
                           }
