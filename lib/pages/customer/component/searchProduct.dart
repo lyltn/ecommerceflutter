@@ -123,7 +123,7 @@ class SearchProductState extends State<SearchProduct> with SingleTickerProviderS
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Productdetail(),
+                                builder: (context) => Productdetail(newProduct: product,),
                               ),
                             );
                           },

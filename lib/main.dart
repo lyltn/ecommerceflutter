@@ -11,6 +11,7 @@ import 'package:ecommercettl/pages/customer/component/PhotoGallery.dart';
 import 'package:ecommercettl/pages/customer/component/PriceRange.dart';
 import 'package:ecommercettl/pages/customer/component/ProductReview.dart';
 import 'package:ecommercettl/pages/customer/component/SearchScreen.dart';
+import 'package:ecommercettl/pages/customer/component/ShopPanel.dart';
 import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:ecommercettl/pages/customer/component/searchProduct.dart';
 import 'package:ecommercettl/pages/customer/home.dart';

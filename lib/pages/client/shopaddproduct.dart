@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/services/brand_service.dart';
@@ -9,7 +8,6 @@ import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'dart:io';
 
 class ShopAddProduct extends StatefulWidget {
   const ShopAddProduct({super.key});

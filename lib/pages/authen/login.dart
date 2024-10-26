@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/authen/forgot_pw.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
@@ -33,31 +34,43 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       try {
-        UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(), // Ensure to trim extra spaces
+        // Sign in with Firebase
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text,
           password: _passwordController.text,
         );
 
-        // Check if user is not null before saving user ID
-        if (userCredential.user != null) {
-          _userService.saveUserId(
-            userId: userCredential.user!.uid, // Use named parameter
+        // Check user role after login
+        String uid = userCredential.user!.uid;
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (userDoc.exists) {
+          String role = userDoc['role'];
+          if (role == 'ADMIN') {
+            // Navigate to Admin page if the role is ADMIN
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => AdminPage()),
+            // );
+          } else if (role == 'CUSTOMER') {
+            // Navigate to BottomNav if the role is CUSTOMER
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => BottomNav()),
+            );
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Đăng nhập thành công")),
           );
         } else {
-          // Handle case where user is null
-          print('User not found.');
+          // User document not found
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Lỗi khi lấy thông tin người dùng.")),
+          );
         }
-        // Đăng nhập thành công, chuyển hướng đến trang chính
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => BottomNav()),
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Đăng nhập thành công")),
-        );
       } on FirebaseAuthException catch (e) {
+        // Handle FirebaseAuth exceptions
         String errorMessage;
         if (e.code == 'user-not-found') {
           errorMessage = 'Không tìm thấy người dùng với email này.';
@@ -66,7 +79,6 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
         }
-        // Hiển thị thông báo lỗi
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
