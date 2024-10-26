@@ -2,19 +2,32 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/models/adminModel.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthService {
-
-  final CollectionReference collectionUser = FirebaseFirestore.instance
-      .collection('users');
+  final CollectionReference collectionUser =
+      FirebaseFirestore.instance.collection('users');
 
   Future<UserModel?> getUserProfile(String userId) async {
     try {
-      DocumentSnapshot documentSnapshot = await collectionUser.doc(userId)
-          .get();
+      DocumentSnapshot documentSnapshot =
+          await collectionUser.doc(userId).get();
       if (documentSnapshot.exists) {
         return UserModel.fromFirestore(documentSnapshot);
+      }
+    } catch (e) {
+      print('Error fetching user profile: $e');
+    }
+    return null;
+  }
+
+  Future<AdminModel?> getadminProfile(String userId) async {
+    try {
+      DocumentSnapshot documentSnapshot =
+          await collectionUser.doc(userId).get();
+      if (documentSnapshot.exists) {
+        return AdminModel.fromFirestore(documentSnapshot);
       }
     } catch (e) {
       print('Error fetching user profile: $e');
@@ -41,6 +54,27 @@ class AuthService {
       return false;
     }
   }
+
+  Future<bool> updateAdminProfile(AdminModel userModel) async {
+    try {
+      AdminModel? admin = await getadminProfile(userModel.id);
+      if (admin != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userModel.id)
+            .update(userModel.toMap());
+        print('Thông tin người dùng đã được cập nhật thành công.');
+        return true;
+      } else {
+        print('Người dùng không tồn tại.');
+        return false;
+      }
+    } catch (e) {
+      print('Cập nhật thông tin người dùng thất bại: $e');
+      return false;
+    }
+  }
+
   Future<String> uploadImage(File image) async {
     try {
       final storageRef = FirebaseStorage.instance
