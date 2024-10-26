@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommercettl/pages/admin/adminhome.dart';
 import 'package:ecommercettl/pages/authen/forgot_pw.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
@@ -35,23 +36,24 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         // Sign in with Firebase
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
 
         // Check user role after login
         String uid = userCredential.user!.uid;
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        DocumentSnapshot userDoc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
         if (userDoc.exists) {
           String role = userDoc['role'];
           if (role == 'ADMIN') {
-            // Navigate to Admin page if the role is ADMIN
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => AdminPage()),
-            // );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminHome()),
+            );
           } else if (role == 'CUSTOMER') {
             // Navigate to BottomNav if the role is CUSTOMER
             Navigator.pushReplacement(
