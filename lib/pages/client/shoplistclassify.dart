@@ -3,6 +3,7 @@ import 'package:ecommercettl/pages/client/shopaddsize.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/client/shoplistproduct.dart';
 import 'package:ecommercettl/services/classify_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,20 @@ class _ShopListClassifyState extends State<ShopListClassify> {
   String productid = '';
   String id = '';
   final ClassifyService classifyService = ClassifyService();
+
+  String? uid;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Anonymous async function inside initState
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +51,7 @@ class _ShopListClassifyState extends State<ShopListClassify> {
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('products')
-                        .where('userid', isEqualTo: 'ly')
+                        .where('userid', isEqualTo: uid!)
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {

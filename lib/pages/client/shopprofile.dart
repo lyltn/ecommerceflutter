@@ -1,3 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/pages/authen/auth_page.dart';
+import 'package:ecommercettl/pages/customer/bottomnav.dart';
+import 'package:ecommercettl/pages/customer/update_profile.dart';
+import 'package:ecommercettl/services/auth_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProfileShop extends StatefulWidget {
@@ -8,11 +16,49 @@ class ProfileShop extends StatefulWidget {
 }
 
 class _ProfileShopState extends State<ProfileShop> {
+  UserModel? userModel;
+  String? uid;
+  late AuthService auth = AuthService();
+
+  Future<void> _loadUserProfile() async {
+    try {
+      userModel =
+          await auth.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {}); // Update the UI once the data is fetched
+    } catch (e) {
+      print('Error fetching user profile: $e');
+    }
+  }
+
+  // Load data when navigating to the page
+  Future<void> _navigateToUpdateProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+    );
+    _loadUserProfile(); // Reload profile after returning from update page
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+
+    // Anonymous async function inside initState
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: userModel == null
+          ? Center(child: CircularProgressIndicator())
+          : _buildBody(),
     );
   }
 
@@ -42,65 +88,87 @@ class _ProfileShopState extends State<ProfileShop> {
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundImage: AssetImage('images/dress.png'),
+          GestureDetector(
+            onTap: () => _navigateToUpdateProfile(),
+            child: CircleAvatar(
+              radius: 30,
+              backgroundImage: userModel?.imgAvatar != null
+                  ? NetworkImage(userModel!.imgAvatar)
+                  : AssetImage('assets/default_avatar.png') as ImageProvider,
+            ),
           ),
           SizedBox(width: 16),
-          // Sử dụng Expanded để tránh tràn giao diện
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('shopRequests')
+                  .where('uid', isEqualTo: uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final docs = snapshot.data!.docs;
+                if (docs.isEmpty) {
+                  return Text("No shop requests found.");
+                }
+
+                var data = docs[0].data() as Map<String, dynamic>;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Nguyễn Văn A',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            data['shopName'] ?? 'Unknown Shop',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        overflow: TextOverflow
-                            .ellipsis, // Ngăn tràn bằng cách cắt chữ
-                      ),
+                        SizedBox(width: 5),
+                        Icon(
+                          Icons.edit,
+                          color: Colors.green,
+                          size: 16,
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 5),
-                    Icon(
-                      Icons.edit,
-                      color: Colors.green,
-                      size: 16,
+                    SizedBox(height: 4),
+                    Text(
+                      data['e-mail'] ?? 'Unknown Email',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      data['submittedAt']?.toString() ?? 'Unknown Date',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      userModel!.address ?? 'Unknown Address',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'a@gmail.com',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis, // Ngăn tràn email
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Ngày tham gia: 01/01/2024',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis, // Ngăn tràn ngày tham gia
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Địa chỉ: 123 Đường ABC, Thành phố XYZ',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis, // Ngăn tràn địa chỉ
-                ),
-              ],
+                );
+              },
             ),
           ),
         ],
@@ -114,14 +182,17 @@ class _ProfileShopState extends State<ProfileShop> {
         _buildMenuItem(Icons.card_giftcard, 'Voucher shop', () {
           // Handle navigation to "Voucher shop"
         }),
-        _buildMenuItem(Icons.account_balance_wallet_outlined, 'Ví của tôi', () {
-          // Handle navigation to "Ví của tôi"
+        _buildMenuItem(Icons.account_balance_wallet_outlined, 'My Wallet', () {
+          // Handle navigation to "My Wallet"
         }),
-        _buildMenuItem(Icons.settings_outlined, 'Cài đặt', () {
-          // Handle navigation to "Cài đặt"
+        _buildMenuItem(Icons.settings_outlined, 'Settings', () {
+          // Handle navigation to "Settings"
         }),
-        _buildMenuItem(Icons.switch_account, 'Chuyển tư cách người dùng', () {
-          // Handle navigation to "Chuyển tư cách người dùng"
+        _buildMenuItem(Icons.switch_account, 'Switch User Role', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BottomNav()),
+          );
         }),
       ],
     );
@@ -140,8 +211,12 @@ class _ProfileShopState extends State<ProfileShop> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ElevatedButton.icon(
-        onPressed: () {
-          // Handle log out
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AuthPage()),
+          );
         },
         icon: Icon(Icons.logout, color: Colors.green),
         label: Text('Log Out'),

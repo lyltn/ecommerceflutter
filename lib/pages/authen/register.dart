@@ -1,3 +1,4 @@
+import 'package:ecommercettl/pages/authen/login.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -71,25 +72,29 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       try {
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
 
         // Lưu thông tin người dùng vào Firestore
-        await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
           'username': _usernameController.text,
           'phone': _phoneController.text,
           'address': _addressController.text,
           'email': _emailController.text,
           'dob': _dobController.text,
-          "role" : "CUSTOMER"
+          "role": "CUSTOMER"
         });
 
         // Đăng ký thành công, đăng nhập và chuyển hướng đến trang chính
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNav()),
+          MaterialPageRoute(builder: (context) => LoginPage()),
         );
 
         // Hiển thị thông báo đăng ký thành công
@@ -134,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30), // Bo tròn 30px
                 ),
-                hintText: 'Nhập username...',// Placeholder
+                hintText: 'Nhập username...', // Placeholder
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -300,14 +305,17 @@ class _RegisterPageState extends State<RegisterPage> {
             margin: EdgeInsets.symmetric(horizontal: 40),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF15A362), // Thay đổi màu nền của nút ở đây
-                padding: EdgeInsets.symmetric(vertical: 15), // Thay đổi độ cao của nút
+                backgroundColor:
+                    Color(0xFF15A362), // Thay đổi màu nền của nút ở đây
+                padding: EdgeInsets.symmetric(
+                    vertical: 15), // Thay đổi độ cao của nút
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30), // Bo tròn nút
                 ),
               ).copyWith(
                 // Thay đổi màu chữ
-                foregroundColor: MaterialStateProperty.all(Colors.white), // Màu chữ
+                foregroundColor:
+                    MaterialStateProperty.all(Colors.white), // Màu chữ
               ),
               onPressed: _register,
               child: Text('Đăng ký'),

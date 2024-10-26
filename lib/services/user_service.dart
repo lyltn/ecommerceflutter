@@ -20,7 +20,7 @@ class UserService {
     });
   }
 
-    Future<String> uploadImage(File image) async {
+  Future<String> uploadImage(File image) async {
     try {
       final storageRef = FirebaseStorage.instance
           .ref()
@@ -48,7 +48,7 @@ class UserService {
     }
   }
 
-  Future<void> saveUserId(String userId) async {
+  Future<void> saveUserId({required String userId}) async {
     await storage.write(key: 'userId', value: userId);
   }
 

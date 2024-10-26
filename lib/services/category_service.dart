@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // shop phải đỗ dữ liệu ra theo userid
 class CategoryService {
@@ -35,11 +36,17 @@ class CategoryService {
 
   Future<List<String>> getnameCategories() async {
     try {
-      QuerySnapshot snapshot = await _firestore
-          .collection('categorys')
-          .where('userid', isEqualTo: 'ly')
-          .get();
-      return snapshot.docs.map((doc) => doc['name'] as String).toList();
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        String uid = user.uid;
+        QuerySnapshot snapshot = await _firestore
+            .collection('categorys')
+            .where('userid', isEqualTo: uid)
+            .get();
+        return snapshot.docs.map((doc) => doc['name'] as String).toList();
+      } else {
+        return [];
+      }
     } catch (e) {
       // Handle errors silently
       return [];

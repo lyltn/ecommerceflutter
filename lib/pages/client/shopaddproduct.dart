@@ -3,6 +3,7 @@ import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/services/brand_service.dart';
 import 'package:ecommercettl/services/category_service.dart';
 import 'package:ecommercettl/services/product_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,7 @@ class ShopAddProduct extends StatefulWidget {
 class _ShopAddProductState extends State<ShopAddProduct> {
   final ProductService productService = ProductService();
   final BrandService brandService = BrandService();
+
   final CategoryService categoryService = CategoryService();
 
   final TextEditingController nameController = TextEditingController();
@@ -29,7 +31,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
   String? categoryValue;
   String? genderValue;
   String? brandValue;
-
+  String? uid;
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
   List<File> _images = [];
@@ -52,11 +54,16 @@ class _ShopAddProductState extends State<ShopAddProduct> {
   void initState() {
     super.initState();
     _fetchData();
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
   }
 
   Future<void> _fetchData() async {
     categories = await categoryService.getnameCategories();
-    brands = await brandService.getnameBrands();
+    brands = await brandService.getNameBrands();
 
     // Trigger a rebuild to update the UI with the fetched data.
     setState(() {});
@@ -82,7 +89,6 @@ class _ShopAddProductState extends State<ShopAddProduct> {
       return Center(child: Text('No images available'));
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -306,9 +312,9 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                             color: Colors.green, size: 40),
                       )
                     : SizedBox(
-                      height: 150, // Chiều cao để giới hạn GridView
-                      child: _buildGridView(_images),
-          ),
+                        height: 150, // Chiều cao để giới hạn GridView
+                        child: _buildGridView(_images),
+                      ),
               ),
             ),
             const SizedBox(height: 30),
@@ -347,7 +353,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                       if (_images != null) {
                         imageUrls = await productService.uploadImages(_images);
                       }
-
+                      uid = await ShopService.getCurrentUserId();
                       await productService.addProduct(
                         nameController.text,
                         descriptionController.text,
@@ -357,7 +363,7 @@ class _ShopAddProductState extends State<ShopAddProduct> {
                         double.parse(commissionController.text),
                         double.parse(priceController.text),
                         imageUrls,
-                        'ly',
+                        uid!,
                         productStatus ? 'active' : 'inactive',
                       );
 

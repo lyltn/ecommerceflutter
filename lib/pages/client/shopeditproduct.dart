@@ -3,6 +3,7 @@ import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/services/brand_service.dart';
 import 'package:ecommercettl/services/category_service.dart';
 import 'package:ecommercettl/services/product_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 import 'package:ecommercettl/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,6 +22,8 @@ class _ShopEditProductState extends State<ShopEditProduct> {
   final BrandService brandService = BrandService();
   final CategoryService categoryService = CategoryService();
 
+  String? uid;
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -33,7 +36,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
   List<File> _images = [];
 
   final ImagePicker _picker = ImagePicker();
-  
+
   final List<String> genders = ['Nam', 'Nữ', 'Unisex'];
 
   List<String> categories = [];
@@ -44,12 +47,17 @@ class _ShopEditProductState extends State<ShopEditProduct> {
     super.initState();
     loadProductData();
     _fetchData();
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
   }
 
   Future<void> _fetchData() async {
     // Fetch categories and brands
     categories = await categoryService.getnameCategories();
-    brands = await brandService.getnameBrands();
+    brands = await brandService.getNameBrands();
 
     // Only update state if the lists are not empty
     if (categories.isNotEmpty && brands.isNotEmpty) {
@@ -107,7 +115,6 @@ class _ShopEditProductState extends State<ShopEditProduct> {
     }
   }
 
-
   Widget buildImagePlaceholder() {
     return Container(
       width: 150,
@@ -123,8 +130,10 @@ class _ShopEditProductState extends State<ShopEditProduct> {
 
   Widget _buildGridView() {
     // Gộp danh sách ảnh cũ (URL) và ảnh mới (File) lại
-    final combinedImages = [...imageUrls.map((url) => Image.network(url)), 
-                            ..._images.map((file) => Image.file(file))];
+    final combinedImages = [
+      ...imageUrls.map((url) => Image.network(url)),
+      ..._images.map((file) => Image.file(file))
+    ];
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -138,8 +147,6 @@ class _ShopEditProductState extends State<ShopEditProduct> {
       },
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +316,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
               child: GestureDetector(
                 onTap: pickImages,
                 child: _images == null && imageUrls != null
-                      ?Container(
+                    ? Container(
                         height: 300,
                         child: _buildGridView(),
                       )
@@ -350,8 +357,8 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_images != null) {
-                        imageUrls =
-                             await productService.updateProductImages(widget.productId,_images);
+                        imageUrls = await productService.updateProductImages(
+                            widget.productId, _images);
                       }
 
                       await productService.updateProduct(
@@ -364,7 +371,7 @@ class _ShopEditProductState extends State<ShopEditProduct> {
                         double.parse(affialteController.text),
                         double.parse(priceController.text),
                         imageUrls ?? imageUrls,
-                        'ly',
+                        uid!,
                         productStatus ? 'active' : 'inactive',
                       );
 
@@ -391,8 +398,6 @@ class _ShopEditProductState extends State<ShopEditProduct> {
       ),
     );
   }
-
- 
 
   Widget buildTextField(
       String label, TextEditingController controller, String hintText,

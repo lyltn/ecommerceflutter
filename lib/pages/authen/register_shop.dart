@@ -10,7 +10,8 @@ class RegisterShopPage extends StatefulWidget {
 class _RegisterShopPageState extends State<RegisterShopPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _shopNameController = TextEditingController();
-  final TextEditingController _shopDescriptionController = TextEditingController();
+  final TextEditingController _shopDescriptionController =
+      TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final ShopService _shopService = ShopService(); // Khởi tạo service
 
@@ -33,7 +34,9 @@ class _RegisterShopPageState extends State<RegisterShopPage> {
 
         // Hiển thị thông báo đăng ký thành công
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đăng ký shop thành công. Vui lòng chờ xét duyệt.')),
+          SnackBar(
+              content:
+                  Text('Đăng ký shop thành công. Vui lòng chờ xét duyệt.')),
         );
 
         // Chuyển hướng đến trang chính hoặc trang khác
