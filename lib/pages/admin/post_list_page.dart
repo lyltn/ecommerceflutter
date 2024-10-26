@@ -1,8 +1,9 @@
-import 'package:ecommercettl/pages/admin/post_detail_page.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ecommercettl/services/post_services.dart';
-import 'Components/post_card.dart';
+import '/models/post.dart';
+import '/services/post_service.dart';
+import 'components/add_post_page.dart';
+import 'components/post_card.dart';
+import 'post_detail_page.dart';
 
 class PostListPage extends StatefulWidget {
   const PostListPage({super.key});
@@ -14,63 +15,63 @@ class PostListPage extends StatefulWidget {
 class _PostListPageState extends State<PostListPage> {
   final PostService postService = PostService();
 
+  void _navigateToAddPostPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddPostPage(postService: postService),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Posts')),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: postService
-            .getPostsStream(), // Make sure this stream is implemented in PostService
+      appBar: AppBar(
+        title: const Text('Posts'),
+      ),
+      body: StreamBuilder<List<Post>>(
+        stream: postService.getPosts(), // Stream of posts
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Error loading posts'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No posts available'));
           }
 
-          if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-            List<DocumentSnapshot> postList = snapshot.data!.docs;
+          final posts = snapshot.data!; // Get the posts
 
-            return ListView.builder(
-              itemCount: postList.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot post = postList[index];
-                Map<String, dynamic> data =
-                    post.data() as Map<String, dynamic>;
+          return ListView.builder(
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index];
 
-                String username = data['userId'];
-                // String imageUrl =
-                //     data['postImgUrl'] != null && data['postImgUrl'].isNotEmpty
-                //         ? data['postImgUrl'][0] // Get the first image
-                //         : ''; // Default or placeholder image
-                String imageUrl = data['postImgUrl'];
-                String postText = data['postTitle'];
-
-                return PostCard(
-                  username: username,
-                  imageUrl: imageUrl,
-                  postText: postText,
-                  onDelete: () {
-                    postService.deletePost(post
-                        .id); // Call your delete method from PostService
-                  },
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PostDetailPage(post: post),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          } else {
-            return const Center(child: Text('No posts found'));
-          }
+              return PostCard(
+                post: post, // Pass the post to the PostCard widget
+                onDelete: () {
+                  // Handle delete logic
+                  postService.deletePost(post.id);
+                },
+                onTap: () {
+                  // Navigate to post details page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PostDetailPage(post: post),
+                    ),
+                  );
+                },
+              );
+            },
+          );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _navigateToAddPostPage(context);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

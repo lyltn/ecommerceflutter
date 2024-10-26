@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/authen/forgot_pw.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
@@ -11,6 +12,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _rememberMe = false;
+  bool _isLoading = false; // Flag to indicate loading state
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -25,17 +27,48 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true; // Start loading
+      });
+
       try {
+        // Sign in with Firebase
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
-        // Đăng nhập thành công, chuyển hướng đến trang chính
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => BottomNav()),
-        );
+
+        // Check user role after login
+        String uid = userCredential.user!.uid;
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (userDoc.exists) {
+          String role = userDoc['role'];
+          if (role == 'ADMIN') {
+            // Navigate to Admin page if the role is ADMIN
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => AdminPage()),
+            // );
+          } else if (role == 'CUSTOMER') {
+            // Navigate to BottomNav if the role is CUSTOMER
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => BottomNav()),
+            );
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Đăng nhập thành công")),
+          );
+        } else {
+          // User document not found
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Lỗi khi lấy thông tin người dùng.")),
+          );
+        }
       } on FirebaseAuthException catch (e) {
+        // Handle FirebaseAuth exceptions
         String errorMessage;
         if (e.code == 'user-not-found') {
           errorMessage = 'Không tìm thấy người dùng với email này.';
@@ -44,10 +77,13 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
         }
-        // Hiển thị thông báo lỗi
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
+      } finally {
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
       }
     }
   }
@@ -56,7 +92,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
+      child: _isLoading
+          ? Center(child: CircularProgressIndicator()) // Show loading indicator if _isLoading is true
+          : Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Hàng cho Email
@@ -78,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30), // Bo tròn 30px
                 ),
-                hintText: 'Nhập email...',// Placeholder
+                hintText: 'Nhập email...', // Placeholder
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {

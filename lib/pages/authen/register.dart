@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
+import '../customer/bottomnav.dart';
+
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -81,12 +83,13 @@ class _RegisterPageState extends State<RegisterPage> {
           'address': _addressController.text,
           'email': _emailController.text,
           'dob': _dobController.text,
+          "role" : "CUSTOMER"
         });
 
         // Đăng ký thành công, đăng nhập và chuyển hướng đến trang chính
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomnavShop()),
+          MaterialPageRoute(builder: (context) => BottomNav()),
         );
 
         // Hiển thị thông báo đăng ký thành công

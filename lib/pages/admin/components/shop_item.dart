@@ -9,14 +9,14 @@ class ShopItem extends StatefulWidget {
   final VoidCallback? onDelete;
 
   const ShopItem({
-    Key? key,
+    super.key,
     required this.shopName,
     required this.productName,
     required this.price,
     required this.imageUrl,
     this.onTap,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   _ShopItemState createState() => _ShopItemState();
@@ -115,7 +115,7 @@ class _ShopItemState extends State<ShopItem> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\đ${widget.price.toStringAsFixed(2)}', // Format price as string
+                          'đ${widget.price.toStringAsFixed(2)}', // Format price as string
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,

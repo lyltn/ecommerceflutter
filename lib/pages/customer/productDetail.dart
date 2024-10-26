@@ -1,5 +1,6 @@
 import 'package:ecommercettl/pages/customer/component/PhotoGallery.dart';
 import 'package:ecommercettl/pages/customer/component/ProductReview.dart';
+import 'package:ecommercettl/pages/customer/component/ShopPanel.dart';
 import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/models/Product.dart';
@@ -136,6 +137,8 @@ class ProductdetailState extends State<Productdetail>
                       ),
                     ),
                     ProductReview(),
+                    ShopPanel(),
+                    const SizedBox(height: 60),
                   ],
                 ),
               ),

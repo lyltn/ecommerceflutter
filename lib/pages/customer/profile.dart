@@ -1,15 +1,53 @@
+import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/register_shop.dart';
-import 'package:ecommercettl/pages/customer/update_profile.dart'; // Import trang cập nhật thông tin cá nhân
+import 'package:ecommercettl/pages/customer/update_profile.dart';
+import 'package:ecommercettl/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   @override
+  _ProfileState createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+
+  late AuthService auth = AuthService();
+  UserModel? userModel; // Change to nullable
+  @override
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      userModel = await auth.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {}); // Update the UI once the data is fetched
+    } catch (e) {
+      print('Error fetching user profile: $e');
+    }
+  }
+  // load data khi sang trang
+  Future<void> navigation() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+    ).then((_) {
+      _loadUserProfile();
+    });
+  }
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(context),
+      body: userModel == null
+          ? Center(child: CircularProgressIndicator())
+          : _buildBody(context),
     );
   }
 
@@ -23,14 +61,16 @@ class Profile extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        _buildProfileInfo(context),
-        _buildMenuItems(context),
-        Spacer(),
-        _buildLogoutButton(context),
-        SizedBox(height: 20),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildProfileInfo(context),
+          _buildMenuItems(context),
+          SizedBox(height: 20), // Add space before the logout button
+          _buildLogoutButton(context),
+          SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
@@ -41,14 +81,13 @@ class Profile extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => UpdateProfilePage()),
-              );
+              navigation();
             },
             child: CircleAvatar(
               radius: 30,
-              backgroundImage: AssetImage('assets/images/kuta.png'),
+              backgroundImage: userModel!.imgAvatar != null
+                  ? NetworkImage(userModel!.imgAvatar)
+                  : AssetImage('assets/default_avatar.png') as ImageProvider,
             ),
           ),
           SizedBox(width: 16),
@@ -58,7 +97,7 @@ class Profile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Nguyễn Văn A',
+                    userModel!.fullName ?? 'Guest',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -74,7 +113,7 @@ class Profile extends StatelessWidget {
               ),
               SizedBox(height: 4),
               Text(
-                'a@gmail.com',
+                userModel!.email ?? '',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
