@@ -22,8 +22,6 @@ class ShopService {
           'shopDescription': shopDescription,
           'status': 'pending',
           'submittedAt': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-          'reviewedBy': null,
-          'reviewedAt': null,
         });
       }
     } catch (e) {
