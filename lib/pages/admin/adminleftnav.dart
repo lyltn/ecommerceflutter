@@ -1,5 +1,6 @@
 import 'package:ecommercettl/main.dart';
 import 'package:ecommercettl/models/adminModel.dart';
+import 'package:ecommercettl/pages/admin/admin_shop_requests.dart';
 import 'package:ecommercettl/pages/admin/adminhome.dart';
 import 'package:ecommercettl/pages/admin/update_profile.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
@@ -7,6 +8,8 @@ import 'package:ecommercettl/services/auth_service.dart';
 import 'package:ecommercettl/services/shop_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'admin_manage_users.dart';
 
 class LeftNavigation extends StatefulWidget {
   const LeftNavigation({super.key});
@@ -118,11 +121,11 @@ class _LeftNavigationState extends State<LeftNavigation> {
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text('Quản lý người dùng'),
+              title: const Text('Quản lý chủ shop'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyApp()),
+                  MaterialPageRoute(builder: (context) => AdminManageUsersPage()),
                 );
               },
             ),
@@ -144,6 +147,16 @@ class _LeftNavigationState extends State<LeftNavigation> {
                   context,
                   MaterialPageRoute(builder: (context) => MyApp()),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Thông báo đăng kí shop'),
+              onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AdminShopRequestsPage()), // Replace MyApp with the actual notification management page
+              );
               },
             ),
             ListTile(

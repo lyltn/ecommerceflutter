@@ -8,6 +8,12 @@ class AdminManageUsersPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Quản lý người dùng'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+        Navigator.of(context).pop();
+          },
+        ),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'USER').snapshots(),

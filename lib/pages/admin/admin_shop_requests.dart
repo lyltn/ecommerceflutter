@@ -15,6 +15,12 @@ class AdminShopRequestsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Yêu cầu đăng ký Shop'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+        Navigator.of(context).pop();
+          },
+        ),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('shopRequests').where('status', isEqualTo: 'pending').snapshots(),
