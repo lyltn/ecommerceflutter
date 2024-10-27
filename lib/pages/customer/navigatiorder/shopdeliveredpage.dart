@@ -109,7 +109,7 @@ class _ShopDeliveredPageState extends State<ShopDeliveredPage> {
                             top: 8.0, bottom: 8.0, left: 10.0, right: 10.0),
                       ),
                       child: const Text(
-                        'chờ lấy hàng',
+                        'đã giao',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),

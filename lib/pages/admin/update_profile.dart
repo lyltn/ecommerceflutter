@@ -1,4 +1,5 @@
-import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/models/adminModel.dart';
+import 'package:ecommercettl/pages/admin/adminhome.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,7 +23,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   final TextEditingController _dobController = TextEditingController();
   final AuthService _authService = AuthService();
   File? _avatarImage;
-  late UserModel userModel;
+  late AdminModel adminModel;
   String imageUrl = "";
 
   @override
@@ -38,24 +39,24 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       setState(() {
         _avatarImage = File(pickedFile.path);
       });
-      print('Image selected: ${pickedFile.path}'); // Debug print
+      print('Image selected: ${pickedFile.path}');
     } else {
-      print('No image selected.'); // Debug print
+      print('No image selected.');
     }
   }
 
   Future<void> _loadUserData() async {
     try {
-      userModel = (await _authService
-          .getUserProfile(FirebaseAuth.instance.currentUser!.uid))!;
+      adminModel = (await _authService
+          .getadminProfile(FirebaseAuth.instance.currentUser!.uid))!;
       setState(() {
-        _usernameController.text = userModel.username;
-        _fullNameController.text = userModel.fullName ?? '';
-        _emailController.text = userModel.email ?? '';
-        _phoneController.text = userModel.phone ?? '';
-        _addressController.text = userModel.address ?? '';
-        _dobController.text = userModel.dob ?? '';
-        imageUrl = userModel.imgAvatar;
+        _usernameController.text = adminModel.username;
+        _fullNameController.text = adminModel.fullName ?? '';
+        _emailController.text = adminModel.email ?? '';
+        _phoneController.text = adminModel.phone ?? '';
+        _addressController.text = adminModel.address ?? '';
+        _dobController.text = adminModel.dob ?? '';
+        imageUrl = adminModel.imgAvatar;
       });
     } catch (e) {
       print(e);
@@ -74,11 +75,10 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         if (_avatarImage != null) {
           uploadedImageUrl = await _authService.uploadImage(_avatarImage!);
         } else {
-          uploadedImageUrl =
-              imageUrl; // Keep the old image if no new image is selected
+          uploadedImageUrl = imageUrl;
         }
 
-        UserModel dataUpdate = UserModel(
+        AdminModel dataUpdate = AdminModel(
           id: FirebaseAuth.instance.currentUser!.uid,
           username: _usernameController.text,
           fullName: _fullNameController.text,
@@ -89,12 +89,17 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
           imgAvatar: uploadedImageUrl,
         );
 
-        bool check = await _authService.updateUserProfile(dataUpdate);
+        bool check = await _authService.updateAdminProfile(dataUpdate);
         if (check) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Cập nhật thông tin thành công.')),
           );
         }
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AdminHome()),
+        );
       } catch (e) {
         print(e);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +147,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
           child: ListView(
             children: [
               GestureDetector(
-                onTap: _selectImage, // This should trigger the image picker
+                onTap: _selectImage,
                 child: CircleAvatar(
                   radius: 50,
                   backgroundImage: _avatarImage != null
@@ -267,7 +272,13 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                onPressed: _updateProfile,
+                onPressed: () {
+                  _updateProfile();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminHome()),
+                  );
+                },
                 child: Text('Cập nhật thông tin'),
               ),
             ],
