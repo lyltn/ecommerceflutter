@@ -43,12 +43,12 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDfgy7x1oYMMH8QcxCn0zMosFM7fEj2ffk',
     appId: '1:81762041969:web:2ca27b744b4c8022845bd0',
-    messagingSenderId: '81762041969',
+    messagingSenderId: '81762041969', 
     projectId: 'ecommerceflutter-61f6d',
     authDomain: 'ecommerceflutter-61f6d.firebaseapp.com',
     storageBucket: 'ecommerceflutter-61f6d.appspot.com',
     measurementId: 'G-9M3S52GV4M',
-  );
+  ); 
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDfgy7x1oYMMH8QcxCn0zMosFM7fEj2ffk',

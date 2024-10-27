@@ -1,6 +1,7 @@
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/register_shop.dart';
+import 'package:ecommercettl/pages/customer/customer_chatbot.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart';
 import 'package:ecommercettl/services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -140,6 +141,12 @@ class _ProfileState extends State<Profile> {
         }),
         _buildMenuItem(Icons.shopping_cart_outlined, 'Giỏ hàng', () {
           // Handle navigation to "Giỏ hàng"
+        }),
+        _buildMenuItem(Icons.support_agent_outlined, 'Hỗ trợ người dùng', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CustomerChatbotPage()),
+          );
         }),
         _buildMenuItem(Icons.store_mall_directory_outlined, 'Đăng kí shop', () {
           Navigator.push(
