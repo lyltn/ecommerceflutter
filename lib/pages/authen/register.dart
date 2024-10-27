@@ -94,22 +94,30 @@ class _RegisterPageState extends State<RegisterPage> {
         // Đăng ký thành công, đăng nhập và chuyển hướng đến trang chính
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => BottomNav()),
         );
 
         // Hiển thị thông báo đăng ký thành công
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Đăng ký thành công và đã đăng nhập')),
         );
-      } on FirebaseAuthException catch (e) {
+            } on FirebaseAuthException catch (e) {
+        String errorMessage;
         if (e.code == 'weak-password') {
-          print('Mật khẩu quá yếu.');
+          errorMessage = 'Mật khẩu quá yếu.';
         } else if (e.code == 'email-already-in-use') {
-          print('Email đã được sử dụng.');
+          errorMessage = 'Email đã được sử dụng.';
+        } else {
+          errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại.';
         }
-      } catch (e) {
-        print(e);
-      }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+            } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã xảy ra lỗi. Vui lòng thử lại.')),
+        );
+            }
     }
   }
 
