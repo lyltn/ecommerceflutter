@@ -104,7 +104,16 @@ class AdminShopRequestsPage extends StatelessWidget {
     });
 
     // Gửi email thông báo
-    await _sendEmail(email, 'Yêu cầu đăng ký shop của bạn đã được duyệt.');
+    await _sendEmail(
+        email,
+        '🎉 Chúc mừng! 🎉\n\n'
+            'Xin chào,\n\n'
+            'Chúng tôi rất vui mừng thông báo rằng yêu cầu đăng ký shop của bạn đã được phê duyệt thành công! 🥳\n\n'
+            '🌟 Giờ đây, bạn có thể bắt đầu quản lý và phát triển cửa hàng của mình trên nền tảng của chúng tôi. Đừng ngần ngại liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi hoặc yêu cầu hỗ trợ nào.\n\n'
+            'Chúc bạn kinh doanh thuận lợi và thành công! 🚀\n\n'
+            'Trân trọng,\n'
+            'Đội ngũ quản trị\n'
+    );
   }
 
   Future<void> _rejectRequest(String docId, String email) async {
@@ -115,7 +124,15 @@ class AdminShopRequestsPage extends StatelessWidget {
     });
 
     // Gửi email thông báo
-    await _sendEmail(email, 'Yêu cầu đăng ký shop của bạn đã bị từ chối.');
+    await _sendEmail(
+        email,
+        '🔔 Thông báo cập nhật từ yêu cầu đăng ký shop của bạn\n\n'
+            'Xin chào,\n\n'
+            'Cảm ơn bạn đã quan tâm và gửi yêu cầu đăng ký shop trên nền tảng của chúng tôi. Sau khi xem xét kỹ lưỡng, chúng tôi rất tiếc phải thông báo rằng hiện tại chúng tôi chưa thể phê duyệt yêu cầu này. 😔\n\n'
+            '🙏 Điều này không ảnh hưởng đến cơ hội hợp tác trong tương lai. Chúng tôi rất mong có dịp đồng hành cùng bạn trong những lần tới. Đừng ngần ngại liên hệ nếu bạn cần thêm thông tin hay hỗ trợ nào khác.\n\n'
+            'Trân trọng,\n'
+            'Đội ngũ quản trị\n'
+    );
   }
 
   Future<void> _sendEmail(String toEmail, String message) async {
