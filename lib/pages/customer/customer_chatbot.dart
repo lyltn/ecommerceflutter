@@ -58,7 +58,7 @@ class _CustomerChatbotPageState extends State<CustomerChatbotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hỗ trợ'),
+        title: Text('Hỗ trợ '),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
             onPressed: () {
