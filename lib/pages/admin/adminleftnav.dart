@@ -3,6 +3,7 @@ import 'package:ecommercettl/models/adminModel.dart';
 import 'package:ecommercettl/pages/admin/admin_shop_requests.dart';
 import 'package:ecommercettl/pages/admin/adminhome.dart';
 import 'package:ecommercettl/pages/admin/update_profile.dart';
+import 'package:ecommercettl/pages/admin/voucher_list.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/services/auth_service.dart';
 import 'package:ecommercettl/services/shop_service.dart';
@@ -125,7 +126,8 @@ class _LeftNavigationState extends State<LeftNavigation> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AdminManageUsersPage()),
+                  MaterialPageRoute(
+                      builder: (context) => AdminManageUsersPage()),
                 );
               },
             ),
@@ -135,7 +137,8 @@ class _LeftNavigationState extends State<LeftNavigation> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyApp()),
+                  MaterialPageRoute(
+                      builder: (context) => VoucherManagementScreen()),
                 );
               },
             ),
@@ -153,10 +156,12 @@ class _LeftNavigationState extends State<LeftNavigation> {
               leading: const Icon(Icons.notifications),
               title: const Text('Thông báo đăng kí shop'),
               onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AdminShopRequestsPage()), // Replace MyApp with the actual notification management page
-              );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          AdminShopRequestsPage()), // Replace MyApp with the actual notification management page
+                );
               },
             ),
             ListTile(
