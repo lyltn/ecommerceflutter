@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/CartModel.dart';
+import 'package:ecommercettl/models/VoucherModel.dart';
 
 class CustomerService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -25,4 +26,22 @@ class CustomerService {
       print("Failed to add item to cart: $e");
     }
   }
+  
+  Future<List<Voucher>> fetchVouchersByShopId(String userId) async {
+    List<Voucher> vouchers = [];
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('vouchers')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        vouchers.add(Voucher.fromFirestore(doc.data() as Map<String, dynamic>, doc.id));
+      }
+    } catch (e) {
+      print("Error fetching vouchers: $e");
+    }
+    return vouchers;
+  }
+
 }

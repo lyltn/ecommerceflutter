@@ -68,8 +68,8 @@ Widget build(BuildContext context) {
                   columns = 6; // Increase columns for larger screens
                   productCount = 12;
                 } else if (constraints.maxWidth > 400) {
-                  columns = 3; // Adjust for tablet sizes
-                  productCount = 6;
+                  columns = 2; // Adjust for tablet sizes
+                  productCount = 4;
                 }
 
                 return GridView.builder(
@@ -139,8 +139,8 @@ Widget build(BuildContext context) {
                     columns = 6; // Increase columns for larger screens
                     productCount = 12;
                   } else if (constraints.maxWidth > 400) {
-                    columns = 3; // Adjust for tablet sizes
-                    productCount = 6;
+                    columns = 2; // Adjust for tablet sizes
+                    productCount = 4;
                   }
 
                   return GridView.builder(

@@ -442,13 +442,32 @@ class ProductdetailState extends State<Productdetail>
                 height: MediaQuery.of(context).size.height * 0.6,
                 child: BuyNow(
                   product: widget.newProduct,
-                  onAgree: _toggleAddToCard,
+                  onAgree: _toggleBuyNow,
+                  shop: _shopData ?? ShopModel(
+                    email: "",
+                    reviewedAt: DateTime(TimeOfDay.hoursPerDay),
+                    reviewedBy: "",
+                    shopDescription: "",
+                    shopName: "",
+                    shopid: "",
+                    status: ""
+                  ),
+                  customer: _userModel ?? UserModel(
+                    address: "",
+                    dob: "",
+                    email: "",
+                    fullName: "",
+                    id: "",
+                    imgAvatar: "",
+                    password: "",
+                    phone: "",
+                    role: "",
+                    username: "",
+                  ),
                 ),
               ),
             ),
 
-
-            // Positioned buttons at the bottom
             if (!showAddToCartButton)
               Positioned(
                 left: 0,
