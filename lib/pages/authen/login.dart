@@ -5,7 +5,8 @@ import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:ecommercettl/services/user_service.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import trang chính
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import trang chính
 
 class LoginPage extends StatefulWidget {
   @override
@@ -42,6 +43,8 @@ class _LoginPageState extends State<LoginPage> {
           password: _passwordController.text,
         );
 
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+
         // Check user role after login
         String uid = userCredential.user!.uid;
         DocumentSnapshot userDoc =
@@ -56,6 +59,7 @@ class _LoginPageState extends State<LoginPage> {
             );
           } else if (role == 'CUSTOMER') {
             // Navigate to BottomNav if the role is CUSTOMER
+            await prefs.setString('cusId', userCredential.user!.uid);
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => BottomNav()),

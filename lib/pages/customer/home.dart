@@ -37,16 +37,15 @@ class _HomeState extends State<Home> {
           ),
           Container(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8), // Apply the border radius here
-              child: SliderBanner(), // Your slider banner
+              borderRadius: BorderRadius.circular(8),
+              child: SliderBanner(),
             ),
           ),
           Container(
             child: DealOfTheDay(remainingTime: remainingTime),
           ),
-          // Fetch products from Firestore and map them to ProductCard widgets
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('products').snapshots(),
+            stream: FirebaseFirestore.instance.collection('products').limit(4).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
@@ -55,54 +54,54 @@ class _HomeState extends State<Home> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               }
 
-              // Map Firestore data to Product objects
               final products = snapshot.data!.docs.map((doc) {
                 var data = doc.data() as Map<String, dynamic>;
                 return Product.fromFirestore(data, doc.id);
               }).toList();
 
-              // Display products in a GridView
-              return GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    crossAxisSpacing: 5,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.4,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      for (var product in products)
-                        GestureDetector(
-                          onTap: () {
-                            // Navigate to ProductDetail page on tap
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Productdetail(newProduct: product,),
-                              ),
-                            );
-                          },
-                          child: ProductCard(
-                            imagePath: product.imageUrls.isNotEmpty
-                                ? product.imageUrls[0] // Use the first image from imageUrl list
-                                : 'images/dress.png', // Fallback image
-                            name: product.name,
-                            description: product.description,
-                            price: product.price,
-                            discountPercentage: 20, // Ensure this is a String
-                            rating: 5, // Ensure this is a double
-                            reviewCount: 4, // Ensure this is an int
-                          ),
+              return GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.6, // Adjust this value to change the card's aspect ratio
+                ),
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Productdetail(newProduct: product),
                         ),
-                    ],
+                      );
+                    },
+                    child: ProductCard(
+                      imagePath: product.imageUrls.isNotEmpty
+                          ? product.imageUrls[0]
+                          : 'images/dress.png',
+                      name: product.name,
+                      price: product.price,
+                      discountPercentage: 20,
+                      rating: 5.0,
+                      reviewCount: 4,
+                      width: MediaQuery.of(context).size.width / 2 - 15 , // Adjust card width
+                      height: 350, // Set a fixed height for the card
+                    ),
                   );
+                },
+              );
             },
           ),
           Container(
             child: Trending(lastDate: lastDate),
           ),
-          // Another section to display more products
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('products').snapshots(),
+            stream: FirebaseFirestore.instance.collection('products').limit(4).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
@@ -116,26 +115,31 @@ class _HomeState extends State<Home> {
                 return Product.fromFirestore(data, doc.id);
               }).toList();
 
-              return GridView.count(
-                crossAxisCount: 2,
+              return GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.6, // Adjust this value to change the card's aspect ratio
+                ),
                 shrinkWrap: true,
-                crossAxisSpacing: 5,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.4,
                 physics: NeverScrollableScrollPhysics(),
-                children: products.map((product) {
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
                   return ProductCard(
                     imagePath: product.imageUrls.isNotEmpty
                         ? product.imageUrls[0]
                         : 'images/dress.png',
                     name: product.name,
-                    description: product.description,
                     price: product.price,
                     discountPercentage: 20,
                     rating: 4.5,
                     reviewCount: 100,
+                    width: MediaQuery.of(context).size.width / 2 - 15, // Adjust card width
+                    height: 350, // Set a fixed height for the card
                   );
-                }).toList(),
+                },
               );
             },
           ),

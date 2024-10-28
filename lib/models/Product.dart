@@ -25,6 +25,12 @@ class Product {
     required this.status,
   });
 
+  @override
+  String toString() {
+    
+    return 'Product(id: $id ,name: $name ,description: $description, brandid: $brandid, categoryid: $categoryid, sex: $sex, affiliate: $affiliate, price: $price, imageUrls: $imageUrls, userid: $userid, status: $status)';
+  }
+
   // Factory method to create a Product from Firestore document data
   factory Product.fromFirestore(Map<String, dynamic> data, String documentId) {
     return Product(

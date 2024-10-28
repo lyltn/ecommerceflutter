@@ -1,55 +1,71 @@
 import 'package:flutter/material.dart';
 
-
 class ShopPanel extends StatelessWidget {
-  const ShopPanel({Key? key}) : super(key: key);
+  final String shopImg;
+  final String shopName;
+  final String shopAddress;
+  final int productCount;
+
+  const ShopPanel({
+    Key? key,
+    required this.shopImg,
+    required this.shopName,
+    required this.shopAddress,
+    required this.productCount,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(3.0),
+      color: Colors.grey[100], 
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(5.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                // Placeholder for shop logo
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[300],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Logo',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ),
+                // Display shop logo or placeholder if the image is empty
+                shopImg.isNotEmpty
+                    ? CircleAvatar(
+                        radius: 40,
+                        backgroundImage: NetworkImage(shopImg),
+                      )
+                    : Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[300],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Logo',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'MORSELA',
-                        style: TextStyle(
+                      Text(
+                        shopName,
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Row(
-                        children: const [
-                          Icon(Icons.location_on, size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
+                        children: [
+                          const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
                           Text(
-                            'TP. Hồ Chí Minh',
-                            style: TextStyle(color: Colors.grey),
+                            shopAddress,
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
@@ -67,9 +83,9 @@ class ShopPanel extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                ShopStat(label: 'sản phẩm', value: '285'),
-                ShopStat(label: 'Đánh giá', value: '4.9'),
+              children: [
+                ShopStat(label: 'sản phẩm', value: productCount.toString()), // Fixed here
+                const ShopStat(label: 'Đánh giá', value: '4.9'),
               ],
             ),
           ],
@@ -91,7 +107,7 @@ class ShopStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
         Text(
           value,
@@ -101,6 +117,7 @@ class ShopStat extends StatelessWidget {
             color: Colors.red,
           ),
         ),
+        SizedBox(width: 5,),
         Text(
           label,
           style: const TextStyle(color: Colors.grey),

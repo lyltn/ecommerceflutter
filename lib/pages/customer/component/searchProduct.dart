@@ -113,7 +113,7 @@ class SearchProductState extends State<SearchProduct> with SingleTickerProviderS
                     shrinkWrap: true,
                     crossAxisSpacing: 5,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 0.4,
+                    childAspectRatio: 0.6,
                     physics: NeverScrollableScrollPhysics(),
                     children: [
                       for (var product in filteredProducts)
@@ -132,11 +132,12 @@ class SearchProductState extends State<SearchProduct> with SingleTickerProviderS
                                 ? product.imageUrls[0] // Use the first image from imageUrl list
                                 : 'images/dress.png', // Fallback image
                             name: product.name,
-                            description: product.description,
                             price: product.price,
                             discountPercentage: 20, // Ensure this is a String
                             rating: 5, // Ensure this is a double
                             reviewCount: 4, // Ensure this is an int
+                            width: MediaQuery.of(context).size.width / 2 - 15 , // Adjust card width
+                            height: 350,
                           ),
                         ),
                     ],

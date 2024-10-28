@@ -16,6 +16,8 @@ import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:ecommercettl/pages/customer/component/searchProduct.dart';
 import 'package:ecommercettl/pages/customer/home.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
+import 'package:ecommercettl/pages/customer/component/TopShopProduct.dart';
+import 'package:ecommercettl/pages/customer/test.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: BottomNav(),
+      home: CheckoutScreen(),
     );
   }
 }

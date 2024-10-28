@@ -8,6 +8,7 @@ import 'package:ecommercettl/services/shop_service.dart';
 import 'package:ecommercettl/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -191,6 +192,8 @@ class _ProfileState extends State<Profile> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ElevatedButton.icon(
         onPressed: () async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.remove('cusId');
           await FirebaseAuth.instance.signOut();
           Navigator.pushReplacement(
             context,

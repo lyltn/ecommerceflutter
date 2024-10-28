@@ -31,7 +31,6 @@ class Trending extends StatelessWidget {
               ),
               SizedBox(height: 8),
 
-              // Second row: Time remaining
               Row(
                 children: [
                   Icon(
