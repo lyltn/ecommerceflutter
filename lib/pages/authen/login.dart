@@ -64,6 +64,12 @@ class _LoginPageState extends State<LoginPage> {
               context,
               MaterialPageRoute(builder: (context) => BottomNav()),
             );
+          } else if (role == 'USER') {
+            if (!mounted) return;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const BottomnavShop()),
+            );
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
