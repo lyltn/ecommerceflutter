@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
+import 'package:ecommercettl/pages/client/voucher_list.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart';
 import 'package:ecommercettl/services/auth_service.dart';
@@ -180,15 +181,18 @@ class _ProfileShopState extends State<ProfileShop> {
     return Column(
       children: [
         _buildMenuItem(Icons.card_giftcard, 'Voucher shop', () {
-          // Handle navigation to "Voucher shop"
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => VoucherManagementScreen()));
         }),
-        _buildMenuItem(Icons.account_balance_wallet_outlined, 'My Wallet', () {
+        _buildMenuItem(Icons.account_balance_wallet_outlined, 'Ví TTL', () {
           // Handle navigation to "My Wallet"
         }),
-        _buildMenuItem(Icons.settings_outlined, 'Settings', () {
+        _buildMenuItem(Icons.settings_outlined, 'Cài đặt', () {
           // Handle navigation to "Settings"
         }),
-        _buildMenuItem(Icons.switch_account, 'Switch User Role', () {
+        _buildMenuItem(Icons.switch_account, 'chuyển trang khách hàng', () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => BottomNav()),
