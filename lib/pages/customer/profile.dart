@@ -159,26 +159,29 @@ class _ProfileState extends State<Profile> {
         }),
         _buildMenuItem(Icons.support_agent_outlined, 'Hỗ trợ người dùng', () {
           Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CustomerChatbotPage()),
+        context,
+        MaterialPageRoute(builder: (context) => CustomerChatbotPage()),
           );
         }),
-        _buildMenuItem(Icons.store_mall_directory_outlined, 'Đăng kí shop', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => RegisterShopPage()),
-          );
-        }),
-        _buildMenuItem(
-          Icons.store_mall_directory_outlined,
-          'chuyển sang shop',
-          () {
-            getCurrentUserId();
+
+        if (userModel?.role == 'CUSTOMER')
+          _buildMenuItem(Icons.store_mall_directory_outlined, 'Đăng kí shop', () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => BottomnavShop()),
+              MaterialPageRoute(builder: (context) => RegisterShopPage()),
             );
-          },
+          }),
+        if (userModel?.role != 'CUSTOMER')
+          _buildMenuItem(
+        Icons.store_mall_directory_outlined,
+        'Chuyển sang shop',
+        () {
+          getCurrentUserId();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BottomnavShop()),
+          );
+        },
         ),
       ],
     );
