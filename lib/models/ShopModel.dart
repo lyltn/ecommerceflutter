@@ -28,7 +28,7 @@ class ShopModel {
       shopDescription: data['shopDescription'] ?? '',
       shopName: data['shopName'] ?? '',
       status: data['status'] ?? '',
-      shopid: data['shopid'] ?? '',
+      shopid: data['uid'] ?? '',
     );
   }
 
@@ -41,7 +41,7 @@ class ShopModel {
       'shopDescription': shopDescription,
       'shopName': shopName,
       'status': status,
-      'shopid': shopid,
+      'uid': shopid,
     };
   }
 }

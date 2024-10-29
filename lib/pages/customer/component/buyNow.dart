@@ -1,7 +1,7 @@
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/models/ShopModel.dart';
 import 'package:ecommercettl/models/UserModel.dart';
-import 'package:ecommercettl/pages/customer/test.dart';
+import 'package:ecommercettl/pages/customer/CheckOutScreen.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -273,6 +273,10 @@ class _BuyNowState extends State<BuyNow> {
                           print("Color selected: ${selectedColor}");
                           print("Size selected: ${selectedSize}");
                           print("Quantity: ${quantitySelected}");
+
+
+                          print("shopid: ${widget.shop.shopid}");
+                          print("shopName: ${widget.shop.shopName}");
 
                           Navigator.push(
                             context,

@@ -3,23 +3,21 @@ import 'package:ecommercettl/models/VoucherModel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class VoucherShop extends StatefulWidget {
-  final ShopModel shop;
+class AdminVoucher extends StatefulWidget {
   final List<Voucher> voucherList;
   final Function(Voucher?) onVoucherSelected;
 
-  const VoucherShop({
+  const AdminVoucher({
     Key? key,
-    required this.shop,
     required this.voucherList,
     required this.onVoucherSelected,
   }) : super(key: key);
 
   @override
-  State<VoucherShop> createState() => _VoucherShopState();
+  State<AdminVoucher> createState() => _AdminVoucherState();
 }
 
-class _VoucherShopState extends State<VoucherShop> {
+class _AdminVoucherState extends State<AdminVoucher> {
   int selectedVoucherIndex = -1; // -1 indicates no voucher selected
 
   @override
@@ -36,7 +34,7 @@ class _VoucherShopState extends State<VoucherShop> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    widget.shop.shopName,
+                    'Chọn TTL Voucher',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -61,7 +59,6 @@ class _VoucherShopState extends State<VoucherShop> {
                       voucher.discount,
                       voucher.condition,
                       voucher.maxDiscount,
-                      voucher.startDate, // Assuming you have startDate
                       voucher.endDate,
                       index,
                     );
@@ -85,13 +82,13 @@ class _VoucherShopState extends State<VoucherShop> {
     );
   }
 
-  Widget _buildVoucherItem(int discount, double condition, double maxDiscount, DateTime startDate, DateTime endDate, int index) {
+  Widget _buildVoucherItem(int discount, double condition, double maxDiscount, DateTime endDate, int index) {
     final currentDate = DateTime.now(); // Get the current date
-    final isVoucherValid = currentDate.isAfter(startDate) && currentDate.isBefore(endDate); // Check if the voucher is valid
+    final isVoucherValid = currentDate.isBefore(endDate); // Check if the voucher is valid
 
     return Container(
       decoration: BoxDecoration(
-        color: isVoucherValid ? Colors.white : Colors.grey.withOpacity(0.3),
+        color: Colors.white,
         border: Border.all(
           color: Colors.grey[300]!,
           width: 1,
@@ -158,21 +155,17 @@ class _VoucherShopState extends State<VoucherShop> {
                     selectedVoucherIndex = selectedVoucherIndex == index ? -1 : index; // Toggle selection
                   });
                 } else {
-                  // If the voucher is expired, show an AlertDialog
+                  // Show dialog for expired voucher
                   _showExpiredVoucherDialog();
                 }
               },
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: selectedVoucherIndex == index,
-                    onChanged: isVoucherValid ? (value) {
-                      setState(() {
-                        selectedVoucherIndex = value! ? index : -1;
-                      });
-                    } : null, // Disable checkbox if expired
-                  ),
-                ],
+              child: Checkbox(
+                value: selectedVoucherIndex == index,
+                onChanged: isVoucherValid ? (value) {
+                  setState(() {
+                    selectedVoucherIndex = value! ? index : -1; // Set to -1 if unchecked
+                  });
+                } : null, // Disable checkbox if expired
               ),
             ),
           ),
