@@ -1,80 +1,56 @@
+import 'package:ecommercettl/models/OrderDetail.dart';
 import 'package:ecommercettl/models/OrderModel.dart';
+import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/pages/client/shoporderdetail.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ShopConfirmpage extends StatefulWidget {
-  const ShopConfirmpage({super.key});
+class OrderWaiting extends StatefulWidget {
+  final List<OrderModel> listOrder;
+  const OrderWaiting({Key? key, required this.listOrder}) : super(key: key);
 
   @override
-  State<ShopConfirmpage> createState() => _ShopConfirmpageState();
+  State<OrderWaiting> createState() => _OrderWaitingState();
 }
 
-class _ShopConfirmpageState extends State<ShopConfirmpage> {
-  late SharedPreferences prefs;
-  String? cusId;
-  String query = "Đang đợi xét duyệt";
-  List<OrderModel> listOrder = List.empty();
-  CustomerService customerService = CustomerService();
-
+class _OrderWaitingState extends State<OrderWaiting> {
+  
   @override
   void initState() {
     super.initState();
-    _loadPreferences(); 
+    print("ditocnem ${widget.listOrder}");
   }
-
-  Future<void> _loadPreferences() async {
-    prefs = await SharedPreferences.getInstance();
-    setState(() {
-      cusId = prefs.getString('cusId'); 
-    });
-
-    if (cusId != null) {
-      await _loadOrder(); 
-    } else {
-      print('cusId is null'); 
-    }
-  }
-
-  Future<void> _loadOrder() async {
-    try {
-      print('cusid: ${cusId}');
-      if (cusId != null) {
-        List<OrderModel> orders = await customerService.fetchOrder(cusId!, query);
-        print('query: ${query}');
-        print('helo: ${orders}');
-        setState(() {
-          listOrder = orders; 
-        });
-      } else {
-        print('Cannot fetch orders: cusId is null');
-      }
-    } catch (e) {
-      print('Error loading orders: $e');
-    }
-  }
+  
   @override
   Widget build(BuildContext context) {
+    print('Received listOrder in OrderWaiting: ${widget.listOrder}');
     return Scaffold(
-      body: ListView(
+      body: ListView.builder(
+        itemCount: widget.listOrder.length,
         padding: const EdgeInsets.all(10.0),
-        children: [
-          buildOrder(
-            imagePath: 'images/dress.png', // Replace with actual image path
-            title: 'Đầm hoa nhí trẻ vai xinh phong cách.dsfsdfsdfsdfsdf..',
-            subtitle: 'màu trắng, size s',
-            price: '150,000 đ',
-            quantity: 1,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ShopOrderDetail()),
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-        ],
+        itemBuilder: (context, index) {
+          final order = widget.listOrder[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+              child: buildOrder(
+              imagePath: order.productImg!,
+              title: order.productName!,
+              subtitle: 'Màu ${order.detail!.color}+, size ${order.detail!.size}',
+              price: NumberFormat("#,###", "vi_VN").format(order.productPrice!),
+              quantity: order.detail!.quantity,
+              totalProduct: order.productCount,
+              totalPrice: order.total,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ShopOrderDetail()),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -84,6 +60,8 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
     required String subtitle,
     required String price,
     required int quantity,
+    required totalProduct,
+    required totalPrice,
     required VoidCallback onTap,
   }) {
     return Card(
@@ -96,7 +74,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
           ListTile(
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
+              child: Image.network(
                 imagePath,
                 width: 50,
                 height: 50,
@@ -113,7 +91,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                 Text(subtitle),
                 const SizedBox(width: 8.0),
                 Text(
-                  price,
+                  '${price}đ',
                   style: const TextStyle(color: Colors.green),
                 ),
                 const SizedBox(width: 8.0),
@@ -132,12 +110,12 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('3 sản phẩm'),
+                  Text('${totalProduct} sản phẩm'),
                 Row(
                   children: [
                     const Text('Tổng tiền: '),
                     Text(
-                      '320,000 VND',
+                      '${NumberFormat("#,###", "vi_VN").format(totalPrice)}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.green,

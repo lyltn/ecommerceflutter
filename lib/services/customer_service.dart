@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/CartModel.dart';
 import 'package:ecommercettl/models/OrderDetail.dart';
 import 'package:ecommercettl/models/OrderModel.dart';
+import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/models/VoucherModel.dart';
 
 class CustomerService {
@@ -67,12 +68,13 @@ class CustomerService {
     DateTime orderDate,
     String shopVoucher,
     String adminVoucher,
-    double total, // Assuming total is a double
+    double total,
     String cusId,
     String name,
     String phone,
-    String address, // Fixed typo from 'adress' to 'address'
+    String address, 
     String status,
+    String note
   ) async {
     // Reference to the Firestore collection
     CollectionReference ordersCollection = FirebaseFirestore.instance.collection('orders');
@@ -89,6 +91,7 @@ class CustomerService {
       phone: phone,
       address: address,
       status: status,
+      note: note
     );
 
     // Convert the Order object to a map
@@ -105,6 +108,7 @@ class CustomerService {
   Future<void> addOrderDetails(
     String orderCode,
     String productId,
+    String cusId,
     String size,
     String color, 
     int quantity
@@ -116,6 +120,7 @@ class CustomerService {
     OrderDetail newOrder = OrderDetail(
       orderCode: orderCode,
       productId: productId,
+      cusId: cusId,
       color: color,
       size: size,
       quantity: quantity
@@ -138,6 +143,7 @@ class CustomerService {
       
       QuerySnapshot querySnapshot = await ordersCollection
           .where('cusId', isEqualTo: cusId)
+          .where('status', isEqualTo: query)
           .get();
       print("cusidne: ${cusId}");
       List<OrderModel> orderList = querySnapshot.docs.map((doc) {
@@ -150,5 +156,57 @@ class CustomerService {
       print('Error fetching orders: $e');
       return [];
     }
+  }
+
+  Future<OrderDetail?> fetchOrderDetail(String orderCode) async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('orderdetails')
+          .where('orderCode', isEqualTo: orderCode)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        var data = snapshot.docs.first.data();
+        print('Fetched order detail data: $data'); // In ra dữ liệu để kiểm tra
+        return OrderDetail.fromFirestore(data);
+      } else {
+        print('No order detail found for orderCode: $orderCode');
+      }
+    } catch (e) {
+      print('Error fetching order detail: $e');
+    }
+    return null;
+  }
+
+  Future<Product?> fetchProductById(String productId) async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId) // Sử dụng doc() để lấy tài liệu theo document id
+          .get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        return Product.fromFirestore(data, snapshot.id); // Trả về sản phẩm
+      }
+    } catch (e) {
+      print('Error fetching product: $e');
+    }
+    return null; // Trả về null nếu không tìm thấy sản phẩm
+  }
+  Future<int> numberOfProduct(String ordercode) async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('orderdetails')
+          .where('orderCode', isEqualTo: ordercode)
+          .get();
+          
+      // Đếm số tài liệu (documents) có orderCode bằng ordercode
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Error numberOfProduct: $e');
+    }
+    
+    return 0; // Trả về 0 nếu có lỗi
   }
 }

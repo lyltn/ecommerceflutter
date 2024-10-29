@@ -575,6 +575,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             String phone = widget.customer.phone;
             String address = widget.customer.address;
             String status = "Đang đợi xét duyệt";
+            String note = _messageController.text.toString();
             
             CustomerService customerService = CustomerService();
 
@@ -588,12 +589,14 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               name,
               phone, 
               address, 
-              status
+              status,
+              note
               );
             
             customerService.addOrderDetails(
               orderCode, 
-              widget.customer.id, 
+              widget.product.id, 
+              widget.customer.id,
               widget.size ?? "", 
               widget.color ?? "",
               widget.quantity,

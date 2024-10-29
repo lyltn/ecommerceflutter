@@ -1,16 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommercettl/models/OrderDetail.dart';
 
 class OrderModel {
   String orderCode;
   DateTime orderDate;
   String shopVoucher;
   String adminVoucher;
-  double total; // Change to String if necessary
+  double total; 
   String cusId;
   String name;
   String phone;
-  String address; // Fixed typo: 'adress' to 'address'
+  String address; 
   String status;
+  String note;
+  OrderDetail? detail;
+  String? productImg;
+  String? productName;
+  double? productPrice;
+  int? productCount;
 
   OrderModel({
     required this.orderCode,
@@ -23,6 +30,11 @@ class OrderModel {
     required this.phone,
     required this.address,
     required this.status,
+    required this.note,
+    this.detail,
+    this.productName,
+    this.productCount,
+    this.productPrice
   });
 
   // Factory method to create an Order from a Firestore document
@@ -38,6 +50,7 @@ class OrderModel {
       phone: data['phone'] ?? '',
       address: data['address'] ?? '',
       status: data['status'] ?? '',
+      note: data['note'] ?? '',
     );
   }
 
@@ -54,6 +67,7 @@ class OrderModel {
       'phone': phone,
       'address': address,
       'status': status,
+      'note': note
     };
   }
 }

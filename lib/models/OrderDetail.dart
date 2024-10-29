@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class OrderDetail {
   String orderCode;
   String productId;
+  String cusId;
   String size;
   String color; 
   int quantity;
@@ -10,17 +11,18 @@ class OrderDetail {
   OrderDetail({
     required this.orderCode,
     required this.productId,
+    required this.cusId,
     required this.size,
     required this.color,
     required this.quantity,
   });
 
   // Method to create an OrderDetail from Firestore document data
-  factory OrderDetail.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map; // Cast to a Map
+  factory OrderDetail.fromFirestore(Map<String, dynamic> data) {
     return OrderDetail(
       orderCode: data['orderCode'] ?? '',
       productId: data['productId'] ?? '',
+      cusId: data['cusId'] ?? '',
       size: data['size'] ?? '',
       color: data['color'] ?? '',
       quantity: data['quantity'] ?? 0,
@@ -32,6 +34,7 @@ class OrderDetail {
     return {
       'orderCode': orderCode,
       'productId': productId,
+      'cusId': cusId,
       'size': size,
       'color': color,
       'quantity': quantity,

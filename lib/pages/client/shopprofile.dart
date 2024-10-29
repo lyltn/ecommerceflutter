@@ -193,7 +193,7 @@ class _ProfileShopState extends State<ProfileShop> {
           // Handle navigation to "Settings"
         }),
         _buildMenuItem(Icons.switch_account, 'chuyển trang khách hàng', () {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => BottomNav()),
           );
