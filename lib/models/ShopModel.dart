@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopModel {
   final String email;
+  final DateTime reviewedAt;
   final String reviewedBy;
   final String shopDescription;
   final String shopName;
@@ -10,6 +11,7 @@ class ShopModel {
 
   ShopModel({
     required this.email,
+    required this.reviewedAt,
     required this.reviewedBy,
     required this.shopDescription,
     required this.shopName,
@@ -21,11 +23,12 @@ class ShopModel {
   factory ShopModel.fromFirestore(Map<String, dynamic> data) {
     return ShopModel(
       email: data['email'] ?? '',
+      reviewedAt: (data['reviewedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       reviewedBy: data['reviewedBy'] ?? '',
       shopDescription: data['shopDescription'] ?? '',
       shopName: data['shopName'] ?? '',
       status: data['status'] ?? '',
-      shopid: data['shopid'] ?? '',
+      shopid: data['uid'] ?? '',
     );
   }
 
@@ -33,11 +36,12 @@ class ShopModel {
   Map<String, dynamic> toMap() {
     return {
       'email': email,
+      'reviewedAt': Timestamp.fromDate(reviewedAt),
       'reviewedBy': reviewedBy,
       'shopDescription': shopDescription,
       'shopName': shopName,
       'status': status,
-      'shopid': shopid,
+      'uid': shopid,
     };
   }
 }

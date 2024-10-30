@@ -18,8 +18,11 @@ import 'package:ecommercettl/pages/customer/component/searchProduct.dart';
 import 'package:ecommercettl/pages/customer/home.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
 import 'package:ecommercettl/pages/customer/component/TopShopProduct.dart';
+<<<<<<< HEAD
 import 'package:ecommercettl/pages/customer/settings.dart';
 import 'package:ecommercettl/pages/customer/test.dart';
+=======
+>>>>>>> 1ff0ab5c826292092ff716c8e39b65096be2515a
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:firebase_core/firebase_core.dart';

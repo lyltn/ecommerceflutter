@@ -195,7 +195,7 @@ class _ProfileShopState extends State<ProfileShop> {
               context, MaterialPageRoute(builder: (context) => SettingsShop()));
         }),
         _buildMenuItem(Icons.switch_account, 'chuyển trang khách hàng', () {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => BottomNav()),
           );

@@ -24,7 +24,7 @@ class Voucher {
   });
 
   // Phương thức để chuyển đổi từ Map sang đối tượng Voucher
-  factory Voucher.fromMap(Map<String, dynamic> data, int id) {
+  factory Voucher.fromMap(Map<String, dynamic> data, String id) {
     return Voucher(
       voucherID: data['voucherCode'],
       discount: data['discount'],

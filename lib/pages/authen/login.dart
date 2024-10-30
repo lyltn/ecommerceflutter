@@ -58,17 +58,17 @@ class _LoginPageState extends State<LoginPage> {
               MaterialPageRoute(builder: (context) => AdminHome()),
             );
           } else if (role == 'CUSTOMER') {
-            // Navigate to BottomNav if the role is CUSTOMER
             await prefs.setString('cusId', userCredential.user!.uid);
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => BottomNav()),
             );
           } else if (role == 'USER') {
+            await prefs.setString('cusId', userCredential.user!.uid);
             if (!mounted) return;
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const BottomNav()),
+              MaterialPageRoute(builder: (context) => const BottomnavShop()),
             );
           }
 

@@ -1,4 +1,7 @@
 import 'package:ecommercettl/models/Product.dart';
+import 'package:ecommercettl/models/ShopModel.dart';
+import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/pages/customer/CheckOutScreen.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,8 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class BuyNow extends StatefulWidget {
   final VoidCallback onAgree;
   final Product product;
+  final ShopModel shop;
+  final UserModel customer;
 
-  const BuyNow({Key? key, required this.product, required this.onAgree}) : super(key: key);
+  const BuyNow({Key? key, required this.product, required this.onAgree, required this.shop, required this.customer}) : super(key: key);
 
   @override
   State<BuyNow> createState() => _BuyNowState();
@@ -269,7 +274,22 @@ class _BuyNowState extends State<BuyNow> {
                           print("Size selected: ${selectedSize}");
                           print("Quantity: ${quantitySelected}");
 
-                          
+
+                          print("shopid: ${widget.shop.shopid}");
+                          print("shopName: ${widget.shop.shopName}");
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CheckoutScreen(
+                              shopinf: widget.shop, 
+                              product: widget.product, 
+                              customer: widget.customer,
+                              color: selectedColor,
+                              size: selectedSize,
+                              quantity: quantitySelected,
+                              )
+                            ),
+                          );
 
                       } 
                       : () {
@@ -282,7 +302,7 @@ class _BuyNowState extends State<BuyNow> {
                       },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(
-                      (selectedSize != null && selectedColor != null) 
+                      (selectedSize != null && selectedColor != null  && quantitySelected != 0) 
                           ? Color(0xFF15A362) 
                           : Colors.grey[300] // Set to grey when disabled
                     ),
@@ -295,7 +315,7 @@ class _BuyNowState extends State<BuyNow> {
                   child: Text(
                     'Mua ngay',
                     style: TextStyle(
-                      color: (selectedSize != null && selectedColor != null) 
+                      color: (selectedSize != null && selectedColor != null && quantitySelected != 0) 
                           ? Colors.white 
                           : Colors.black54, // Change text color when disabled
                     ),
