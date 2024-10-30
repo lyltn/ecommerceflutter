@@ -3,6 +3,7 @@ import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/register_shop.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
 import 'package:ecommercettl/pages/customer/chatbot.dart';
+import 'package:ecommercettl/pages/customer/settings.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart';
 import 'package:ecommercettl/services/auth_service.dart';
 import 'package:ecommercettl/services/shop_service.dart';
@@ -153,20 +154,23 @@ class _ProfileState extends State<Profile> {
           // Handle navigation to "Ví của tôi"
         }),
         _buildMenuItem(Icons.settings_outlined, 'Cài đặt', () {
-          // Handle navigation to "Cài đặt"
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Settings()),
+          );
         }),
         _buildMenuItem(Icons.shopping_cart_outlined, 'Giỏ hàng', () {
           // Handle navigation to "Giỏ hàng"
         }),
         _buildMenuItem(Icons.support_agent_outlined, 'Hỗ trợ người dùng', () {
           Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => CustomerChatbotPage()),
+            context,
+            MaterialPageRoute(builder: (context) => CustomerChatbotPage()),
           );
         }),
-
         if (userModel?.role == 'CUSTOMER')
-          _buildMenuItem(Icons.store_mall_directory_outlined, 'Đăng kí shop', () {
+          _buildMenuItem(Icons.store_mall_directory_outlined, 'Đăng kí shop',
+              () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => RegisterShopPage()),
@@ -174,16 +178,16 @@ class _ProfileState extends State<Profile> {
           }),
         if (userModel?.role != 'CUSTOMER')
           _buildMenuItem(
-        Icons.store_mall_directory_outlined,
-        'Chuyển sang shop',
-        () {
-          getCurrentUserId();
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => BottomnavShop()),
-          );
-        },
-        ),
+            Icons.store_mall_directory_outlined,
+            'Chuyển sang shop',
+            () {
+              getCurrentUserId();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BottomnavShop()),
+              );
+            },
+          ),
       ],
     );
   }

@@ -34,6 +34,10 @@ class UserService {
     }
   }
 
+  Future<void> deleteUser(String docId) {
+    return users.doc(docId).delete();
+  }
+
   Future<Map<String, dynamic>?> getUserById(String uid) async {
     try {
       DocumentSnapshot doc = await users.doc(uid).get();

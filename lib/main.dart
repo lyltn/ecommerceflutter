@@ -18,6 +18,7 @@ import 'package:ecommercettl/pages/customer/component/searchProduct.dart';
 import 'package:ecommercettl/pages/customer/home.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
 import 'package:ecommercettl/pages/customer/component/TopShopProduct.dart';
+import 'package:ecommercettl/pages/customer/settings.dart';
 import 'package:ecommercettl/pages/customer/test.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
