@@ -30,6 +30,28 @@ class ShopService {
     }
   }
 
+  Future<void> deleteUserAndProducts(String docId) async {
+    try {
+      // Xóa người dùng với id là docId
+      await _firestore.collection('shopRequests').doc(docId).delete();
+
+      // Lấy danh sách các sản phẩm có userId là docId
+      QuerySnapshot productsSnapshot = await _firestore
+          .collection('products')
+          .where('userId', isEqualTo: docId)
+          .get();
+
+      // Dùng vòng lặp để xóa từng sản phẩm
+      for (var doc in productsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      print("User and related products deleted successfully.");
+    } catch (e) {
+      print("Error deleting user and products: $e");
+    }
+  }
+
   static Future<String?> getCurrentUserId() async {
     User? user = FirebaseAuth.instance.currentUser;
     return user?.uid; // If user is null, return null; otherwise return uid

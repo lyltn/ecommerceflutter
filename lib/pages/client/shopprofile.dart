@@ -8,6 +8,7 @@ import 'package:ecommercettl/services/auth_service.dart';
 import 'package:ecommercettl/services/shop_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ecommercettl/pages/client/settings.dart';
 
 class ProfileShop extends StatefulWidget {
   const ProfileShop({super.key});
@@ -190,7 +191,8 @@ class _ProfileShopState extends State<ProfileShop> {
           // Handle navigation to "My Wallet"
         }),
         _buildMenuItem(Icons.settings_outlined, 'Cài đặt', () {
-          // Handle navigation to "Settings"
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => SettingsShop()));
         }),
         _buildMenuItem(Icons.switch_account, 'chuyển trang khách hàng', () {
           Navigator.pushReplacement(
