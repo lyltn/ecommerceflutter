@@ -57,7 +57,6 @@ class _OrderState extends State<Order> {
       setState(() {
         // Flatten the cachedOrders and assign to listOrder
         listOrder = cachedOrders.expand((i) => i).toList();
-        print("listorder: ${listOrder}");
       });
     } else {
       // Handle empty cache case if needed
@@ -72,8 +71,8 @@ class _OrderState extends State<Order> {
 
     if (cusId != null) {
       await _loadOrder(currentTabIndex); 
-    } else {
       print('cusId is null neee'); 
+    } else {
       print('Loaded cusId: ${prefs.getString('cusId')}');
     }
   }
@@ -98,39 +97,36 @@ class _OrderState extends State<Order> {
 
     try {
       if (cusId != null) {
-        List<OrderModel> orders = await customerService.fetchOrder(cusId!, query);
-        List<OrderModel> ordersWithDetails = [];
+        listOrder = await customerService.fetchOrder(cusId!, query);
+        // List<OrderModel> ordersWithDetails = [];
 
-        for (var order in orders) {
-          OrderDetail? orderDetail = await customerService.fetchOrderDetail(order.orderCode);
-          int totalProduct = await customerService.numberOfProduct(order.orderCode);
-          order.detail = orderDetail;
-          order.productCount = totalProduct;
+        // for (var order in orders) {
+        //   OrderDetail? orderDetail = await customerService.fetchOrderDetail(order.orderCode);
+        //   int totalProduct = await customerService.numberOfProduct(order.orderCode);
+        //   order.detail = orderDetail;
+        //   order.productCount = totalProduct;
 
-          if (order.detail != null && order.detail!.productId != null) {
-            final productId = order.detail!.productId!;
-            Product? pro = await customerService.fetchProductById(productId);
+        //   if (order.detail != null && order.detail!.productId != null) {
+        //     final productId = order.detail!.productId!;
+        //     Product? pro = await customerService.fetchProductById(productId);
 
-            if (pro != null) {
-              order.productImg = pro.imageUrls.isNotEmpty ? pro.imageUrls[0] : null;
-              order.productName = pro.name;
-              order.productPrice = pro.price;
-            } else {
-              print('Product not found for productId: $productId');
-            }
-          } else {
-            print('Order detail or productId is null for orderCode: ${order.orderCode}');
-          }
+        //     if (pro != null) {
+        //       order.productImg = pro.imageUrls.isNotEmpty ? pro.imageUrls[0] : null;
+        //       order.productName = pro.name;
+        //       order.productPrice = pro.price;
+        //     } else {
+        //       print('Product not found for productId: $productId');
+        //     }
+        //   } else {
+        //     print('Order detail or productId is null for orderCode: ${order.orderCode}');
+        //   }
 
-          ordersWithDetails.add(order);
-        }
+          // ordersWithDetails.add(order);
+        };
         setState(() {
-          cachedOrders[tabIndex] = ordersWithDetails; 
+          cachedOrders[tabIndex] = listOrder; 
           listOrder = cachedOrders.expand((i) => i).toList();
         });
-      } else {
-        print('Cannot fetch orders: cusId is null');
-      }
     } catch (e) {
       print('Error loading orders: $e');
     } finally {

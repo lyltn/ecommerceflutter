@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:ecommercettl/models/OrderDetail.dart';
+import 'package:ecommercettl/models/OrderModel.dart';
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/models/ShopModel.dart';
 import 'package:ecommercettl/models/UserModel.dart';
@@ -44,6 +46,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   String message = "";
   Voucher? selectedVoucher;
   Voucher? AdminSelectedVoucher;
+  List<Product> productList = [];
 
   @override
   void initState() {
@@ -590,7 +593,14 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               phone, 
               address, 
               status,
-              note
+              note,
+              widget.product.imageUrls[0],
+              widget.product.name,
+              widget.product.price,
+              1,
+              widget.color ?? "",
+              widget.size ?? "",
+              widget.quantity,
               );
             
             customerService.addOrderDetails(

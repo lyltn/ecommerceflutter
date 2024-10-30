@@ -6,13 +6,15 @@ import 'package:ecommercettl/pages/customer/profile.dart';
 import 'package:flutter/material.dart';
 
 class BottomNav extends StatefulWidget {
-  const BottomNav({super.key});
+  final int? tempIndex; 
+  const BottomNav({super.key, this.tempIndex});
 
   @override
   State<BottomNav> createState() => _BottomNavState();
 }
 
 class _BottomNavState extends State<BottomNav> {
+
   int currentTabIndex = 0;
 
   late List<Widget> pages;
@@ -30,6 +32,14 @@ class _BottomNavState extends State<BottomNav> {
     post = Post();
     pages = [homepage, post, order, profile];
     super.initState();
+    loadIndex(widget.tempIndex ?? 0);
+  }
+  void loadIndex (int index){
+    if(index != 0){
+      setState(() {
+        currentTabIndex = index;
+      });
+    }
   }
 
   @override

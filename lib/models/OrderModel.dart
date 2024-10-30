@@ -18,6 +18,9 @@ class OrderModel {
   String? productName;
   double? productPrice;
   int? productCount;
+  String? color;
+  String? size;
+  int? quantity;
 
   OrderModel({
     required this.orderCode,
@@ -32,9 +35,13 @@ class OrderModel {
     required this.status,
     required this.note,
     this.detail,
+    this.productImg,
     this.productName,
     this.productCount,
-    this.productPrice
+    this.productPrice,
+    this.color,
+    this.size, 
+    this.quantity,
   });
 
   // Factory method to create an Order from a Firestore document
@@ -51,6 +58,13 @@ class OrderModel {
       address: data['address'] ?? '',
       status: data['status'] ?? '',
       note: data['note'] ?? '',
+      productImg: data['productImg'] ?? '',
+      productCount: data['productCount'] ?? '',
+      productName: data['productName'] ?? '',
+      productPrice: data['productPrice'] ?? '',
+      color: data['color'] ?? '',
+      size: data['size'] ?? '',
+      quantity: data['quantity'] ?? 0
     );
   }
 
@@ -67,7 +81,14 @@ class OrderModel {
       'phone': phone,
       'address': address,
       'status': status,
-      'note': note
+      'note': note,
+      'productImg' : productImg,
+      'productCount' : productCount,
+      'productName' : productName,
+      'productPrice' : productPrice,
+      'color' : color,
+      'size' : size,
+      'quantity' : quantity
     };
   }
 }

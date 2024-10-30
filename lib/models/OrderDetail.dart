@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OrderDetail {
-  String orderCode;
-  String productId;
-  String cusId;
-  String size;
-  String color; 
-  int quantity;
+  final String orderCode;
+  final String productId;
+  final String cusId;
+  final String size;
+  final String color;
+  final int quantity;
 
   OrderDetail({
     required this.orderCode,

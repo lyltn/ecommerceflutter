@@ -37,9 +37,9 @@ class _OrderWaitingState extends State<OrderWaiting> {
               child: buildOrder(
               imagePath: order.productImg!,
               title: order.productName!,
-              subtitle: 'Màu ${order.detail!.color}+, size ${order.detail!.size}',
+              subtitle: 'Màu ${order.color}, size ${order.size}',
               price: NumberFormat("#,###", "vi_VN").format(order.productPrice!),
-              quantity: order.detail!.quantity,
+              quantity: order.quantity ?? 0,
               totalProduct: order.productCount,
               totalPrice: order.total,
               onTap: () {
