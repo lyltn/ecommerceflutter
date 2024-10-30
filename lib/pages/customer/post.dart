@@ -1,87 +1,202 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/models/PostModel.dart';
+import 'package:ecommercettl/services/auth_service.dart';
+import 'package:ecommercettl/services/post_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:async';
+import 'package:intl/intl.dart';
+import 'package:ecommercettl/pages/customer/update_profile.dart';
+import 'package:ecommercettl/pages/customer/user_posts.dart';
+import 'package:ecommercettl/pages/customer/post_detail.dart';
 
-class Post extends StatefulWidget {
-  const Post({super.key});
+class PostPage extends StatefulWidget {
+  const PostPage({super.key});
 
   @override
-  State<Post> createState() => _PostState();
+  State<PostPage> createState() => _PostPageState();
 }
 
-class _PostState extends State<Post> {
+class _PostPageState extends State<PostPage> {
+  final PostService _postService = PostService();
+  final AuthService _authService = AuthService();
+  UserModel? userModel;
+  File? _image;
+  String searchQuery = '';
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      userModel = await _authService.getUserProfile(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {});
+    } catch (e) {
+      print('Error fetching user profile: $e');
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_image != null) {
+      // Upload image to Firebase Storage and get the download URL
+      String imageUrl = await _postService.uploadImage(_image!);
+
+      // Create a new post with the image URL
+      PostModel newPost = PostModel(
+        id: FirebaseFirestore.instance.collection('posts').doc().id,
+        userId: FirebaseAuth.instance.currentUser!.uid,
+        content: '',
+        imageUrls: [imageUrl],
+        link: '',
+        status: true,
+        createdDate: DateTime.now(),
+        lastModifiedDate: DateTime.now(),
+      );
+
+      // Save the post to Firestore
+      await _postService.createPost(newPost);
+
+      // Clear the selected image
+      setState(() {
+        _image = null;
+      });
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(seconds: 3), () {
+      setState(() {
+        searchQuery = query;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            floating: true,
-            expandedHeight: 120.0,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Padding(
-                padding: EdgeInsets.fromLTRB(16, 40, 16, 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: NetworkImage('https://example.com/profile_image.jpg'),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
+      appBar: AppBar(
+        title: Text('Bài viết'),
+      ),
+      body: Column(
+        children: [
+          if (userModel != null)
+            Container(
+                decoration: BoxDecoration(color: const Color.fromARGB(255, 255, 255, 255)),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // Điều hướng đến trang bài đăng của người dùng
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => UserPostsPage()),
+                          );
+                        },
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundImage: userModel!.imgAvatar != null
+                              ? NetworkImage(userModel!.imgAvatar!)
+                              : AssetImage('assets/default_avatar.png') as ImageProvider,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Lê Thị Ngọc Ly',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Tìm kiếm...',
-                              filled: true,
-                              fillColor: Colors.grey[200],
+                          Row(
+                            children: [
+                              Text(
+                                userModel!.fullName ?? 'Guest',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),                            
+                            ],
+                            ),SizedBox(width: 20),
+                            Container(
+                            width: 200,
+                            height: 30, // Set a smaller height
+                            child: TextField(
+                              decoration: InputDecoration(
+                              labelText: 'Tìm kiếm',
+                              labelStyle: TextStyle(color: const Color.fromARGB(255, 206, 206, 206)), // Make the label text grey
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(5.0),
+                              borderSide: BorderSide(color: Colors.white),
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              prefixIcon: Icon(Icons.search, size: 5), // Adjust the size of the search icon
+                              contentPadding: EdgeInsets.symmetric(vertical: 5), // Adjust the vertical padding
+                              ),
+                              onChanged: _onSearchChanged,
                             ),
-                          ),
+                            ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+
+                ],
               ),
             ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.all(16.0),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 8.0,
-                crossAxisSpacing: 8.0,
-                childAspectRatio: 1.0,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Center(
-                      child: Text('Image ${index + 1}'),
-                    ),
+          Expanded(
+            child: StreamBuilder<List<PostModel>>(
+              stream: _postService.getPosts(),
+              builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+              List<PostModel> posts = snapshot.data!;
+              if (searchQuery.isNotEmpty) {
+                posts = posts.where((post) => post.content.contains(searchQuery)).toList();
+              }
+              return GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, // Change the number of columns to make images smaller
+                crossAxisSpacing: 3.0,
+                mainAxisSpacing: 3.0,
+                ),
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                PostModel post = posts[index];
+                return GestureDetector(
+                  onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PostDetailPage(post: post)),
                   );
+                  },
+                  child: Image.network(post.imageUrls.first, fit: BoxFit.cover),
+                );
                 },
-                childCount: 30, // Adjust this number based on your needs
-              ),
+              );
+              },
             ),
           ),
         ],
