@@ -19,7 +19,7 @@ class _BottomNavState extends State<BottomNav> {
   late Widget currentPage;
   late Home homepage;
   late Profile profile;
-  late Post post;
+  late PostPage post;
   late Order order;
 
   @override
@@ -27,7 +27,7 @@ class _BottomNavState extends State<BottomNav> {
     homepage = Home();
     order = Order();
     profile = Profile();
-    post = Post();
+    post = PostPage();
     pages = [homepage, post, order, profile];
     super.initState();
   }
