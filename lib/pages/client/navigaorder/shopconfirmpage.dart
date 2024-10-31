@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/client/shoporderdetail.dart';
 import 'package:ecommercettl/services/order_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ShopConfirmpage extends StatefulWidget {
@@ -12,16 +13,27 @@ class ShopConfirmpage extends StatefulWidget {
 
 class _ShopConfirmpageState extends State<ShopConfirmpage> {
   final OrderService orderService = OrderService();
+  String? uid;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Anonymous async function inside initState
+    () async {
+      uid = (await FirebaseAuth.instance.currentUser) as String?;
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Shop Confirm Page"),
-      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('orders')
-            .where('usercode', isEqualTo: 'ly')
+            .where('shopId', isEqualTo: uid)
             .where('status', isEqualTo: 'Đang đợi xét duyệt')
             .snapshots(),
         builder: (context, snapshot) {
@@ -79,12 +91,12 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                           ),
                           SizedBox(width: 8.0),
                           Text(
-                            data['productPrice'] ?? '000000',
+                            (data['productPrice'] ?? 0).toString(),
                             style: TextStyle(color: Colors.green),
                           ),
                           SizedBox(width: 8.0),
                           Text(
-                            data['productCount'] ?? '0',
+                            (data['productCount'] ?? 0).toString(),
                           ),
                         ],
                       ),
@@ -101,13 +113,13 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            data['quantity'] ?? '0',
+                            (data['quantity'] ?? 0).toString(),
                           ),
                           Row(
                             children: [
                               Text('Tổng tiền: '),
                               Text(
-                                data['total'] ?? '000',
+                                (data['total'] ?? 0).toString(),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.green,
@@ -126,7 +138,8 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ShopOrderDetail(),
+                                builder: (context) =>
+                                    ShopOrderDetail(orderId: data['orderCode']),
                               ),
                             );
                           },
@@ -138,11 +151,22 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                                 borderRadius: BorderRadius.circular(5.0),
                               ),
                             ),
-                            label: const Text(
-                              'xem chi tiết đơn hàng',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 46, 46, 46),
-                                fontSize: 12.0,
+                            label: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ShopOrderDetail(
+                                        orderId: data['orderCode']),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'xem chi tiết đơn hàng',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 46, 46, 46),
+                                  fontSize: 12.0,
+                                ),
                               ),
                             ),
                             icon: const Icon(
@@ -154,7 +178,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            orderService.updateOrderStatus(doc.id);
+                            orderService.updateOrderStatus(doc.id, 'Đã duyệt');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,

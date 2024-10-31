@@ -42,9 +42,9 @@ class OrderService {
     return orders.doc(docId).delete();
   }
 
-  Future<void> updateOrderStatus(String idOrder) {
+  Future<void> updateOrderStatus(String idOrder, String status) {
     return orders.doc(idOrder).update({
-      'status': 'Đã duyệt',
+      'status': status,
     });
   }
 }

@@ -1,13 +1,20 @@
+import 'package:ecommercettl/services/product_service.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class ShopOrderDetail extends StatefulWidget {
-  const ShopOrderDetail({super.key});
+  final String orderId;
+
+  const ShopOrderDetail({super.key, required this.orderId});
 
   @override
   State<ShopOrderDetail> createState() => _ShopOrderDetailState();
 }
 
 class _ShopOrderDetailState extends State<ShopOrderDetail> {
+  ProductService productService = ProductService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,351 +28,171 @@ class _ShopOrderDetailState extends State<ShopOrderDetail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    OrderDetailRow(label: '#023453'),
-                    OrderDetailRow(label: 'Ngọc Ly'),
-                    OrderDetailRow(label: '0234567894'),
-                    OrderDetailRow(label: '02/10/2024 2:16 PM'),
-                    OrderDetailRow(
-                      label:
-                          '470 trần đại nghĩa, hòa hải, ngũ hành sơn, đã năng...',
-                      isMultiline: true,
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('orders')
+                  .where('orderCode', isEqualTo: widget.orderId)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var orderData =
+                    snapshot.data!.docs.first.data() as Map<String, dynamic>;
+
+                return Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        OrderDetailRow(label: 'Mã đơn hàng: ${widget.orderId}'),
+                        OrderDetailRow(
+                            label: 'Tên khách hàng: ${orderData['name']}'),
+                        OrderDetailRow(
+                            label: 'Số điện thoại: ${orderData['phone']}'),
+                        OrderDetailRow(
+                          label:
+                              'Ngày đặt: ${DateFormat('dd MMMM yyyy, HH:mm:ss').format((orderData['orderDate'] as Timestamp).toDate())}',
+                        ),
+                        OrderDetailRow(
+                          label: 'Địa chỉ: ${orderData['address']}',
+                          isMultiline: true,
+                        ),
+                        OrderDetailRow(
+                            label:
+                                'Ghi chú: ${orderData['note'] ?? "Không có ghi chú"}'),
+                        Row(
+                          children: [
+                            OrderDetailRow(
+                                label:
+                                    'Số lượng: ${(orderData['quantity'] ?? 0).toString()}'),
+                            const SizedBox(width: 8),
+                            OrderDetailRow(
+                                label:
+                                    'Voucher: ${orderData['shopVoucher'] ?? "x"}'),
+                            OrderDetailRow(
+                                label:
+                                    ';  ${orderData['adminVoucher'] ?? "x"}'),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: TotalAmountRow(
+                              amount: (orderData['total'] ?? 0).toString()),
+                        ),
+                      ],
                     ),
-                    OrderDetailRow(label: 'Không có ghi chú'),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
             Expanded(
-              child: ListView(
-                children: [
-                  Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'images/dress.png', // Replace with the actual image path
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(
-                                  width:
-                                      10.0), // Spacing between image and text
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Đầm hoa nhí trẻ vai xinh phòng phong cách hàn xinh xắn',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines:
-                                          5, // Ensure it only takes two lines
-                                      overflow: TextOverflow.ellipsis,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('orderdetails')
+                    .where('orderCode', isEqualTo: widget.orderId)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  return ListView(
+                    children: snapshot.data!.docs.map((doc) {
+                      var data = doc.data() as Map<String, dynamic>;
+
+                      // Fetching product details using ProductService
+                      return FutureBuilder<DocumentSnapshot>(
+                        future:
+                            productService.getProductByIdd(data['productId']),
+                        builder: (context, productSnapshot) {
+                          if (!productSnapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+
+                          var productData = productSnapshot.data!.data()
+                              as Map<String, dynamic>;
+                          String imageUrl = productData['imageUrl']
+                              [0]; // Assuming imageUrl is a list
+                          String productName = productData['name'];
+                          String priceProduct =
+                              '${productData['price'].toString()} đ';
+
+                          return Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                      imageUrl,
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
                                     ),
-                                    const SizedBox(height: 5.0),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: const [
+                                  ),
+                                  const SizedBox(width: 10.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
                                         Text(
-                                          '#032',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          'màu trắng, size S',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          '150,000 đ',
-                                          style: TextStyle(
-                                            color: Colors.green,
+                                          productName,
+                                          style: const TextStyle(
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 14,
                                           ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        Text(
-                                          'x1',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                          ),
+                                        const SizedBox(height: 5.0),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              '${data['color']}, ${data['size']}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              priceProduct,
+                                              style: const TextStyle(
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              'x${data['quantity'].toString()}',
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'images/dress.png', // Replace with the actual image path
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(
-                                  width:
-                                      10.0), // Spacing between image and text
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Đầm hoa nhí trẻ vai xinh phòng phong cách hàn xinh xắn ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines:
-                                          5, // Ensure it only takes two lines
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 5.0),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: const [
-                                        Text(
-                                          '#032',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          'màu trắng, size S',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          '150,000 đ',
-                                          style: TextStyle(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          'x1',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'images/dress.png', // Replace with the actual image path
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(
-                                  width:
-                                      10.0), // Spacing between image and text
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Đầm hoa nhí trẻ vai xinh phòng phong cách hàn xinh xắn ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines:
-                                          5, // Ensure it only takes two lines
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 5.0),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: const [
-                                        Text(
-                                          '#032',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          'màu trắng, size S',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          '150,000 đ',
-                                          style: TextStyle(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          'x1',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'images/dress.png', // Replace with the actual image path
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(
-                                  width:
-                                      10.0), // Spacing between image and text
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Đầm hoa nhí trẻ vai xinh phòng phong cách hàn xinh xắn',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines:
-                                          5, // Ensure it only takes two lines
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 5.0),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: const [
-                                        Text(
-                                          '#032',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          'màu trắng, size S',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          '150,000 đ',
-                                          style: TextStyle(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          'x1',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                ],
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: TotalAmountRow(amount: '375.000 vnd'),
             ),
           ],
         ),
@@ -378,9 +205,11 @@ class OrderDetailRow extends StatelessWidget {
   final String label;
   final bool isMultiline;
 
-  const OrderDetailRow(
-      {Key? key, required this.label, this.isMultiline = false})
-      : super(key: key);
+  const OrderDetailRow({
+    Key? key,
+    required this.label,
+    this.isMultiline = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -406,7 +235,7 @@ class TotalAmountRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(
+        const Text(
           'Tổng Tiền: ',
           style: TextStyle(
             fontSize: 18,
@@ -415,7 +244,7 @@ class TotalAmountRow extends StatelessWidget {
         ),
         Text(
           amount,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.green,

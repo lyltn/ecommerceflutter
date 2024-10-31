@@ -16,13 +16,12 @@ class ShopPlacedPage extends StatefulWidget {
 }
 
 class _ShopPlacedPageState extends State<ShopPlacedPage> {
-  
   @override
   void initState() {
     super.initState();
     print("ditocnem ${widget.listOrder}");
   }
-  
+
   @override
   Widget build(BuildContext context) {
     print('Received listOrder in ShopPlacedPage: ${widget.listOrder}');
@@ -34,19 +33,20 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
           final order = widget.listOrder[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
-              child: buildOrder(
+            child: buildOrder(
               imagePath: order.productImg!,
               title: order.productName!,
-              subtitle: 'Màu ${order.detail!.color}+, size ${order.detail!.size}',
+              subtitle:
+                  'Màu ${order.detail!.color}+, size ${order.detail!.size}',
               price: NumberFormat("#,###", "vi_VN").format(order.productPrice!),
               quantity: order.detail!.quantity,
               totalProduct: order.productCount,
               totalPrice: order.total,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ShopOrderDetail()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => ShopOrderDetail()),
+                // );
               },
             ),
           );
@@ -54,6 +54,7 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
       ),
     );
   }
+
   Widget buildOrder({
     required String imagePath,
     required String title,
@@ -110,7 +111,7 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                  Text('${totalProduct} sản phẩm'),
+                Text('${totalProduct} sản phẩm'),
                 Row(
                   children: [
                     const Text('Tổng tiền: '),

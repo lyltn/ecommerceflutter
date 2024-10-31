@@ -92,20 +92,25 @@ class ProductService {
     return products.doc(docId).delete();
   }
 
-
-  Future<List<String>> updateProductImages(String productId, List<File> newImages) async {
+  Future<List<String>> updateProductImages(
+      String productId, List<File> newImages) async {
     List<String> uploadedUrls = [];
-    
+
     try {
       // Step 1: Fetch the old image URLs from Firestore
-      DocumentSnapshot productSnapshot = await FirebaseFirestore.instance.collection('products').doc(productId).get();
+      DocumentSnapshot productSnapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .get();
       if (productSnapshot.exists && productSnapshot['imageUrl'] != null) {
-        List<String> oldImageUrls = List<String>.from(productSnapshot['imageUrl']);
-        
+        List<String> oldImageUrls =
+            List<String>.from(productSnapshot['imageUrl']);
+
         // Step 2: Delete the old images from Firebase Storage
         for (String imageUrl in oldImageUrls) {
           try {
-            Reference storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
+            Reference storageRef =
+                FirebaseStorage.instance.refFromURL(imageUrl);
             await storageRef.delete();
             print('Deleted old image: $imageUrl');
           } catch (e) {
@@ -113,13 +118,12 @@ class ProductService {
           }
         }
       }
-      
+
       // Step 3: Upload the new images
       for (var image in newImages) {
         try {
-          Reference storageRef = FirebaseStorage.instance
-              .ref()
-              .child('product_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
+          Reference storageRef = FirebaseStorage.instance.ref().child(
+              'product_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
 
           UploadTask uploadTask = storageRef.putFile(image);
 
@@ -131,7 +135,7 @@ class ProductService {
           print('Error uploading image: $e');
         }
       }
-      
+
       // Return the list of new image URLs
       return uploadedUrls;
     } catch (e) {
@@ -140,14 +144,12 @@ class ProductService {
     }
   }
 
-
-  Future<List<String>> uploadImages( List<File> _images) async {
+  Future<List<String>> uploadImages(List<File> _images) async {
     List<String> uploadedUrls = [];
     for (var image in _images) {
       try {
-        Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('product_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
+        Reference storageRef = FirebaseStorage.instance.ref().child(
+            'product_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
 
         UploadTask uploadTask = storageRef.putFile(image);
 
@@ -160,5 +162,74 @@ class ProductService {
       }
     }
     return uploadedUrls;
+  }
+
+  Future<String?> getProductImageById(String productId) async {
+    try {
+      DocumentSnapshot doc = await products.doc(productId).get();
+
+      if (doc.exists) {
+        List<String> imageUrls = List<String>.from(doc['imageUrl'] ?? []);
+        if (imageUrls.isNotEmpty) {
+          // Return the first image URL or any specific index if needed
+          return imageUrls.first;
+        } else {
+          print('No images found for this product.');
+          return null;
+        }
+      } else {
+        print('Product does not exist.');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching product image: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getProductNameById(String productId) async {
+    try {
+      DocumentSnapshot doc = await products.doc(productId).get();
+
+      if (doc.exists) {
+        return doc['name'] as String?; // Return the name
+      } else {
+        print('Product does not exist.');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching product name: $e');
+      return null;
+    }
+  }
+
+  /// Get the product price by product ID.
+  Future<double?> getProductPriceById(String productId) async {
+    try {
+      DocumentSnapshot doc = await products.doc(productId).get();
+
+      if (doc.exists) {
+        return doc['price'] as double?; // Return the price
+      } else {
+        print('Product does not exist.');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching product price: $e');
+      return null;
+    }
+  }
+
+  Future<DocumentSnapshot> getProductByIdd(String productId) async {
+    try {
+      DocumentSnapshot productDoc = await products.doc(productId).get();
+      if (productDoc.exists) {
+        return productDoc; // Return the product document
+      } else {
+        throw Exception('Product not found');
+      }
+    } catch (e) {
+      throw Exception('Error fetching product: $e');
+    }
   }
 }
