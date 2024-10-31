@@ -132,7 +132,7 @@ class _PostPageState extends State<PostPage> {
                           Row(
                             children: [
                               Text(
-                                userModel!.fullName ?? 'Guest',
+                                userModel!.username ?? 'Guest',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
