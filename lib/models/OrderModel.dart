@@ -13,6 +13,7 @@ class OrderModel {
   String address; 
   String status;
   String note;
+  String shopId;
   OrderDetail? detail;
   String? productImg;
   String? productName;
@@ -34,6 +35,7 @@ class OrderModel {
     required this.address,
     required this.status,
     required this.note,
+    required this.shopId,
     this.detail,
     this.productImg,
     this.productName,
@@ -58,6 +60,7 @@ class OrderModel {
       address: data['address'] ?? '',
       status: data['status'] ?? '',
       note: data['note'] ?? '',
+      shopId: data['shopId' ?? ''],
       productImg: data['productImg'] ?? '',
       productCount: data['productCount'] ?? '',
       productName: data['productName'] ?? '',
@@ -82,6 +85,7 @@ class OrderModel {
       'address': address,
       'status': status,
       'note': note,
+      'shopId': shopId,
       'productImg' : productImg,
       'productCount' : productCount,
       'productName' : productName,

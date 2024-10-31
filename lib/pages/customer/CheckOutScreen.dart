@@ -579,6 +579,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             String address = widget.customer.address;
             String status = "Đang đợi xét duyệt";
             String note = _messageController.text.toString();
+            String shopId = widget.shopinf.shopid;
             
             CustomerService customerService = CustomerService();
 
@@ -594,6 +595,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               address, 
               status,
               note,
+              shopId,
               widget.product.imageUrls[0],
               widget.product.name,
               widget.product.price,

@@ -78,13 +78,14 @@ class CustomerService {
     String address, 
     String status,
     String note,
+    String shopId,
     String? productImg,
     String? productName,
     double? productPrice,
     int? productCount,
     String? color,
     String? size,
-    int? quantity
+    int? quantity,
 
   ) async {
     // Reference to the Firestore collection
@@ -109,7 +110,8 @@ class CustomerService {
       productCount:  productCount,
       color: color,
       size: size,
-      quantity: quantity
+      quantity: quantity,
+      shopId: shopId,
     );
      Map<String, dynamic> orderData = newOrder.toFirestore();
     try {
