@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +9,6 @@ import 'package:ecommercettl/services/auth_service.dart';
 import 'package:ecommercettl/services/post_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart';
 import 'package:ecommercettl/pages/customer/user_posts.dart';
@@ -98,13 +99,12 @@ class _PostPageState extends State<PostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bài viết'),
+        title: Text('Bài Viết'),
       ),
       body: Column(
         children: [
           if (userModel != null)
-            Container(
-                decoration: BoxDecoration(color: const Color.fromARGB(255, 255, 255, 255)),
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
@@ -137,31 +137,31 @@ class _PostPageState extends State<PostPage> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
-                              ),                            
+                              ),
                             ],
-                            ),SizedBox(width: 20),
-                            Container(
+                          ),
+                          SizedBox(height: 4),
+                          Container(
                             width: 200,
                             height: 30, // Set a smaller height
                             child: TextField(
                               decoration: InputDecoration(
-                              labelText: 'Tìm kiếm',
-                              labelStyle: TextStyle(color: const Color.fromARGB(255, 206, 206, 206)), // Make the label text grey
-                              border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(color: Colors.white),
-                              ),
-                              prefixIcon: Icon(Icons.search, size: 5), // Adjust the size of the search icon
-                              contentPadding: EdgeInsets.symmetric(vertical: 5), // Adjust the vertical padding
+                                labelText: 'Tìm kiếm',
+                                labelStyle: TextStyle(color: const Color.fromARGB(255, 206, 206, 206)), // Make the label text grey
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  borderSide: BorderSide(color: Colors.white),
+                                ),
+                                prefixIcon: Icon(Icons.search, size: 20), // Adjust the size of the search icon
+                                contentPadding: EdgeInsets.symmetric(vertical: 5), // Adjust the vertical padding
                               ),
                               onChanged: _onSearchChanged,
                             ),
-                            ),
+                          ),
                         ],
                       ),
                     ],
                   ),
-
                 ],
               ),
             ),
@@ -169,38 +169,53 @@ class _PostPageState extends State<PostPage> {
             child: StreamBuilder<List<PostModel>>(
               stream: _postService.getPosts(),
               builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
-              }
-              List<PostModel> posts = snapshot.data!;
-              if (searchQuery.isNotEmpty) {
-                posts = posts.where((post) => post.content.contains(searchQuery)).toList();
-              }
-              return GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, // Change the number of columns to make images smaller
-                crossAxisSpacing: 3.0,
-                mainAxisSpacing: 3.0,
-                ),
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                PostModel post = posts[index];
-                return GestureDetector(
-                  onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PostDetailPage(post: post)),
-                  );
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('Không có bài viết nào.'));
+                }
+
+                List<PostModel> posts = snapshot.data!;
+                if (searchQuery.isNotEmpty) {
+                  posts = posts.where((post) => post.content.contains(searchQuery)).toList();
+                }
+                if (posts.isEmpty) {
+                  return Center(child: Text('Không có bài viết nào.'));
+                }
+                return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 3.0,
+                    mainAxisSpacing: 3.0,
+                  ),
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    PostModel post = posts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostDetailPage(
+                              post: post,
+                              posts: posts,
+                              initialIndex: index,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Image.network(post.imageUrls.first, fit: BoxFit.cover),
+                    );
                   },
-                  child: Image.network(post.imageUrls.first, fit: BoxFit.cover),
                 );
-                },
-              );
               },
             ),
           ),
         ],
       ),
+      
     );
   }
 }

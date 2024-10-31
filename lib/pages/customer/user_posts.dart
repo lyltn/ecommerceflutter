@@ -1,3 +1,7 @@
+import 'package:ecommercettl/models/CommentModel.dart';
+import 'package:ecommercettl/models/ReactionModel.dart';
+import 'package:ecommercettl/pages/customer/create_post.dart';
+import 'package:ecommercettl/pages/customer/edit_post.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,9 +9,8 @@ import 'package:ecommercettl/models/PostModel.dart';
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/services/post_service.dart';
 import 'package:ecommercettl/services/auth_service.dart';
-import 'package:ecommercettl/pages/customer/post_detail.dart';
-import 'package:ecommercettl/pages/customer/edit_post.dart';
-import 'package:ecommercettl/pages/customer/create_post.dart';
+import 'package:ecommercettl/services/comment_service.dart';
+import 'package:ecommercettl/services/reaction_service.dart';
 import 'package:intl/intl.dart';
 
 class UserPostsPage extends StatefulWidget {
@@ -20,6 +23,8 @@ class UserPostsPage extends StatefulWidget {
 class _UserPostsPageState extends State<UserPostsPage> {
   final PostService _postService = PostService();
   final AuthService _authService = AuthService();
+  final CommentService _commentService = CommentService();
+  final ReactionService _reactionService = ReactionService();
   final String userId = FirebaseAuth.instance.currentUser!.uid;
 
   Future<UserModel?> _getUserData(String userId) async {
@@ -28,6 +33,111 @@ class _UserPostsPageState extends State<UserPostsPage> {
       return UserModel.fromFirestore(doc);
     }
     return null;
+  }
+
+  Future<void> _addOrUpdateReaction(String postId, String reactionType) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final reactionRef = FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postId)
+          .collection('reactions')
+          .doc(user.uid);
+
+      final reactionSnapshot = await reactionRef.get();
+
+      if (reactionSnapshot.exists) {
+        final currentReaction = ReactionModel.fromFirestore(reactionSnapshot);
+
+        if (currentReaction.type == reactionType) {
+          // Remove the reaction if it is the same as the current reaction
+          await reactionRef.delete();
+
+          // Update the reaction count in Firestore
+          final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+          await postRef.update({
+            if (reactionType == 'like') 'likeCount': FieldValue.increment(-1),
+            if (reactionType == 'dislike') 'dislikeCount': FieldValue.increment(-1),
+          });
+
+          // Update the local state to reflect the removed reaction
+          setState(() {
+            if (reactionType == 'like') {
+              // Update the local post model
+            } else if (reactionType == 'dislike') {
+              // Update the local post model
+            }
+          });
+        } else {
+          // Update the reaction if it is different from the current reaction
+          await reactionRef.update({'type': reactionType});
+
+          // Update the reaction count in Firestore
+          final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+          await postRef.update({
+            if (currentReaction.type == 'like') 'likeCount': FieldValue.increment(-1),
+            if (currentReaction.type == 'dislike') 'dislikeCount': FieldValue.increment(-1),
+            if (reactionType == 'like') 'likeCount': FieldValue.increment(1),
+            if (reactionType == 'dislike') 'dislikeCount': FieldValue.increment(1),
+          });
+
+          // Update the local state to reflect the new reaction
+          setState(() {
+            if (currentReaction.type == 'like') {
+              // Update the local post model
+            } else if (currentReaction.type == 'dislike') {
+              // Update the local post model
+            }
+            if (reactionType == 'like') {
+              // Update the local post model
+            } else if (reactionType == 'dislike') {
+              // Update the local post model
+            }
+          });
+        }
+      } else {
+        // Add a new reaction if no reaction exists
+        final reaction = ReactionModel(
+          id: user.uid,
+          postId: postId,
+          userId: user.uid,
+          type: reactionType,
+          createdDate: DateTime.now(),
+        );
+
+        await reactionRef.set(reaction.toMap());
+
+        // Update the reaction count in Firestore
+        final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+        await postRef.update({
+          if (reactionType == 'like') 'likeCount': FieldValue.increment(1),
+          if (reactionType == 'dislike') 'dislikeCount': FieldValue.increment(1),
+        });
+
+        // Update the local state to reflect the new reaction
+        setState(() {
+          if (reactionType == 'like') {
+            // Update the local post model
+          } else if (reactionType == 'dislike') {
+            // Update the local post model
+          }
+        });
+      }
+    }
+  }
+
+  Widget _buildReactionButton(String postId, String reactionType, IconData icon, int count) {
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(icon),
+          onPressed: () async {
+            await _addOrUpdateReaction(postId, reactionType);
+          },
+        ),
+        Text('$count'),
+      ],
+    );
   }
 
   @override
@@ -160,6 +270,124 @@ class _UserPostsPageState extends State<UserPostsPage> {
                             ),
                           SizedBox(height: 10),
                           Text(post.content),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              _buildReactionButton(post.id, 'like', Icons.thumb_up, post.likeCount),
+                              _buildReactionButton(post.id, 'dislike', Icons.thumb_down, post.dislikeCount),
+                            ],
+                          ),
+                          Divider(),
+                          StreamBuilder<List<CommentModel>>(
+                            stream: _commentService.getComments(post.id),
+                            builder: (context, commentSnapshot) {
+                              if (!commentSnapshot.hasData) {
+                                return Center(child: CircularProgressIndicator());
+                              }
+                              final comments = commentSnapshot.data!;
+                              if (comments.length <= 2) {
+                                return Column(
+                                  children: comments.map((comment) {
+                                    return FutureBuilder<UserModel?>(
+                                      future: _authService.getUserProfile(comment.userId),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return CircularProgressIndicator();
+                                        } else if (snapshot.hasError) {
+                                          return Text('Error loading user data');
+                                        } else if (snapshot.hasData && snapshot.data != null) {
+                                          UserModel user = snapshot.data!;
+                                          return ListTile(
+                                            leading: CircleAvatar(
+                                              backgroundImage: user.imgAvatar != null
+                                                  ? NetworkImage(user.imgAvatar!)
+                                                  : AssetImage('assets/default_avatar.png') as ImageProvider,
+                                            ),
+                                            title: Text(user.fullName ?? 'Guest'),
+                                            subtitle: Text(comment.content),
+                                            trailing: Text(DateFormat('dd/MM/yyyy').format(comment.createdDate)),
+                                          );
+                                        } else {
+                                          return Text('User not found');
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                );
+                              } else {
+                                return Column(
+                                  children: [
+                                    ...comments.take(2).map((comment) {
+                                      return FutureBuilder<UserModel?>(
+                                        future: _authService.getUserProfile(comment.userId),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return CircularProgressIndicator();
+                                          } else if (snapshot.hasError) {
+                                            return Text('Error loading user data');
+                                          } else if (snapshot.hasData && snapshot.data != null) {
+                                            UserModel user = snapshot.data!;
+                                            return ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundImage: user.imgAvatar != null
+                                                    ? NetworkImage(user.imgAvatar!)
+                                                    : AssetImage('assets/default_avatar.png') as ImageProvider,
+                                              ),
+                                              title: Text(user.fullName ?? 'Guest'),
+                                              subtitle: Text(comment.content),
+                                              trailing: Text(DateFormat('dd/MM/yyyy').format(comment.createdDate)),
+                                            );
+                                          } else {
+                                            return Text('User not found');
+                                          }
+                                        },
+                                      );
+                                    }).toList(),
+                                    TextButton(
+                                      onPressed: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) {
+                                            return ListView.builder(
+                                              itemCount: comments.length,
+                                              itemBuilder: (context, index) {
+                                                final comment = comments[index];
+                                                return FutureBuilder<UserModel?>(
+                                                  future: _authService.getUserProfile(comment.userId),
+                                                  builder: (context, snapshot) {
+                                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                                      return CircularProgressIndicator();
+                                                    } else if (snapshot.hasError) {
+                                                      return Text('Error loading user data');
+                                                    } else if (snapshot.hasData && snapshot.data != null) {
+                                                      UserModel user = snapshot.data!;
+                                                      return ListTile(
+                                                        leading: CircleAvatar(
+                                                          backgroundImage: user.imgAvatar != null
+                                                              ? NetworkImage(user.imgAvatar!)
+                                                              : AssetImage('assets/default_avatar.png') as ImageProvider,
+                                                        ),
+                                                        title: Text(user.fullName ?? 'Guest'),
+                                                        subtitle: Text(comment.content),
+                                                        trailing: Text(DateFormat('dd/MM/yyyy').format(comment.createdDate)),
+                                                      );
+                                                    } else {
+                                                      return Text('User not found');
+                                                    }
+                                                  },
+                                                );
+                                              },
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Text('Xem thêm bình luận'),
+                                    ),
+                                  ],
+                                );
+                              }
+                            },
+                          ),
                         ],
                       ),
                     ),
