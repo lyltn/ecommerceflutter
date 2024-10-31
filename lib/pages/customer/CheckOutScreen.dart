@@ -46,7 +46,6 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   String message = "";
   Voucher? selectedVoucher;
   Voucher? AdminSelectedVoucher;
-  List<Product> productList = [];
 
   @override
   void initState() {
@@ -101,7 +100,6 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
   double calculateShopDiscount() {
     double totalProductPrice = widget.product.price * widget.quantity;
-
     if (selectedVoucher != null && totalProductPrice > selectedVoucher!.condition) {
       double discount = (totalProductPrice * selectedVoucher!.discount / 100)
           .clamp(0, selectedVoucher!.maxDiscount);
@@ -121,22 +119,22 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     return 0;
   }
   String generateRandomString(int length) {
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  final random = Random();
-  
-  // Use a Set to ensure characters are unique
-  final uniqueCharacters = <String>{};
-  
-  while (uniqueCharacters.length < length) {
-    // Generate a random index to select a character
-    final randomIndex = random.nextInt(characters.length);
-    // Add the character to the set (duplicates are ignored)
-    uniqueCharacters.add(characters[randomIndex]);
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    
+    // Use a Set to ensure characters are unique
+    final uniqueCharacters = <String>{};
+    
+    while (uniqueCharacters.length < length) {
+      // Generate a random index to select a character
+      final randomIndex = random.nextInt(characters.length);
+      // Add the character to the set (duplicates are ignored)
+      uniqueCharacters.add(characters[randomIndex]);
+    }
+    
+    // Convert the set to a string
+    return uniqueCharacters.join('');
   }
-  
-  // Convert the set to a string
-  return uniqueCharacters.join('');
-}
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +268,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       backgroundColor: Colors.black.withOpacity(0.7),
                       builder: (BuildContext context) {
                         return VoucherShop(
-                          shop: widget.shopinf,
+                          shop: widget.shopinf.shopName,
+                          price: widget.product.price,
                           voucherList: voucherList,
                           onVoucherSelected: (Voucher? UserSelectedVoucher) {
                             if (UserSelectedVoucher != null) {

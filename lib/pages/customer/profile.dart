@@ -27,6 +27,7 @@ class _ProfileState extends State<Profile> {
   UserModel? userModel; 
   List<Cart>? cartList;
 
+
   @override
   void initState() {
     super.initState();
@@ -38,9 +39,11 @@ class _ProfileState extends State<Profile> {
 
   Future<void> getCurrentUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    CustomerService customerService = CustomerService();
     uid = prefs.getString('cusId');
     if (uid != null) {
       print('Cus ID profile: $uid');
+      userModel = await customerService.getCustomerInfo(uid!);
       await fetchCart(uid!);
     } else {
       print('No user is signed in.');
@@ -188,7 +191,7 @@ class _ProfileState extends State<Profile> {
         _buildMenuItem(Icons.shopping_cart_outlined, 'Giỏ hàng', () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => CartPage(cartList: cartList!)),
+            MaterialPageRoute(builder: (context) => CartPage(cartList: cartList!, customer: userModel!,)),
           );
         }),
         _buildMenuItem(Icons.support_agent_outlined, 'Hỗ trợ người dùng', () {

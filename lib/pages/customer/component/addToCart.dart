@@ -271,6 +271,7 @@ class _AddToCartState extends State<AddToCart> {
 
                           CustomerService customerService = CustomerService();
                           String shopName = await customerService.fetchShopNameFromDatabase(widget.product.userid);
+                          String shopImg = await customerService.fetchShopImgFromDatabase(widget.product.userid);
                           SharedPreferences prefs = await SharedPreferences.getInstance();
                           String? cusId = prefs.getString('cusId');
                           if (cusId == null) {
@@ -286,8 +287,10 @@ class _AddToCartState extends State<AddToCart> {
                           await customerService.addToCart(
                             cusId, 
                             widget.product.id, 
+                            widget.product.imageUrls[0],
                             widget.product.userid,
                             shopName,
+                            shopImg,
                             quantitySelected, 
                             selectedSize, 
                             selectedColor,

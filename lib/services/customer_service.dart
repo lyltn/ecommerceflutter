@@ -3,20 +3,23 @@ import 'package:ecommercettl/models/CartModel.dart';
 import 'package:ecommercettl/models/OrderDetail.dart';
 import 'package:ecommercettl/models/OrderModel.dart';
 import 'package:ecommercettl/models/Product.dart';
+import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/models/VoucherModel.dart';
 
 class CustomerService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> addToCart(String userId, String productId, String shopId, String shopName, int quantity, String? selectedSize, String? selectedColor, double price) async {
+  Future<void> addToCart(String userId, String productId, String productImg, String shopId, String shopName, String shopimg, int quantity, String? selectedSize, String? selectedColor, double price) async {
     try {
       // Create a Cart object without a cartid
       Cart cartItem = Cart(
         cartId: '', // This will be set after adding to Firestore
         cusId: userId,
         productId: productId,
+        productImg: productImg,
         shopName: shopName,
         shopId: shopId,
+        shopimg: shopimg,
         quantity: quantity,
         color: selectedColor ?? '',
         size: selectedSize ?? '',
@@ -45,7 +48,7 @@ class CustomerService {
         vouchers.add(Voucher.fromMap(doc.data() as Map<String, dynamic>, doc.id));
       }
     } catch (e) {
-      print("Error fetching vouchers: $e");
+      print("Error fetching vouchers data: $e");
     }
     return vouchers;
   }
@@ -279,6 +282,24 @@ class CustomerService {
       return "Error fetching shop name"; // Return an error message
     }
   }
+  Future<String> fetchShopImgFromDatabase(String shopId) async {
+    try {
+      DocumentReference docRef = _firestore.collection('users').doc(shopId);
+
+      DocumentSnapshot docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        String shopImg = docSnapshot['imgAvatar'] as String; // Cast to String
+        print("imgneeeeeeeeeeeeeeeeeeeeeee${shopImg}");
+        return shopImg; // Return the shop image
+      } else {
+        return "Shop not found"; // Return a default message if no shop found
+      }
+    } catch (e) {
+      print("Error fetching shop img for shop ID $shopId: $e");
+      return "Error fetching shop img"; // Return an error message
+    }
+  }
 
  Future<void> updateCartQuantityById(String cartId, int newQuantity) async {
     try {
@@ -309,5 +330,25 @@ class CustomerService {
       print("Error updating cart item : $e");
       // Handle the error (e.g., show a message to the user)
     }
+  }
+
+  Future<UserModel?> getCustomerInfo(String cusId) async {
+    try {
+      DocumentReference docRef = _firestore.collection('users').doc(cusId);
+      DocumentSnapshot docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        UserModel user = UserModel.fromFirestore(docSnapshot);
+        print("Thông tin user: ${user.toString()}"); // Hoặc in ra các trường cụ thể
+        return user;
+      } else {
+        print("User không tồn tại");
+        return null;
+      }
+    } catch (e) {
+      print("Lỗi khi lấy thông tin user với cusId: $cusId: $e");
+    }
+    return null;
+
   }
 }

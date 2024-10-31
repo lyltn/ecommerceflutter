@@ -1,14 +1,19 @@
 import 'package:ecommercettl/models/CartModel.dart';
+import 'package:ecommercettl/models/Product.dart';
+import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/pages/customer/CheckOutCart.dart';
 import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:ecommercettl/pages/customer/component/CartItem.dart';
 import 'package:ecommercettl/pages/customer/profile.dart';
+import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CartPage extends StatefulWidget {
   final List<Cart> cartList;
+  final UserModel customer;
 
-  const CartPage({super.key, required this.cartList});
+  const CartPage({super.key, required this.cartList, required this.customer});
 
   @override
   State<CartPage> createState() => _CartPageState();
@@ -18,61 +23,95 @@ class _CartPageState extends State<CartPage> {
   bool isAllSelected = false;
   double totalPrice = 0.0;
   final Map<String, bool> shopSelectionStates = {};
+  List<Product?> productList = []; // Changed to non-final to allow modifications
+  final CustomerService customerService = CustomerService();
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    for (var item in widget.cartList) {
+      shopSelectionStates[item.shopId] = false;
+    }
+    fetchProducts();
+  }
+
+
+  Future<void> fetchProducts() async {
+    setState(() {
+      isLoading = true;
+    });
+    List<Product?> fetchedProducts = [];
+    for (var item in widget.cartList) {
+      var product = await customerService.fetchProductById(item.productId);
+      fetchedProducts.add(product);
+    }
+    setState(() {
+      productList = fetchedProducts;
+      isLoading = false;
+    });
+  }
 
   void onCartItemChanged(bool? isSelected, Cart cart) {
     setState(() {
-      cart.isSelected = isSelected ?? false; // Cập nhật trạng thái chọn cho sản phẩm
-      calculateTotalPrice(); // Tính toán lại tổng tiền khi sản phẩm được chọn/không chọn
+      cart.isSelected = isSelected ?? false;
+      calculateTotalPrice();
     });
   }
 
   void toggleSelectAll(bool? value) {
     setState(() {
       isAllSelected = value ?? false;
-      // Cập nhật trạng thái chọn cho tất cả các shop
       for (var key in shopSelectionStates.keys) {
         shopSelectionStates[key] = isAllSelected;
         for (var item in widget.cartList.where((cart) => cart.shopId == key)) {
-          item.isSelected = isAllSelected; // Cập nhật trạng thái chọn cho tất cả các sản phẩm trong shop
+          item.isSelected = isAllSelected;
         }
       }
-      calculateTotalPrice(); // Tính toán lại tổng tiền khi chọn tất cả
+      calculateTotalPrice();
     });
   }
 
   void toggleSelectShop(String shopName, bool? value) {
     setState(() {
-      // Cập nhật trạng thái chọn của shop
-      shopSelectionStates[shopName] = value ?? false; 
-
+      shopSelectionStates[shopName] = value ?? false;
       for (var item in widget.cartList.where((cart) => cart.shopName == shopName)) {
-        item.isSelected = shopSelectionStates[shopName] ?? true;
+        item.isSelected = shopSelectionStates[shopName] ?? false;
       }
-
-      // Tính toán lại tổng tiền của các sản phẩm đã chọn
       calculateTotalPrice();
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Khởi tạo trạng thái chọn cho mỗi shop
-    for (var item in widget.cartList) {
-      shopSelectionStates[item.shopId] = false; // Khởi tạo thành false mặc định
+  List<Product?> getSelectedProducts() {
+    List<Product?> selectedProducts = [];
+    print("productlistneeeeeeeeeeee${productList}");
+    for (var cart in widget.cartList.where((item) => item.isSelected)) {
+      var product = productList.firstWhere(
+        (p) => p?.id == cart.productId,
+        orElse: () => null,
+      );
+      if (product != null) {
+        selectedProducts.add(product);
+      }
     }
+    return selectedProducts;
   }
 
   void calculateTotalPrice() {
-    setState(() {
-      totalPrice = 0;
-      for (var item in widget.cartList) {
-        // Kiểm tra xem sản phẩm có được chọn hay không
-        if (item.isSelected) {
-          totalPrice += item.price * item.quantity;
-        }
-      }
-    });
+    totalPrice = widget.cartList
+        .where((item) => item.isSelected)
+        .fold(0, (sum, item) => sum + item.price * item.quantity);
+  }
+
+  void proceedToCheckout() {
+    final selectedItems = widget.cartList.where((item) => item.isSelected).toList();
+    final selectedProducts = getSelectedProducts();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckOutCart(listCart: selectedItems, listProduct: selectedProducts, customer: widget.customer,),
+      ),
+    );
   }
 
   void handleQuantityChange(bool isSuccess) {
@@ -224,9 +263,7 @@ class _CartPageState extends State<CartPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Thực hiện logic thanh toán
-                    },
+                    onPressed: proceedToCheckout ,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(

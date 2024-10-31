@@ -2,8 +2,10 @@ class Cart {
   final String cartId;
   final String cusId;     // Customer ID
   final String productId;
+  final String productImg;
   final String shopId;
   final String shopName;
+  final String shopimg;
   int quantity;     // Quantity as an integer
   final String color;
   final String size;
@@ -14,8 +16,10 @@ class Cart {
     required this.cartId,
     required this.cusId,
     required this.productId,
+    required this.productImg,
     required this.shopId,
     required this.shopName,
+    required this.shopimg,
     required this.quantity,
     required this.color,
     required this.size,
@@ -29,8 +33,10 @@ class Cart {
       cartId: documentId,
       cusId: data['cusid'] ?? '',
       productId: data['productid'] ?? '',
+      productImg: data['productImg'] ?? '',
       shopId: data['shopid'] ?? '',
       shopName: data['shopName'],
+      shopimg: data['shopImg'],
       quantity: (data['quantity'] is int) 
           ? data['quantity'] 
           : int.tryParse(data['quantity'].toString()) ?? 0, // Flexible parsing
@@ -45,8 +51,10 @@ class Cart {
     return {
       'cusid': cusId,
       'productid': productId,
+      'productImg': productImg,
       'shopid': shopId,
       'shopName': shopName,
+      'shopImg': shopimg,
       'quantity': quantity,    // Store as int for simplicity
       'color': color,
       'size': size,
