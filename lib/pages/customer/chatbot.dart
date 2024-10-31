@@ -88,7 +88,7 @@ class _CustomerChatbotPageState extends State<CustomerChatbotPage> {
                       ),
                       child: Text(
                         message['message']!,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.black),
                       ),
                     ),
                   ),
