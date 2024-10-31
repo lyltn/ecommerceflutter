@@ -16,13 +16,12 @@ class OrderWaiting extends StatefulWidget {
 }
 
 class _OrderWaitingState extends State<OrderWaiting> {
-  
   @override
   void initState() {
     super.initState();
     print("ditocnem ${widget.listOrder}");
   }
-  
+
   @override
   Widget build(BuildContext context) {
     print('Received listOrder in OrderWaiting: ${widget.listOrder}');
@@ -34,7 +33,7 @@ class _OrderWaitingState extends State<OrderWaiting> {
           final order = widget.listOrder[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
-              child: buildOrder(
+            child: buildOrder(
               imagePath: order.productImg!,
               title: order.productName!,
               subtitle: 'Màu ${order.color}, size ${order.size}',
@@ -43,10 +42,10 @@ class _OrderWaitingState extends State<OrderWaiting> {
               totalProduct: order.productCount,
               totalPrice: order.total,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ShopOrderDetail()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => ShopOrderDetail()),
+                // );
               },
             ),
           );
@@ -54,6 +53,7 @@ class _OrderWaitingState extends State<OrderWaiting> {
       ),
     );
   }
+
   Widget buildOrder({
     required String imagePath,
     required String title,
@@ -110,7 +110,7 @@ class _OrderWaitingState extends State<OrderWaiting> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                  Text('${totalProduct} sản phẩm'),
+                Text('${totalProduct} sản phẩm'),
                 Row(
                   children: [
                     const Text('Tổng tiền: '),
