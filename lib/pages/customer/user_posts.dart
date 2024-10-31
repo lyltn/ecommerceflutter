@@ -221,7 +221,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      user?.fullName ?? 'Guest',
+                                      user?.username ?? 'Guest',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                                   ? NetworkImage(user.imgAvatar!)
                                                   : AssetImage('assets/default_avatar.png') as ImageProvider,
                                             ),
-                                            title: Text(user.fullName ?? 'Guest'),
+                                            title: Text(user.username ?? 'Guest'),
                                             subtitle: Text(comment.content),
                                             trailing: Text(DateFormat('dd/MM/yyyy').format(comment.createdDate)),
                                           );
@@ -333,7 +333,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                                     ? NetworkImage(user.imgAvatar!)
                                                     : AssetImage('assets/default_avatar.png') as ImageProvider,
                                               ),
-                                              title: Text(user.fullName ?? 'Guest'),
+                                              title: Text(user.username ?? 'Guest'),
                                               subtitle: Text(comment.content),
                                               trailing: Text(DateFormat('dd/MM/yyyy').format(comment.createdDate)),
                                             );
@@ -367,7 +367,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                                               ? NetworkImage(user.imgAvatar!)
                                                               : AssetImage('assets/default_avatar.png') as ImageProvider,
                                                         ),
-                                                        title: Text(user.fullName ?? 'Guest'),
+                                                        title: Text(user.username ?? 'Guest'),
                                                         subtitle: Text(comment.content),
                                                         trailing: Text(DateFormat('dd/MM/yyyy').format(comment.createdDate)),
                                                       );
