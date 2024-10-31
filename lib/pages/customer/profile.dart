@@ -1,11 +1,14 @@
+import 'package:ecommercettl/models/CartModel.dart';
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/authen/auth_page.dart';
 import 'package:ecommercettl/pages/authen/register_shop.dart';
 import 'package:ecommercettl/pages/client/shopbottomnav.dart';
+import 'package:ecommercettl/pages/customer/CartPage.dart';
 import 'package:ecommercettl/pages/customer/chatbot.dart';
 import 'package:ecommercettl/pages/customer/settings.dart';
 import 'package:ecommercettl/pages/customer/update_profile.dart';
 import 'package:ecommercettl/services/auth_service.dart';
+import 'package:ecommercettl/services/customer_service.dart';
 import 'package:ecommercettl/services/shop_service.dart';
 import 'package:ecommercettl/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -19,24 +22,48 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   // Call this method to retrieve and store the userId asynchronously
-
   String? uid;
   late AuthService auth = AuthService();
-  UserModel? userModel; // Change to nullable
+  UserModel? userModel; 
+  List<Cart>? cartList;
 
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
     getCurrentUserId();
+    _loadUserProfile();
+    
   }
 
+
   Future<void> getCurrentUserId() async {
-    uid = await ShopService.getCurrentUserId();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    uid = prefs.getString('cusId');
     if (uid != null) {
-      print('User ID: $uid');
+      print('Cus ID profile: $uid');
+      await fetchCart(uid!);
     } else {
       print('No user is signed in.');
+    }
+  }
+
+  
+  Future<void> fetchCart(String cusId) async {
+    CustomerService customerService = CustomerService();
+    if (cusId != null) {
+      try {
+        // Fetch the cart list based on the user's ID (uid)
+        cartList = await customerService.fetchCartListByCusId(uid!);
+        for (var item in cartList!) {
+          print("cart number check  : ${item.shopId}, Size: ${item.color}, Price: ${item.size}, Userid:${item.cusId}");
+        }
+
+        print("Cart items fetched successfully: ${cartList!.length}");
+      } catch (e) {
+        print("Error fetching cart items: $e");
+      }
+    } else {
+      print("User ID is null. Cannot fetch cart.");
     }
   }
 
@@ -148,7 +175,6 @@ class _ProfileState extends State<Profile> {
     return Column(
       children: [
         _buildMenuItem(Icons.shopping_bag_outlined, 'Đơn hàng của tôi', () {
-          // Handle navigation to "Đơn hàng của tôi"
         }),
         _buildMenuItem(Icons.account_balance_wallet_outlined, 'Ví của tôi', () {
           // Handle navigation to "Ví của tôi"
@@ -160,7 +186,10 @@ class _ProfileState extends State<Profile> {
           );
         }),
         _buildMenuItem(Icons.shopping_cart_outlined, 'Giỏ hàng', () {
-          // Handle navigation to "Giỏ hàng"
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => CartPage(cartList: cartList!)),
+          );
         }),
         _buildMenuItem(Icons.support_agent_outlined, 'Hỗ trợ người dùng', () {
           Navigator.push(

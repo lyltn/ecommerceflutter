@@ -1,20 +1,24 @@
+import 'package:ecommercettl/models/CartModel.dart';
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AddToCart extends StatefulWidget {
-  final VoidCallback onAgree;
+class EditCart extends StatefulWidget {
+  final ValueChanged<String> onCartSizeUpdated;
+  final ValueChanged<String> onCartColorUpdated;
+  final ValueChanged<int> onCartQuantityUpdated;
   final Product product;
+  final Cart cart;
 
-  const AddToCart({Key? key, required this.product, required this.onAgree}) : super(key: key);
+  const EditCart({Key? key, required this.product, required this.onCartSizeUpdated, required this.onCartColorUpdated, required this.onCartQuantityUpdated, required this.cart}) : super(key: key);
 
   @override
-  State<AddToCart> createState() => _AddToCartState();
+  State<EditCart> createState() => _EditCartState();
 }
 
-class _AddToCartState extends State<AddToCart> {
+class _EditCartState extends State<EditCart> {
   int totalQuantity = 0;
   List<String> sizes = []; // List to hold sizes
   List<String> colors = []; // List to hold colors
@@ -27,7 +31,7 @@ class _AddToCartState extends State<AddToCart> {
     super.initState();
     _fetchSizes(); // Fetch sizes when the widget is initialized
     _fetchColors(); // Fetch colors when the widget is initialized
-    _fetchInventoryDocuments(); // Initial fetch to set quantity based on current inventory
+    _fetchInventoryDocuments();
   }
 
   // Fetch the inventory documents from Firestore whenever a selection changes
@@ -96,11 +100,13 @@ class _AddToCartState extends State<AddToCart> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
         color: Colors.white,
+        height: MediaQuery.of(context).size.height * 0.6,
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
@@ -226,21 +232,21 @@ class _AddToCartState extends State<AddToCart> {
                         icon: const Icon(Icons.remove),
                         onPressed: () {
                           setState(() {
-                            if (quantitySelected > 0) {
-                              quantitySelected--; // Decrease quantity
+                            if (widget.cart.quantity > 0) {
+                              widget.cart.quantity--; 
                             }
                           });
                         },
                       ),
                       Text(
-                        '$quantitySelected', // Display current quantity
+                        '${widget.cart.quantity}', // Display current quantity
                         style: const TextStyle(fontSize: 20),
                       ),
                       IconButton(
                         icon: const Icon(Icons.add),
                         onPressed: () {
                           setState(() {
-                            quantitySelected++; // Increase quantity
+                            widget.cart.quantity++; // Increase quantity
                           });
                         },
                       ),
@@ -252,22 +258,11 @@ class _AddToCartState extends State<AddToCart> {
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: (selectedSize != null && selectedColor != null && quantitySelected != 0) 
+                  onPressed: (selectedSize != null && selectedColor != null && widget.cart.quantity != 0) 
                       ? () async {
-                          print("ID: ${widget.product.id}");
-                          print("Name: ${widget.product.name}");
-                          print("Description: ${widget.product.description}");
-                          print("Brand ID: ${widget.product.brandid}");
-                          print("Category ID: ${widget.product.categoryid}");
-                          print("Sex: ${widget.product.sex}");
-                          print("Affiliate: ${widget.product.affiliate}");
-                          print("Price: ${widget.product.price}");
-                          print("Image URLs: ${widget.product.imageUrls}");
-                          print("User ID: ${widget.product.userid}");
-                          print("Status: ${widget.product.status}");
                           print("Color selected: ${selectedColor}");
                           print("Size selected: ${selectedSize}");
-                          print("Quantity: ${quantitySelected}");
+                          print("Quantity: ${widget.cart.quantity}");
 
                           CustomerService customerService = CustomerService();
                           String shopName = await customerService.fetchShopNameFromDatabase(widget.product.userid);
@@ -282,25 +277,11 @@ class _AddToCartState extends State<AddToCart> {
                             );
                             return; 
                           }
-                          print("addtoCardNe");
-                          await customerService.addToCart(
-                            cusId, 
-                            widget.product.id, 
-                            widget.product.userid,
-                            shopName,
-                            quantitySelected, 
-                            selectedSize, 
-                            selectedColor,
-                            widget.product.price
-                            );
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Đã thêm sản phẩm vào giỏ hàng!'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-
+                          print("EditCartNe");
+                          await customerService.updateCartById(widget.cart.cartId, widget.cart.quantity, selectedSize!,  selectedColor!);
+                          widget.onCartColorUpdated(selectedColor ?? "");
+                          widget.onCartSizeUpdated(selectedSize?? "");
+                          widget.onCartQuantityUpdated(widget.cart.quantity ?? 0);
                           // Optionally, reset selections after adding to cart
                           setState(() {
                             selectedSize = null;
@@ -331,7 +312,7 @@ class _AddToCartState extends State<AddToCart> {
                     ),
                   ),
                   child: Text(
-                    'Thêm vào giỏ hàng',
+                    'Xác nhận',
                     style: TextStyle(
                       color: (selectedSize != null && selectedColor != null) 
                           ? Colors.white 

@@ -1,29 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/post.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:ecommercettl/models/PostModel.dart';
 
 class PostService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-  // Add a new post
-  Future<void> addPost(Post post) {
-    return _db.collection('posts').add(post.toMap());
-  }
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Get all posts
-  Stream<List<Post>> getPosts() {
+  Stream<List<PostModel>> getPosts() {
     return _db
         .collection('posts')
-        .orderBy('createdDate',
-            descending: true) // Order by createdDate in descending order
+        .orderBy('createdDate', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
+      return snapshot.docs.map((doc) => PostModel.fromFirestore(doc)).toList();
     });
   }
 
+  // Create a new post
+  Future<void> createPost(PostModel post) {
+    return _db.collection('posts').doc(post.id).set(post.toMap());
+  }
+
   // Update a post
-  Future<void> updatePost(Post post) {
-    // Update the lastModifiedDate to the current time
+  Future<void> updatePost(PostModel post) {
     post.lastModifiedDate = DateTime.now();
     return _db.collection('posts').doc(post.id).update(post.toMap());
   }
@@ -33,12 +34,12 @@ class PostService {
     return _db.collection('posts').doc(id).delete();
   }
 
-  // Get a specific post by ID
-  Future<Post?> getPostById(String id) async {
-    DocumentSnapshot doc = await _db.collection('posts').doc(id).get();
-    if (doc.exists) {
-      return Post.fromFirestore(doc);
-    }
-    return null; // Return null if the post does not exist
+  // Upload an image to Firebase Storage
+  Future<String> uploadImage(File image) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference storageRef = _storage.ref().child('posts/$fileName');
+    UploadTask uploadTask = storageRef.putFile(image);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    return await taskSnapshot.ref.getDownloadURL();
   }
 }
