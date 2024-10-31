@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/client/shoporderdetail.dart';
 import 'package:ecommercettl/services/order_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ShopConfirmpage extends StatefulWidget {
@@ -12,6 +13,20 @@ class ShopConfirmpage extends StatefulWidget {
 
 class _ShopConfirmpageState extends State<ShopConfirmpage> {
   final OrderService orderService = OrderService();
+  String? uid;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Anonymous async function inside initState
+    () async {
+      uid = (await FirebaseAuth.instance.currentUser) as String?;
+      print('User ID: $uid');
+      setState(() {}); // Update UI if necessary
+    }();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +36,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('orders')
-            .where('usercode', isEqualTo: 'ly')
+            .where('shopId', isEqualTo: uid)
             .where('status', isEqualTo: 'Đang đợi xét duyệt')
             .snapshots(),
         builder: (context, snapshot) {
@@ -154,7 +169,7 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            orderService.updateOrderStatus(doc.id);
+                            orderService.updateOrderStatus(doc.id, 'Đã duyệt');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
