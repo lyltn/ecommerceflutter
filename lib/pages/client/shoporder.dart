@@ -123,7 +123,7 @@ class _OrderShopState extends State<OrderShop> {
               child: Row(
                 children: [
                   buildTab('Chờ xác nhận', 0),
-                  buildTab('Đã đặt', 1),
+                  buildTab('Đã xác nhận', 1),
                   buildTab('Đang giao', 2),
                   buildTab('Đã giao', 3),
                   buildTab('Đã huỷ', 4),

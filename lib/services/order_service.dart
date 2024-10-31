@@ -41,4 +41,10 @@ class OrderService {
   Future<void> deleteOrder(String docId) {
     return orders.doc(docId).delete();
   }
+
+  Future<void> updateOrderStatus(String idOrder) {
+    return orders.doc(idOrder).update({
+      'status': 'Đã duyệt',
+    });
+  }
 }
