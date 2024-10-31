@@ -9,7 +9,8 @@ class PostModel {
   bool status;
   DateTime createdDate;
   DateTime lastModifiedDate;
-  Map<String, int> reactions; // New field for reactions
+  int likeCount;
+  int dislikeCount; // Change loveCount to dislikeCount
 
   PostModel({
     required this.id,
@@ -20,7 +21,8 @@ class PostModel {
     this.status = true,
     required this.createdDate,
     required this.lastModifiedDate,
-    this.reactions = const {}, // Initialize reactions
+    this.likeCount = 0,
+    this.dislikeCount = 0, // Change loveCount to dislikeCount
   });
 
   Map<String, dynamic> toMap() {
@@ -32,7 +34,8 @@ class PostModel {
       'status': status,
       'createdDate': createdDate.toIso8601String(),
       'lastModifiedDate': lastModifiedDate.toIso8601String(),
-      'reactions': reactions, // Add reactions to map
+      'likeCount': likeCount,
+      'dislikeCount': dislikeCount, // Change loveCount to dislikeCount
     };
   }
 
@@ -44,10 +47,11 @@ class PostModel {
       content: data['content'],
       imageUrls: List<String>.from(data['imageUrls']),
       link: data['link'],
-      status: data['status'],
+      status: data['status'] ?? true,
       createdDate: DateTime.parse(data['createdDate']),
       lastModifiedDate: DateTime.parse(data['lastModifiedDate']),
-      reactions: Map<String, int>.from(data['reactions'] ?? {}), // Initialize reactions
+      likeCount: data['likeCount'] ?? 0,
+      dislikeCount: data['dislikeCount'] ?? 0, // Change loveCount to dislikeCount
     );
   }
 }
