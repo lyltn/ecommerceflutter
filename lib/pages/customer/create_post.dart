@@ -15,6 +15,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final PostService _postService = PostService();
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _linkController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   File? _image;
 
   Future<void> _pickImage() async {
@@ -27,7 +28,28 @@ class _CreatePostPageState extends State<CreatePostPage> {
   }
 
   Future<void> _createPost() async {
-    if (_image != null && _contentController.text.isNotEmpty) {
+    if (_formKey.currentState!.validate()) {
+      // Show loading spinner
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Creating post...'),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
       // Upload image to Firebase Storage and get the download URL
       String imageUrl = await _postService.uploadImage(_image!);
 
@@ -41,10 +63,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
         status: true,
         createdDate: DateTime.now(),
         lastModifiedDate: DateTime.now(),
+        likeCount: 0,
+        dislikeCount: 0,
       );
 
       // Save the post to Firestore
       await _postService.createPost(newPost);
+
+      // Hide loading spinner
+      Navigator.pop(context);
 
       // Clear the selected image and text fields
       setState(() {
@@ -55,7 +82,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tạo bài viết thành công!')),
+        SnackBar(content: Text('Post created successfully!')),
       );
 
       // Navigate back to the previous screen
@@ -67,35 +94,44 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tạo bài viết'),
+        title: Text('Create Post'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _contentController,
-              decoration: InputDecoration(labelText: 'Nội dung'),
-            ),
-            TextField(
-              controller: _linkController,
-              decoration: InputDecoration(labelText: 'Link'),
-            ),
-            SizedBox(height: 16),
-            _image != null
-                ? Image.file(_image!)
-                : Text('Không có hình ảnh nào được chọn.'),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Chọn ảnh'),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _createPost,
-              child: Text('Tạo bài viết'),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _contentController,
+                decoration: InputDecoration(labelText: 'Content'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter content';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _linkController,
+                decoration: InputDecoration(labelText: 'Link'),
+              ),
+              SizedBox(height: 16),
+              _image != null
+                  ? Image.file(_image!)
+                  : Text('No image selected.'),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Pick Image'),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _createPost,
+                child: Text('Create Post'),
+              ),
+            ],
+          ),
         ),
       ),
     );
