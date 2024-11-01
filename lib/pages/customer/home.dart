@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/pages/customer/component/DealOfTheDay.dart';
 import 'package:ecommercettl/pages/customer/component/FindBar.dart';
 import 'package:ecommercettl/pages/customer/component/HomeAppBar.dart';
-import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
+import 'package:ecommercettl/pages/customer/component/ProductSellCard.dart';
 import 'package:ecommercettl/pages/customer/component/SliderBanner.dart';
 import 'package:ecommercettl/pages/customer/component/Trending.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
@@ -93,7 +93,7 @@ Widget build(BuildContext context) {
                           ),
                         );
                       },
-                      child: ProductCard(
+                      child: ProductSellCard(
                         imagePath: product.imageUrls.isNotEmpty
                             ? product.imageUrls[0]
                             : 'images/dress.png',
@@ -164,7 +164,7 @@ Widget build(BuildContext context) {
                             ),
                           );
                         },
-                        child: ProductCard(
+                        child: ProductSellCard(
                           imagePath: product.imageUrls.isNotEmpty
                               ? product.imageUrls[0]
                               : 'images/dress.png',

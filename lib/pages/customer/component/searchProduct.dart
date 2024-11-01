@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/pages/customer/component/FilterAction.dart';
 import 'package:ecommercettl/pages/customer/component/FindBar.dart';
-import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
+import 'package:ecommercettl/pages/customer/component/ProductSellCard.dart';
 import 'package:ecommercettl/pages/customer/component/FilterPanel.dart'; // Import the FilterPanel
 import 'package:ecommercettl/pages/customer/productDetail.dart'; // Import your ProductDetail page
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
@@ -127,7 +127,7 @@ class SearchProductState extends State<SearchProduct> with SingleTickerProviderS
                               ),
                             );
                           },
-                          child: ProductCard(
+                          child: ProductSellCard(
                             imagePath: product.imageUrls.isNotEmpty
                                 ? product.imageUrls[0] // Use the first image from imageUrl list
                                 : 'images/dress.png', // Fallback image

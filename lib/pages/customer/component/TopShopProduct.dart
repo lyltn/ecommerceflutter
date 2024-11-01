@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/Product.dart';
-import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
+import 'package:ecommercettl/pages/customer/component/ProductSellCard.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
 import 'package:flutter/material.dart';
 
@@ -65,7 +65,7 @@ class TopShopProduct extends StatelessWidget {
                   final product = products[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ProductCard(
+                    child: ProductSellCard(
                       imagePath: product.imageUrls.isNotEmpty
                           ? product.imageUrls[0]
                           : 'images/dress.png',
