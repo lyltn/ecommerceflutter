@@ -1,4 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommercettl/models/Product.dart';
+import 'package:ecommercettl/pages/customer/component/ProductCard.dart';
+import 'package:ecommercettl/pages/customer/productDetail.dart';
+import 'package:ecommercettl/services/customer_service.dart';
 import 'package:ecommercettl/services/shop_service.dart';
 import 'package:flutter/material.dart';
 
@@ -16,24 +20,37 @@ class _ShopDetailPageState extends State<ShopDetailPage>
   late TabController _tabController;
   String? uid;
   String? shopid;
+  List<Product>? productList;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _initializeUid();
+    _fetchProductByShop();
   }
 
   Future<void> _initializeUid() async {
     uid = await ShopService.getCurrentUserId();
     shopid = await ShopService.getUidByShopName(widget.shopName);
     setState(() {}); // Update UI after UID is obtained
+    print("useriddddddddddddddd:${uid}");
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+  void _fetchProductByShop() async{
+    CustomerService customerService = CustomerService();
+    uid = await ShopService.getCurrentUserId();
+    try {
+      productList = await customerService.fetchProductByShopId(uid!);
+      print("productlist ${productList}");
+    } catch (e) {
+      print("Error fetching products: $e");
+    }
   }
 
   @override
@@ -77,7 +94,7 @@ class _ShopDetailPageState extends State<ShopDetailPage>
               ? ShopInfoTab(shopid: shopid!) // Add the new ShopInfoTab
               : Center(child: CircularProgressIndicator()),
           shopid != null
-              ? ProductsTab(uid: shopid!)
+              ? ProductsTab(uid: shopid!, list: productList!,)
               : Center(child: CircularProgressIndicator()),
           shopid != null
               ? CategoriesTab(shopid: shopid!)
@@ -90,90 +107,97 @@ class _ShopDetailPageState extends State<ShopDetailPage>
 
 class ProductsTab extends StatelessWidget {
   final String uid;
+  final List<Product> list;
 
-  ProductsTab({required this.uid});
+  ProductsTab({required this.uid, required this.list});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('products')
-          .where('userid', isEqualTo: uid)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        final products = snapshot.data!.docs;
-
-        return GridView.builder(
-          padding: EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 0.7,
-          ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            var productData = products[index].data() as Map<String, dynamic>;
-            return ProductCard(data: productData);
+    return GridView.builder(
+      padding: EdgeInsets.all(8),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.6, // Adjust
+      ),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        var productData = list[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Productdetail(newProduct: productData),
+              ),
+            );
           },
+          child: ProductCard(
+            imagePath: productData.imageUrls[0],
+            name: productData.name,
+            price: productData.price,
+            rating: 5, // Assuming static rating and review count for now
+            reviewCount: 10,
+            sold: 3,
+             width: MediaQuery.of(context).size.width / 2 - 15, // Adjust card width
+             height: 350, // Set a fixed height for the card
+          ),
         );
       },
     );
   }
 }
 
-class ProductCard extends StatelessWidget {
-  final Map<String, dynamic> data;
 
-  ProductCard({required this.data});
+// class ProductCard extends StatelessWidget {
+//   final Product data;
 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.network(
-            data["imageUrl"][0] ?? "https://via.placeholder.com/150",
-            height: 130,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              data["name"] ?? "Product Name",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              (data["price"] ?? 0.0).toString(),
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("⭐ ${data["rating"] ?? "5.0"}"),
-                Text("Đã bán ${data["sold"] ?? "3"}"),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   ProductCard({required this.data});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Image.network(
+//             data["imageUrl"][0] ?? "https://via.placeholder.com/150",
+//             height: 130,
+//             width: double.infinity,
+//             fit: BoxFit.cover,
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: Text(
+//               data["name"] ?? "Product Name",
+//               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+//               maxLines: 2,
+//               overflow: TextOverflow.ellipsis,
+//             ),
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 8.0),
+//             child: Text(
+//               (data["price"] ?? 0.0).toString(),
+//               style: TextStyle(color: Colors.red),
+//             ),
+//           ),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 8.0),
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 Text("⭐ ${data["rating"] ?? "5.0"}"),
+//                 Text("Đã bán ${data["sold"] ?? "3"}"),
+//               ],
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class CategoriesTab extends StatelessWidget {
   final String shopid;

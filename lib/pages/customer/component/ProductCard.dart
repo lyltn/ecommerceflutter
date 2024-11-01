@@ -8,6 +8,7 @@ class ProductCard extends StatelessWidget {
   final int reviewCount;
   final double? width;  // New parameter
   final double? height; // New parameter
+  final double? sold;
 
   const ProductCard({
     Key? key,
@@ -18,6 +19,7 @@ class ProductCard extends StatelessWidget {
     required this.reviewCount,
     this.width,
     this.height,
+    this.sold
   }) : super(key: key);
 
   @override
@@ -87,12 +89,25 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: contentPadding / 2),
+                        
                         Text(
-                          '$rating ($reviewCount)',
+                          reviewCount != 0 ?
+                          '$rating ($reviewCount)' : "",
                           style: bodyStyle,
                         ),
                       ],
                     ),
+                    SizedBox(height: 5,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          sold != null ?
+                          'Đã bán: ($sold)' : "",
+                          style: bodyStyle,
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),

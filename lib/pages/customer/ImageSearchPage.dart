@@ -42,7 +42,7 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
       body: Stack(
         children: [
           Container(
-            child: SearchImageProduct(listProductId: ['TQBzWAlqo95MTHS6BjCE', 'p2uPlkLfXGysrhnfy1G6']),
+            child: SearchImageProduct(listProductId: []),
           )
         ]
       ),

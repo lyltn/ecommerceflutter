@@ -68,6 +68,22 @@ class CustomerService {
     }
     return vouchers;
   }
+  Future<List<Product>> fetchProductByShopId(String userId) async {
+    List<Product> list = [];
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('products')
+          .where('userid', isEqualTo: userId)
+          .get();
+      print("Documents fetched: ${snapshot.docs.length}"); // Add this line
+      for (var doc in snapshot.docs) {
+        list.add(Product.fromFirestore(doc.data() as Map<String, dynamic>, doc.id));
+      }
+    } catch (e) {
+      print("Error fetching vouchers data: $e");
+    }
+    return list;
+  }
 
   Future<void> addOrder(
     String orderCode,
