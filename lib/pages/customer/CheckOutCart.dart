@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/pages/customer/component/CartItem.dart';
 import 'package:flutter/material.dart';
@@ -23,32 +24,35 @@ class CheckOutCart extends StatefulWidget {
 
 class _CheckOutCartState extends State<CheckOutCart> {
   CustomerService customerService = CustomerService();
-  Map<String, Voucher?> selectedVouchers = {};
-  double selectedAdminVoucher = 0;
+  Map<String, Voucher> selectedVouchers = {};
   Voucher? AdminSelectedVoucher;
-  List<Voucher> adminVoucherList = List.empty();
+  List<Voucher> adminVoucherList = [];
   double totalOrderAmount = 0;
+  double totalShopAmount = 0;
   Map<String, double> deliveryCosts = {};
   double totalDeliveryCost = 0;
+  Map<String, double> shopPricesBeforeDiscount = {};
+  Map<String, double> shopPricesAfterDiscount = {};
 
   Map<String, TextEditingController> _messageControllers = {};
-  String message = "";
 
   @override
   void initState() {
     super.initState();
     calculateDeliveryCost(widget.listCart);
+    calculateShopPrices();
     calculateTotalOrderAmount();
     fetchAdminVouchers();
     for (var cart in widget.listCart) {
       if (!_messageControllers.containsKey(cart.shopId)) {
         _messageControllers[cart.shopId] = TextEditingController();
       }
-    };
+    }
+    print("Initial selectedVouchers: $selectedVouchers");
   }
+
   @override
   void dispose() {
-    // Dispose of all message controllers
     for (var controller in _messageControllers.values) {
       controller.dispose();
     }
@@ -59,21 +63,19 @@ class _CheckOutCartState extends State<CheckOutCart> {
     Map<String, double> shopTotals = {};
     Map<String, double> newDeliveryCosts = {};
 
-    // Calculate total price for each shop
     for (var item in cartItems) {
-      shopTotals[item.shopName] = (shopTotals[item.shopName] ?? 0) + (item.price * item.quantity);
+      shopTotals[item.shopId] = (shopTotals[item.shopId] ?? 0) + (item.price * item.quantity);
     }
 
-    // Calculate delivery cost for each shop
-    shopTotals.forEach((shopName, total) {
+    shopTotals.forEach((shopId, total) {
       if (total > 1500000) {
-        newDeliveryCosts[shopName] = 0;
+        newDeliveryCosts[shopId] = 0;
       } else if (total > 690000) {
-        newDeliveryCosts[shopName] = 15000;
+        newDeliveryCosts[shopId] = 15000;
       } else if (total > 300000) {
-        newDeliveryCosts[shopName] = 25000;
+        newDeliveryCosts[shopId] = 25000;
       } else {
-        newDeliveryCosts[shopName] = 33000;
+        newDeliveryCosts[shopId] = 33000;
       }
     });
 
@@ -83,100 +85,113 @@ class _CheckOutCartState extends State<CheckOutCart> {
     });
   }
 
-  void calculateTotalOrderAmount() {
-    double total = 0;
-    Map<String, Map<String, dynamic>> groupedItems = groupCartItemsByShopName();
+  void calculateShopPrices() {
+    Map<String, double> beforeDiscount = {};
+    Map<String, double> afterDiscount = {};
 
-    groupedItems.forEach((shopId, shopData) {
-      List<Cart> items = shopData['items'];
+    for (var entry in groupCartItemsByShopId().entries) {
+      String shopId = entry.key;
+      List<Cart> items = entry.value['items'];
       double shopTotal = items.fold(0, (sum, item) => sum + (item.price * item.quantity));
+      beforeDiscount[shopId] = shopTotal;
       double discount = calculateShopDiscount(shopId, shopTotal);
-      total += shopTotal - discount + (deliveryCosts[shopId] ?? 0);
-    });
-
-    // Apply admin voucher discount
-    double adminDiscount = calculateAdminDiscount();
-    total -= adminDiscount;
+      afterDiscount[shopId] = shopTotal - discount;
+    }
 
     setState(() {
-      totalOrderAmount = total;
+      shopPricesBeforeDiscount = beforeDiscount;
+      shopPricesAfterDiscount = afterDiscount;
     });
   }
-  Map<String, Map<String, dynamic>> groupCartItemsByShopName() {
+
+  void calculateTotalOrderAmount() {
+    double totalBeforeDiscount = shopPricesBeforeDiscount.values.reduce((sum, price) => sum + price);
+    double totalAfterShopDiscounts = shopPricesAfterDiscount.values.reduce((sum, price) => sum + price);
+    double shopDiscount = totalBeforeDiscount - totalAfterShopDiscounts;
+    
+    double adminDiscount = calculateAdminDiscount(totalBeforeDiscount);
+    
+    double finalTotal = totalBeforeDiscount + totalDeliveryCost - shopDiscount - adminDiscount;
+
+    setState(() {
+      totalShopAmount = totalBeforeDiscount;
+      totalOrderAmount = finalTotal;
+    });
+
+    print('Total Before Discount: $totalBeforeDiscount');
+    print('Shop Discount: $shopDiscount');
+    print('Total Delivery Cost: $totalDeliveryCost');
+    print('Admin Discount: $adminDiscount');
+    print('Final Total Order Amount: $finalTotal');
+  }
+
+  Map<String, Map<String, dynamic>> groupCartItemsByShopId() {
     Map<String, Map<String, dynamic>> groupedItems = {};
     for (var cart in widget.listCart) {
-      if (!groupedItems.containsKey(cart.shopName)) {
-        groupedItems[cart.shopName] = {
+      if (!groupedItems.containsKey(cart.shopId)) {
+        groupedItems[cart.shopId] = {
           'items': <Cart>[],
           'shopImg': cart.shopimg,
+          'shopName': cart.shopName,
         };
       }
-      (groupedItems[cart.shopName]!['items'] as List<Cart>).add(cart);
+      (groupedItems[cart.shopId]!['items'] as List<Cart>).add(cart);
     }
     return groupedItems;
   }
 
-  double calculateShopDiscount(String shopName, double price) {
-    if (selectedVouchers[shopName] != null) {
-      return (price * selectedVouchers[shopName]!.discount / 100);
+  double calculateShopDiscount(String shopId, double price) {
+    if (selectedVouchers.containsKey(shopId)) {
+      Voucher voucher = selectedVouchers[shopId]!;
+      double discount = (price * voucher.discount / 100).clamp(0, voucher.maxDiscount);
+      print("Calculating discount for shop $shopId: $discount");
+      return discount;
     }
+    print("No discount applied for shop $shopId");
     return 0;
-  }
-  double calculateTotalShopDiscount() {
-    double totalDiscount = 0;
-    Map<String, Map<String, dynamic>> groupedItems = groupCartItemsByShopName();
-
-    groupedItems.forEach((shopId, shopData) {
-      List<Cart> items = shopData['items'];
-      double shopTotal = items.fold(0, (sum, item) => sum + (item.price * item.quantity));
-      totalDiscount += calculateShopDiscount(shopId, shopTotal);
-    });
-
-    return totalDiscount;
   }
 
   Future<List<Voucher>?> fetchVouchers(String shopId) async {
     try {
       List<Voucher> voucherList = await customerService.fetchVouchersByShopId(shopId);
-      setState(() {}); // Refresh the UI
+      setState(() {});
       return voucherList;
     } catch (error) {
       print("Error fetching vouchers: $error");
     }
     return null;
   }
+
   Future<void> fetchAdminVouchers() async {
     try {
       adminVoucherList = await customerService.fetchVouchersByADmin();
-      setState(() {}); // Refresh the UI
+      setState(() {});
     } catch (error) {
-      print("Error fetching vouchers: $error");
+      print("Error fetching admin vouchers: $error");
     }
   }
 
-   double calculateAdminDiscount() {
-    if (AdminSelectedVoucher != null && totalOrderAmount > AdminSelectedVoucher!.condition) {
-      double discount = (totalOrderAmount * AdminSelectedVoucher!.discount / 100)
+  double calculateAdminDiscount(double total) {
+    if (AdminSelectedVoucher != null && total > AdminSelectedVoucher!.condition) {
+      double discount = (total * AdminSelectedVoucher!.discount / 100)
           .clamp(0, AdminSelectedVoucher!.maxDiscount);
+      print("Admin discount: $discount");
       return discount;
     }
+    print("No admin discount applied");
     return 0;
   }
+
   String generateRandomString(int length) {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
-    
-    // Use a Set to ensure characters are unique
     final uniqueCharacters = <String>{};
     
     while (uniqueCharacters.length < length) {
-      // Generate a random index to select a character
       final randomIndex = random.nextInt(characters.length);
-      // Add the character to the set (duplicates are ignored)
       uniqueCharacters.add(characters[randomIndex]);
     }
     
-    // Convert the set to a string
     return uniqueCharacters.join('');
   }
 
@@ -190,43 +205,33 @@ class _CheckOutCartState extends State<CheckOutCart> {
 
     CustomerService customerService = CustomerService();
 
-    // Group cart items by shop
-    Map<String, List<Cart>> shopOrders = {};
-    for (var item in widget.listCart) {
-      if (!shopOrders.containsKey(item.shopId)) {
-        shopOrders[item.shopId] = [];
-      }
-      shopOrders[item.shopId]!.add(item);
-    }
+    Map<String, List<Cart>> shopOrders = groupCartItemsByShopId().map((key, value) => MapEntry(key, value['items'] as List<Cart>));
 
     try {
-      // Create an order for each shop
+      
       for (var entry in shopOrders.entries) {
+        String orderCode = generateRandomString(10);
         String shopId = entry.key;
         List<Cart> shopItems = entry.value;
-        
-        // Generate a unique order code for each shop
-        String orderCode = generateRandomString(10);
 
-        // Calculate total price for this shop's order
-        double shopTotal = shopItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
+        double shopPriceBeforeDiscount = shopPricesBeforeDiscount[shopId] ?? 0;
+        double shopPriceAfterDiscount = shopPricesAfterDiscount[shopId] ?? 0;
+        double delivery = deliveryCosts[shopId] ?? 0;
 
-        // Get shop-specific voucher
-        String? shopVoucher = selectedVouchers[shopId]?.voucherID;
+        String shopVoucher = selectedVouchers[shopId]?.voucherID ?? "";
+        print("shopId: $shopId, shopVoucher: $shopVoucher");
 
-        // Get shop-specific message
         String shopMessage = _messageControllers[shopId]?.text ?? "";
-        
-        // Fetch the first product's details to use as the order's main product
+        print("Shop message: $shopMessage");
+
         Product? firstProduct = await customerService.fetchProductById(shopItems.first.productId);
 
-        // Create the order for this shop
         await customerService.addOrder(
           orderCode,
           orderDate,
-          shopVoucher ?? "",
           AdminSelectedVoucher?.voucherID ?? "",
-          shopTotal,
+          shopVoucher,
+          shopPriceAfterDiscount + delivery - calculateAdminDiscount(shopPriceBeforeDiscount),
           cusId,
           name,
           phone,
@@ -234,27 +239,24 @@ class _CheckOutCartState extends State<CheckOutCart> {
           status,
           shopMessage,
           shopId,
-          firstProduct!.imageUrls[0].isNotEmpty ? firstProduct.imageUrls[0] : '',
+          firstProduct!.imageUrls.isNotEmpty ? firstProduct.imageUrls[0] : '',
           firstProduct.name,
-          shopTotal,
+          shopPriceBeforeDiscount + delivery,
           shopItems.length,
-          "", // Leave color blank as it's per item
-          "", // Leave size blank as it's per item
+          shopItems.first.color ?? "",
+          shopItems.first.size ?? "",
           shopItems.fold(0, (sum, item) => sum! + item.quantity),
+          calculateAdminDiscount(shopPriceBeforeDiscount),
         );
 
-        // Add order details for each product in this shop's order
         for (var item in shopItems) {
-          // Fetch product details for each item
-          Product? product = await customerService.fetchProductById(item.productId);
-          
           await customerService.addOrderDetails(
             orderCode,
             item.productId,
             cusId,
             item.size ?? "",
             item.color ?? "",
-            item.quantity,
+            item.quantity
           );
         }
       }
@@ -272,7 +274,7 @@ class _CheckOutCartState extends State<CheckOutCart> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, Map<String, dynamic>> groupedCartItems = groupCartItemsByShopName();
+    Map<String, Map<String, dynamic>> groupedCartItems = groupCartItemsByShopId();
     calculateTotalOrderAmount();
 
     return Scaffold(
@@ -288,7 +290,6 @@ class _CheckOutCartState extends State<CheckOutCart> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Free shipping banner
             Container(
               color: Color(0xFFFFF8E7),
               padding: EdgeInsets.all(12),
@@ -305,8 +306,6 @@ class _CheckOutCartState extends State<CheckOutCart> {
                 ],
               ),
             ),
-
-            // Shipping address
             Padding(
               padding: EdgeInsets.all(16),
               child: Column(
@@ -324,111 +323,23 @@ class _CheckOutCartState extends State<CheckOutCart> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Đào Trung Thành | (+84) 946 814 775'),
-                        Text('Ngã Tư Lưu Quang Vũ, Đường Mai Đăng Chơn\nPhường Hòa Quý, Quận Ngũ Hành Sơn, Đà Nẵng'),
+                        Text('${widget.customer.fullName} | ${widget.customer.phone}'),
+                        Text(widget.customer.address),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            // Store sections
             for (var entry in groupedCartItems.entries)
               buildShopSection(
                 entry.key,
                 entry.value['shopImg'] as String,
+                entry.value['shopName'] as String,
                 (entry.value['items'] as List<Cart>),
               ),
-            ElevatedButton(
-              onPressed: () async {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.black.withOpacity(0.7),
-                  builder: (BuildContext context) {
-                    return VoucherShop(
-                      shop: "Admin",
-                      price: totalOrderAmount,
-                      voucherList: adminVoucherList,
-                      onVoucherSelected: (Voucher? userSelectedVoucher) {
-                        if (userSelectedVoucher != null) {
-                          setState(() {
-                            AdminSelectedVoucher = userSelectedVoucher;
-                            calculateTotalOrderAmount();
-                          });
-                          print('Selected Admin Voucher: ${userSelectedVoucher.discount}%');
-                        } else {
-                          print('No admin voucher selected');
-                        }
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                padding: EdgeInsets.zero,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                  side: BorderSide.none,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.ticket,
-                        color: Colors.blue.shade700,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Voucher của Sàn',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        selectedAdminVoucher != 0
-                            ? '-${NumberFormat("#,###", "vi_VN").format(calculateAdminDiscount())}đ'
-                            : 'Chọn hoặc nhập mã',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: selectedAdminVoucher != 0 ? Colors.green : Colors.grey,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        size: 18,
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start, 
-              children: [
-                Text(
-                  'Phương thức thanh toán',
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 4), 
-                Text(
-                  'Thanh toán khi nhận hàng',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
+            buildAdminVoucherButton(),
+            buildPaymentMethodSection(),
             Divider(),
             buildPaymentDetails(),
           ],
@@ -438,22 +349,21 @@ class _CheckOutCartState extends State<CheckOutCart> {
     );
   }
 
-  Widget buildShopSection(String shopName, String shopImg, List<Cart> cartItems) {
-    double shopTotal = cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
-    double discount = calculateShopDiscount(shopName, shopTotal);
-    double shopDeliveryCost = deliveryCosts[shopName] ?? 0;
+  Widget buildShopSection(String shopId, String shopImg, String shopName, List<Cart> cartItems) {
+    double shopTotal = shopPricesBeforeDiscount[shopId] ?? 0;
+    double discount = shopTotal - (shopPricesAfterDiscount[shopId] ?? 0);
+    double shopDeliveryCost = deliveryCosts[shopId] ?? 0;
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Shop name
           Padding(
             padding: EdgeInsets.all(12),
             child: Row(
               children: [
-                shopImg != null && shopImg.isNotEmpty 
+                shopImg.isNotEmpty 
                 ? ClipOval(
                     child: Image.network(
                       shopImg,
@@ -498,14 +408,14 @@ class _CheckOutCartState extends State<CheckOutCart> {
               ],
             ),
           ),
-          // Products list
           ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
             itemCount: cartItems.length,
             itemBuilder: (context, index) {
               var cartItem = cartItems[index];
-              var product = widget.listProduct.firstWhere((p) => p?.id == cartItem.productId, orElse: () => null);
+              var product = 
+                  widget.listProduct.firstWhere((p) => p?.id == cartItem.productId, orElse: () => null);
               if (product != null) {
                 return ProductItem(
                   product: product,
@@ -520,134 +430,238 @@ class _CheckOutCartState extends State<CheckOutCart> {
               return SizedBox();
             },
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Lời nhắn cho Shop',
-                  style: TextStyle(fontSize: 18), // Adjust the font size here
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _messageControllers[cartItems.first.shopId],
-                    decoration: InputDecoration(
-                      hintText: 'Để lại lời nhắn',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-                    ),
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
+          buildShopMessageInput(shopId),
           Divider(),
-          // Shop total and discount
-          Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Tổng tiền hàng: ${NumberFormat("#,###", "vi_VN").format(shopTotal)}đ'),
-                if (discount > 0)
-                  Text('Giảm giá: -${NumberFormat("#,###", "vi_VN").format(discount)}đ',
-                      style: TextStyle(color: Colors.green)),
-                Text('Phí vận chuyển: ${NumberFormat("#,###", "vi_VN").format(shopDeliveryCost)}đ'),
-                Text('Tổng sau giảm giá và phí vận chuyển: ${NumberFormat("#,###", "vi_VN").format(shopTotal - discount + shopDeliveryCost)}đ',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          // Shop voucher button
-          ElevatedButton(
-            onPressed: () async {
-              String shopId = cartItems.first.shopId;
-              List<Voucher>? fetchedVouchers = await fetchVouchers(shopId);
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.black.withOpacity(0.7),
-                builder: (BuildContext context) {
-                  return VoucherShop(
-                    shop: shopName,
-                    price: shopTotal,
-                    voucherList: fetchedVouchers!,
-                    onVoucherSelected: (Voucher? userSelectedVoucher) {
-                      if (userSelectedVoucher != null) {
-                        setState(() {
-                          selectedVouchers[shopName] = userSelectedVoucher;
-                          calculateTotalOrderAmount();
-                        });
-                        print('Selected Voucher: ${userSelectedVoucher.discount}%');
-                      } else {
-                        print('No voucher selected');
-                      }
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              padding: EdgeInsets.zero,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-                side: BorderSide.none,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      FontAwesomeIcons.ticket,
-                      color: Colors.redAccent.shade700,
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      'Voucher của Shop',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(
-                      selectedVouchers[shopName] != null
-                          ? '-${NumberFormat("#,###", "vi_VN").format(discount)}đ'
-                          : 'Chọn hoặc nhập mã',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: selectedVouchers[shopName] != null ? Colors.green : Colors.grey,
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 18,
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
+          buildShopTotalSection(shopTotal, discount, shopDeliveryCost),
+          buildShopVoucherButton(shopId, shopName, shopTotal),
           Divider(),
         ],
       ),
     );
   }
+
+  Widget buildShopMessageInput(String shopId) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Lời nhắn cho Shop',
+          style: TextStyle(fontSize: 18),
+        ),
+        Expanded(
+          child: TextField(
+            controller: _messageControllers[shopId],
+            decoration: InputDecoration(
+              hintText: 'Để lại lời nhắn',
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+            ),
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildShopTotalSection(double shopTotal, double discount, double shopDeliveryCost) {
+    return Padding(
+      padding: EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Tổng tiền hàng: ${NumberFormat("#,###", "vi_VN").format(shopTotal)}đ'),
+          if (discount > 0)
+            Text('Giảm giá: -${NumberFormat("#,###", "vi_VN").format(discount)}đ',
+                style: TextStyle(color: Colors.green)),
+          Text('Phí vận chuyển: ${NumberFormat("#,###", "vi_VN").format(shopDeliveryCost)}đ'),
+          Text(
+              'Tổng sau giảm giá và phí vận chuyển: ${NumberFormat("#,###", "vi_VN").format(shopTotal - discount + shopDeliveryCost)}đ',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget buildShopVoucherButton(String shopId, String shopName, double shopTotal) {
+    return ElevatedButton(
+      onPressed: () async {
+        List<Voucher>? fetchedVouchers = await fetchVouchers(shopId);
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.black.withOpacity(0.7),
+          builder: (BuildContext context) {
+            return VoucherShop(
+              shop: shopName,
+              price: shopTotal,
+              voucherList: fetchedVouchers ?? [],
+              onVoucherSelected: (Voucher? userSelectedVoucher) {
+                setState(() {
+                  if (userSelectedVoucher != null) {
+                    selectedVouchers[shopId] = userSelectedVoucher;
+                    print('Voucher selected for shop $shopId: ${userSelectedVoucher.voucherID}');
+                  } else {
+                    selectedVouchers.remove(shopId);
+                    print('Voucher removed for shop $shopId');
+                  }
+                  calculateShopPrices();
+                  calculateTotalOrderAmount();
+                });
+                Navigator.pop(context);
+              },
+            );
+          },
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        padding: EdgeInsets.zero,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide.none,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                FontAwesomeIcons.ticket,
+                color: Colors.redAccent.shade700,
+              ),
+              SizedBox(width: 10),
+              Text(
+                'Voucher của Shop',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                selectedVouchers[shopId] != null
+                    ? '-${NumberFormat("#,###", "vi_VN").format(shopTotal - (shopPricesAfterDiscount[shopId] ?? 0))}đ'
+                    : 'Chọn hoặc nhập mã',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: selectedVouchers[shopId] != null ? Colors.green : Colors.grey,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget buildAdminVoucherButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.black.withOpacity(0.7),
+          builder: (BuildContext context) {
+            return VoucherShop(
+              shop: "Admin",
+              price: totalOrderAmount,
+              voucherList: adminVoucherList,
+              onVoucherSelected: (Voucher? userSelectedVoucher) {
+                setState(() {
+                  AdminSelectedVoucher = userSelectedVoucher;
+                  calculateTotalOrderAmount();
+                });
+                print('Selected Admin Voucher: ${userSelectedVoucher?.discount ?? "None"}%');
+                Navigator.pop(context);
+              },
+            );
+          },
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        padding: EdgeInsets.zero,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide.none,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                FontAwesomeIcons.ticket,
+                color: Colors.blue.shade700,
+              ),
+              SizedBox(width: 10),
+              Text(
+                'Voucher của Sàn',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                AdminSelectedVoucher != null
+                    ? '-${NumberFormat("#,###", "vi_VN").format(calculateAdminDiscount(totalShopAmount))}đ'
+                    : 'Chọn hoặc nhập mã',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AdminSelectedVoucher != null ? Colors.green : Colors.grey,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget buildPaymentMethodSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, 
+      children: [
+        Text(
+          'Phương thức thanh toán',
+          style: TextStyle(fontSize: 16),
+        ),
+        SizedBox(height: 4), 
+        Text(
+          'Thanh toán khi nhận hàng',
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+
   Widget buildPaymentDetails() {
-    double subtotal = widget.listCart.fold(0, (sum, item) => sum + (item.price * item.quantity));
-    double totalShopDiscount = calculateTotalShopDiscount();
-    double adminDiscount = calculateAdminDiscount();
+    double subtotal = shopPricesBeforeDiscount.values.reduce((a, b) => a + b);
+    double totalShopDiscount = subtotal - shopPricesAfterDiscount.values.reduce((a, b) => a + b);
+    double adminDiscount = calculateAdminDiscount(totalShopAmount);
     double totalVoucherDiscount = totalShopDiscount + adminDiscount;
-    double totalDeliveryCost = deliveryCosts.values.reduce((sum, cost) => sum + cost);
 
     return Container(
       padding: EdgeInsets.all(16),
@@ -665,7 +679,6 @@ class _CheckOutCartState extends State<CheckOutCart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Icon(
@@ -684,20 +697,15 @@ class _CheckOutCartState extends State<CheckOutCart> {
             ],
           ),
           SizedBox(height: 20),
-
-          // Payment Details Rows
           _buildDetailRow('Tổng tiền hàng', subtotal),
           _buildDetailRow('Tổng tiền phí vận chuyển', totalDeliveryCost),
           _buildDetailRow('Shop voucher', -totalShopDiscount, isDiscount: true),
           _buildDetailRow('TTL Voucher', -adminDiscount, isDiscount: true),
           _buildDetailRow('Tổng cộng Voucher giảm giá', -totalVoucherDiscount, isDiscount: true),
-            
           Divider(height: 24),
-          
-          // Total Amount
           _buildDetailRow(
             'Tổng thanh toán',
-            totalOrderAmount,
+            subtotal + totalDeliveryCost - totalShopDiscount - adminDiscount,
             textStyle: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,

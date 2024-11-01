@@ -72,8 +72,8 @@ class CustomerService {
   Future<void> addOrder(
     String orderCode,
     DateTime orderDate,
-    String shopVoucher,
     String adminVoucher,
+    String shopVoucher,
     double total,
     String cusId,
     String name,
@@ -89,6 +89,7 @@ class CustomerService {
     String? color,
     String? size,
     int? quantity,
+    double AdminPriceDiscount,
 
   ) async {
     // Reference to the Firestore collection
@@ -98,8 +99,8 @@ class CustomerService {
     OrderModel newOrder = OrderModel(
       orderCode: orderCode,
       orderDate: orderDate,
-      shopVoucher: shopVoucher,
       adminVoucher: adminVoucher,
+      shopVoucher: shopVoucher,
       total: total,
       cusId: cusId,
       name: name,
@@ -115,6 +116,7 @@ class CustomerService {
       size: size,
       quantity: quantity,
       shopId: shopId,
+      AdminPriceDiscount: AdminPriceDiscount
     );
      Map<String, dynamic> orderData = newOrder.toFirestore();
     try {
@@ -130,7 +132,7 @@ class CustomerService {
     String cusId,
     String size,
     String color, 
-    int quantity
+    int quantity,
   ) async {
     // Reference to the Firestore collection
     CollectionReference ordersCollection = FirebaseFirestore.instance.collection('orderdetails');
@@ -142,7 +144,7 @@ class CustomerService {
       cusId: cusId,
       color: color,
       size: size,
-      quantity: quantity
+      quantity: quantity,
     );
 
     // Convert the Order object to a map

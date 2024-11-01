@@ -4,8 +4,8 @@ import 'package:ecommercettl/models/OrderDetail.dart';
 class OrderModel {
   String orderCode;
   DateTime orderDate;
-  String shopVoucher;
   String adminVoucher;
+  String shopVoucher;
   double total; 
   String cusId;
   String name;
@@ -22,12 +22,13 @@ class OrderModel {
   String? color;
   String? size;
   int? quantity;
+  double AdminPriceDiscount;
 
   OrderModel({
     required this.orderCode,
     required this.orderDate,
-    required this.shopVoucher,
     required this.adminVoucher,
+    required this.shopVoucher,
     required this.total,
     required this.cusId,
     required this.name,
@@ -44,6 +45,7 @@ class OrderModel {
     this.color,
     this.size, 
     this.quantity,
+    required this.AdminPriceDiscount,
   });
 
   // Factory method to create an Order from a Firestore document
@@ -51,8 +53,8 @@ class OrderModel {
     return OrderModel(
       orderCode: data['orderCode'] ?? '',
       orderDate: (data['orderDate'] as Timestamp).toDate(), // Convert Firestore Timestamp to DateTime
-      shopVoucher: data['shopVoucher'] ?? '',
       adminVoucher: data['adminVoucher'] ?? '',
+      shopVoucher: data['shopVoucher'] ?? '',
       total: data['total']?.toDouble() ?? 0.0, // Ensure total is double
       cusId: data['cusId'] ?? '',
       name: data['name'] ?? '',
@@ -67,7 +69,8 @@ class OrderModel {
       productPrice: data['productPrice'] ?? '',
       color: data['color'] ?? '',
       size: data['size'] ?? '',
-      quantity: data['quantity'] ?? 0
+      quantity: data['quantity'] ?? 0,
+      AdminPriceDiscount: data['adminPriceDiscount'] ?? 0
     );
   }
 
@@ -76,8 +79,8 @@ class OrderModel {
     return {
       'orderCode': orderCode,
       'orderDate': Timestamp.fromDate(orderDate), // Convert DateTime to Firestore Timestamp
-      'shopVoucher': shopVoucher,
       'adminVoucher': adminVoucher,
+      'shopVoucher': shopVoucher,
       'total': total,
       'cusId': cusId,
       'name': name,
@@ -92,7 +95,8 @@ class OrderModel {
       'productPrice' : productPrice,
       'color' : color,
       'size' : size,
-      'quantity' : quantity
+      'quantity' : quantity,
+      'adminPriceDiscount': AdminPriceDiscount
     };
   }
 }

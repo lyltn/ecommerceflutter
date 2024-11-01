@@ -2,6 +2,7 @@ import 'package:ecommercettl/models/OrderDetail.dart';
 import 'package:ecommercettl/models/OrderModel.dart';
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/pages/client/shoporderdetail.dart';
+import 'package:ecommercettl/pages/customer/OrderDetail.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +42,7 @@ class _OrderWaitingState extends State<OrderWaiting> {
               quantity: order.quantity ?? 0,
               totalProduct: order.productCount,
               totalPrice: order.total,
+              orderCode: order.orderCode,
               onTap: () {
                 // Navigator.push(
                 //   context,
@@ -62,6 +64,7 @@ class _OrderWaitingState extends State<OrderWaiting> {
     required int quantity,
     required totalProduct,
     required totalPrice,
+    required orderCode,
     required VoidCallback onTap,
   }) {
     return Card(
@@ -132,7 +135,16 @@ class _OrderWaitingState extends State<OrderWaiting> {
               GestureDetector(
                 onTap: onTap,
                 child: OutlinedButton.icon(
-                  onPressed: () {}, // Can be empty if onTap is used
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                                builder: (context) =>
+                                    SeeOrderDetail(orderId: orderCode),
+                      ),
+                    );
+
+                  }, // Can be empty if onTap is used
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.all(8.0),
                     shape: RoundedRectangleBorder(
