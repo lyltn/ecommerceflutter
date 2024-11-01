@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -100,6 +99,7 @@ class _PostPageState extends State<PostPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Bài Viết'),
+        backgroundColor: const Color(0xFF15A362),
       ),
       body: Column(
         children: [
@@ -112,7 +112,7 @@ class _PostPageState extends State<PostPage> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // Điều hướng đến trang bài đăng của người dùng
+                          // Navigate to user posts page
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => UserPostsPage()),
@@ -129,31 +129,36 @@ class _PostPageState extends State<PostPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                userModel!.username ?? 'Guest',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            userModel!.username ?? 'Guest',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           SizedBox(height: 4),
                           Container(
                             width: 200,
-                            height: 30, // Set a smaller height
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 3), // changes position of shadow
+                                ),
+                              ],
+                            ),
                             child: TextField(
                               decoration: InputDecoration(
                                 labelText: 'Tìm kiếm',
-                                labelStyle: TextStyle(color: const Color.fromARGB(255, 206, 206, 206)), // Make the label text grey
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                prefixIcon: Icon(Icons.search, size: 20), // Adjust the size of the search icon
-                                contentPadding: EdgeInsets.symmetric(vertical: 5), // Adjust the vertical padding
+                                labelStyle: TextStyle(color: const Color.fromARGB(255, 206, 206, 206)),
+                                border: InputBorder.none,
+                                prefixIcon: Icon(Icons.search, size: 20),
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                               ),
                               onChanged: _onSearchChanged,
                             ),
@@ -187,8 +192,8 @@ class _PostPageState extends State<PostPage> {
                 return GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    crossAxisSpacing: 3.0,
-                    mainAxisSpacing: 3.0,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
                   ),
                   itemCount: posts.length,
                   itemBuilder: (context, index) {
@@ -206,7 +211,40 @@ class _PostPageState extends State<PostPage> {
                           ),
                         );
                       },
-                      child: Image.network(post.imageUrls.first, fit: BoxFit.cover),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: FutureBuilder<void>(
+                          future: Future.value(), // Replace with your actual future
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(child: Text('Error: ${snapshot.error}'));
+                            } else {
+                              return Image.network(
+                                post.imageUrls.first,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                            : null,
+                                      ),
+                                    );
+                                  }
+                                },
+                                errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                                  return Center(child: Text('Error loading image'));
+                                },
+                              );
+                            }
+                          },
+                        ),
+                      ),
                     );
                   },
                 );
@@ -215,7 +253,6 @@ class _PostPageState extends State<PostPage> {
           ),
         ],
       ),
-      
     );
   }
 }

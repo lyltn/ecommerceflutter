@@ -46,4 +46,21 @@ class CommentService {
       return snapshot.docs.map((doc) => CommentModel.fromFirestore(doc)).toList();
     });
   }
+  Future<List<CommentModel>> fetchComments(String postId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .orderBy('createdDate', descending: true) // Sort comments by creation date
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => CommentModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print("Error fetching comments: $e");
+      return []; // Return an empty list in case of error
+    }
+  }
 }

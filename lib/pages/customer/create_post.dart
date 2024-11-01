@@ -16,13 +16,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _linkController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  File? _image;
+  List<File> _images = [];
 
-  Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  Future<void> _pickImages() async {
+    final pickedFiles = await ImagePicker().pickMultiImage();
+    if (pickedFiles != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images = pickedFiles.map((pickedFile) => File(pickedFile.path)).toList();
       });
     }
   }
@@ -42,7 +42,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(width: 16),
-                  Text('Creating post...'),
+                  Text('Đang tạo bài viết...'),
                 ],
               ),
             ),
@@ -50,15 +50,19 @@ class _CreatePostPageState extends State<CreatePostPage> {
         },
       );
 
-      // Upload image to Firebase Storage and get the download URL
-      String imageUrl = await _postService.uploadImage(_image!);
+      // Upload images to Firebase Storage and get the download URLs
+      List<String> imageUrls = [];
+      for (File image in _images) {
+        String imageUrl = await _postService.uploadImage(image);
+        imageUrls.add(imageUrl);
+      }
 
-      // Create a new post with the image URL
+      // Create a new post with the image URLs
       PostModel newPost = PostModel(
         id: FirebaseFirestore.instance.collection('posts').doc().id,
         userId: FirebaseAuth.instance.currentUser!.uid,
         content: _contentController.text,
-        imageUrls: [imageUrl],
+        imageUrls: imageUrls,
         link: _linkController.text,
         status: true,
         createdDate: DateTime.now(),
@@ -73,16 +77,16 @@ class _CreatePostPageState extends State<CreatePostPage> {
       // Hide loading spinner
       Navigator.pop(context);
 
-      // Clear the selected image and text fields
+      // Clear the selected images and text fields
       setState(() {
-        _image = null;
+        _images = [];
         _contentController.clear();
         _linkController.clear();
       });
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post created successfully!')),
+        SnackBar(content: Text('Tạo bài viết thành công!')),
       );
 
       // Navigate back to the previous screen
@@ -94,43 +98,110 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Post'),
+        title: Text('Tạo bài viết'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _contentController,
-                decoration: InputDecoration(labelText: 'Content'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter content';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _linkController,
-                decoration: InputDecoration(labelText: 'Link'),
-              ),
-              SizedBox(height: 16),
-              _image != null
-                  ? Image.file(_image!)
-                  : Text('No image selected.'),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text('Pick Image'),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _createPost,
-                child: Text('Create Post'),
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bạn đang nghĩ gì vậy?',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 12),
+                TextFormField(
+                  controller: _contentController,
+                  decoration: InputDecoration(
+                    labelText: 'Nội dung',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Color(0xFF15A362)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Color(0xFF15A362), width: 2.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Vui lòng nhập nội dung';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 12),
+                TextFormField(
+                  controller: _linkController,
+                  decoration: InputDecoration(
+                    labelText: 'Link',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.teal),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.teal, width: 2.0),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+                if (_images.isNotEmpty)
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _images.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 4.0,
+                      mainAxisSpacing: 4.0,
+                    ),
+                    itemBuilder: (context, index) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Image.file(
+                          _images[index],
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  )
+                else
+                  Center(child: Text('Không có ảnh nào được chọn.')),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _pickImages,
+                  style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF15A362),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  ),
+                  child: Text(
+                  'Chọn ảnh',
+                  style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _createPost,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF15A362),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
+                    child: Text(
+                    'Tạo bài viết',
+                    style: TextStyle(color: Colors.white),
+                    ),
+                  
+                ),
+              ],
+            ),
           ),
         ),
       ),

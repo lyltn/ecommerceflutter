@@ -7,9 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ecommercettl/services/auth_service.dart';
 import 'package:ecommercettl/services/comment_service.dart';
-import 'package:ecommercettl/services/post_service.dart';
 import 'package:ecommercettl/services/reaction_service.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class PostDetailPage extends StatefulWidget {
   final List<PostModel> posts;
@@ -22,30 +22,38 @@ class PostDetailPage extends StatefulWidget {
 }
 
 class _PostDetailPageState extends State<PostDetailPage> {
-  PageController _pageController;
+  late final PageController _pageController;
   final CommentService _commentService = CommentService();
-  final PostService _postService = PostService();
   final ReactionService _reactionService = ReactionService();
   ReactionModel? _userReaction;
   final TextEditingController _commentController = TextEditingController();
-
-  _PostDetailPageState() : _pageController = PageController();
+  int _currentImageIndex = 0;
+  late String _currentPostId;
+  late Future<UserModel?> _userProfileFuture;
+  late Stream<DocumentSnapshot> _postStream;
+  late Stream<List<CommentModel>> _commentsStream;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
-    _loadUserReaction(widget.posts[widget.initialIndex].id);
+    _currentPostId = widget.posts[widget.initialIndex].id;
+    _loadUserReaction(_currentPostId);
+    _loadPostData(_currentPostId);
   }
 
   Future<void> _loadUserReaction(String postId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final reaction = await _reactionService.getUserReaction(postId, user.uid);
-      setState(() {
-        _userReaction = reaction;
-      });
+      setState(() => _userReaction = reaction);
     }
+  }
+
+  void _loadPostData(String postId) {
+    _userProfileFuture = AuthService().getUserProfile(widget.posts[widget.initialIndex].userId);
+    _postStream = FirebaseFirestore.instance.collection('posts').doc(postId).snapshots();
+    _commentsStream = _commentService.getComments(postId);
   }
 
   Future<void> _addComment(String postId, String content) async {
@@ -61,20 +69,24 @@ class _PostDetailPageState extends State<PostDetailPage> {
       await _commentService.addComment(postId, comment);
     }
   }
-  Future<void> _editComment(String postId, CommentModel comment, String newContent) async {
-    final updatedComment = CommentModel(
-      id: comment.id,
-      postId: postId,
-      userId: comment.userId,
-      content: newContent,
-      createdDate: comment.createdDate,
-    );
-    await _commentService.updateComment(postId, updatedComment);
+
+  Future<void> _editComment(String postId, String commentId, String newContent) async {
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc(commentId)
+        .update({'content': newContent});
   }
+
   Future<void> _deleteComment(String postId, String commentId) async {
-    await _commentService.deleteComment(postId, commentId);
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc(commentId)
+        .delete();
   }
-  
 
   Future<void> _addOrUpdateReaction(String postId, String reactionType) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -84,57 +96,19 @@ class _PostDetailPageState extends State<PostDetailPage> {
           .doc(postId)
           .collection('reactions')
           .doc(user.uid);
-
       final reactionSnapshot = await reactionRef.get();
 
       if (reactionSnapshot.exists) {
         final currentReaction = ReactionModel.fromFirestore(reactionSnapshot);
-
         if (currentReaction.type == reactionType) {
-          // Remove the reaction if it is the same as the current reaction
           await reactionRef.delete();
-
-          // Update the reaction count in Firestore
-          final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-          await postRef.update({
-            if (reactionType == 'like') 'likeCount': FieldValue.increment(-1),
-            if (reactionType == 'dislike') 'dislikeCount': FieldValue.increment(-1),
-          });
-
-          // Update the local state to reflect the removed reaction
-          setState(() {
-            if (reactionType == 'like') {
-              widget.posts[widget.initialIndex].likeCount -= 1;
-            } else if (reactionType == 'dislike') {
-              widget.posts[widget.initialIndex].dislikeCount -= 1;
-            }
-            _userReaction = null;
-          });
+          await _updateReactionCount(postId, reactionType, -1);
+          setState(() => _userReaction = null);
         } else {
-          // Update the reaction if it is different from the current reaction
           await reactionRef.update({'type': reactionType});
-
-          // Update the reaction count in Firestore
-          final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-          await postRef.update({
-            if (currentReaction.type == 'like') 'likeCount': FieldValue.increment(-1),
-            if (currentReaction.type == 'dislike') 'dislikeCount': FieldValue.increment(-1),
-            if (reactionType == 'like') 'likeCount': FieldValue.increment(1),
-            if (reactionType == 'dislike') 'dislikeCount': FieldValue.increment(1),
-          });
-
-          // Update the local state to reflect the new reaction
+          await _updateReactionCount(postId, currentReaction.type, -1);
+          await _updateReactionCount(postId, reactionType, 1);
           setState(() {
-            if (currentReaction.type == 'like') {
-              widget.posts[widget.initialIndex].likeCount -= 1;
-            } else if (currentReaction.type == 'dislike') {
-              widget.posts[widget.initialIndex].dislikeCount -= 1;
-            }
-            if (reactionType == 'like') {
-              widget.posts[widget.initialIndex].likeCount += 1;
-            } else if (reactionType == 'dislike') {
-              widget.posts[widget.initialIndex].dislikeCount += 1;
-            }
             _userReaction = ReactionModel(
               id: user.uid,
               postId: postId,
@@ -145,80 +119,61 @@ class _PostDetailPageState extends State<PostDetailPage> {
           });
         }
       } else {
-        // Add a new reaction if no reaction exists
-        final reaction = ReactionModel(
+        await reactionRef.set(ReactionModel(
           id: user.uid,
           postId: postId,
           userId: user.uid,
           type: reactionType,
           createdDate: DateTime.now(),
-        );
-
-        await reactionRef.set(reaction.toMap());
-
-        // Update the reaction count in Firestore
-        final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-        await postRef.update({
-          if (reactionType == 'like') 'likeCount': FieldValue.increment(1),
-          if (reactionType == 'dislike') 'dislikeCount': FieldValue.increment(1),
-        });
-
-        // Update the local state to reflect the new reaction
+        ).toMap());
+        await _updateReactionCount(postId, reactionType, 1);
         setState(() {
-          if (reactionType == 'like') {
-            widget.posts[widget.initialIndex].likeCount += 1;
-          } else if (reactionType == 'dislike') {
-            widget.posts[widget.initialIndex].dislikeCount += 1;
-          }
-          _userReaction = reaction;
+          _userReaction = ReactionModel(
+            id: user.uid,
+            postId: postId,
+            userId: user.uid,
+            type: reactionType,
+            createdDate: DateTime.now(),
+          );
         });
       }
     }
   }
 
-   void _showEditCommentDialog(String postId, CommentModel comment) {
-    final TextEditingController _editCommentController = TextEditingController(text: comment.content);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Edit Comment'),
-          content: TextField(
-            controller: _editCommentController,
-            decoration: InputDecoration(hintText: 'Enter new comment'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _editComment(postId, comment, _editCommentController.text);
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _updateReactionCount(String postId, String reactionType, int change) async {
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+    await postRef.update({
+      reactionType == 'like' ? 'likeCount' : 'dislikeCount': FieldValue.increment(change),
+    });
   }
+  Future<UserModel?> _getUserData(String userId) async {
+  final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+  if (doc.exists) {
+    return UserModel.fromFirestore(doc);
+  }
+  return null;
+}
 
+  String _formatDate(DateTime dateTime) {
+    return DateFormat('hh:mm a, dd MMMM yyyy').format(dateTime);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bài viết'),
+        title: Text('Post Details', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
       ),
       body: PageView.builder(
         controller: _pageController,
         itemCount: widget.posts.length,
         onPageChanged: (index) {
-          _loadUserReaction(widget.posts[index].id);
+          setState(() {
+            _currentPostId = widget.posts[index].id;
+            _loadUserReaction(_currentPostId);
+            _loadPostData(_currentPostId);
+          });
         },
         itemBuilder: (context, index) {
           final post = widget.posts[index];
@@ -227,13 +182,34 @@ class _PostDetailPageState extends State<PostDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.network(post.imageUrls.first, fit: BoxFit.cover),
-                SizedBox(height: 8),
+                Container(
+                  height: 400, // Tăng chiều cao cho hình ảnh
+                  child: Stack(
+                    children: [
+                      PageView.builder(
+                        itemCount: post.imageUrls.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentImageIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, imageIndex) {
+                          return _buildImage(post.imageUrls[imageIndex]);
+                        },
+                      ),
+                      _buildImageIndicators(post.imageUrls.length),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12),
                 FutureBuilder<UserModel?>(
-                  future: AuthService().getUserProfile(post.userId),
+                  future: _getUserData(post.userId),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return SpinKitFadingCircle(
+                        color: Colors.blue,
+                        size: 50.0,
+                      );
                     } else if (snapshot.hasError) {
                       return Text('Error loading user data');
                     } else if (snapshot.hasData && snapshot.data != null) {
@@ -242,8 +218,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         children: [
                           CircleAvatar(
                             radius: 20,
-                            backgroundImage: user.imgAvatar != null
-                                ? NetworkImage(user.imgAvatar!)
+                            backgroundImage: user.imgAvatar.isNotEmpty
+                                ? NetworkImage(user.imgAvatar)
                                 : AssetImage('assets/default_avatar.png') as ImageProvider,
                           ),
                           SizedBox(width: 8),
@@ -251,11 +227,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                user.username ?? 'Guest',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                user.username.isNotEmpty ? user.username : 'Anonymous',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 DateFormat('dd/MM/yyyy').format(post.createdDate),
@@ -273,19 +246,43 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 SizedBox(height: 8),
                 Text(post.content, style: TextStyle(fontSize: 16)),
                 SizedBox(height: 8),
-                Row(
-                  children: [
-                    _buildReactionButton(post.id, 'like', Icons.thumb_up, post.likeCount),
-                    _buildReactionButton(post.id, 'dislike', Icons.thumb_down, post.dislikeCount),
-                  ],
+                StreamBuilder<DocumentSnapshot>(
+                  stream: _postStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: SpinKitFadingCircle(
+                          color: Colors.blue,
+                          size: 50.0,
+                        ),
+                      );
+                    }
+                    final postData = snapshot.data!;
+                    final likeCount = postData['likeCount'] ?? 0;
+                    final dislikeCount = postData['dislikeCount'] ?? 0;
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        _buildReactionButton(post.id, 'like', Icons.thumb_up, likeCount),
+                        SizedBox(width: 16),
+                        _buildReactionButton(post.id, 'dislike', Icons.thumb_down, dislikeCount),
+                      ],
+                    );
+                  },
                 ),
                 Divider(),
                 Expanded(
                   child: StreamBuilder<List<CommentModel>>(
-                    stream: _commentService.getComments(post.id),
+                    stream: _commentsStream,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
-                        return Center(child: CircularProgressIndicator());
+                        return Center(
+                          child: SpinKitFadingCircle(
+                            color: Colors.blue,
+                            size: 50.0,
+                          ),
+                        );
                       }
                       final comments = snapshot.data!;
                       return ListView.builder(
@@ -296,36 +293,59 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             future: AuthService().getUserProfile(comment.userId),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return CircularProgressIndicator();
+                                return Center(
+                                  child: SpinKitFadingCircle(
+                                    color: Colors.blue,
+                                    size: 50.0,
+                                  ),
+                                );
                               } else if (snapshot.hasError) {
                                 return Text('Error loading user data');
                               } else if (snapshot.hasData && snapshot.data != null) {
                                 UserModel user = snapshot.data!;
                                 return ListTile(
                                   leading: CircleAvatar(
-                                    backgroundImage: user.imgAvatar != null
-                                        ? NetworkImage(user.imgAvatar!)
+                                    backgroundImage: user.imgAvatar.isNotEmpty
+                                        ? NetworkImage(user.imgAvatar)
                                         : AssetImage('assets/default_avatar.png') as ImageProvider,
                                   ),
-                                  title: Text(user.username ?? 'Guest'),
-                                  subtitle: Text(comment.content),
+                                  title: Text(
+                                    user.username.isNotEmpty ? user.username : 'Anonymous',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        comment.content,
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        _formatDate(comment.createdDate),
+                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
                                   trailing: comment.userId == FirebaseAuth.instance.currentUser!.uid
                                       ? PopupMenuButton<String>(
-                                          onSelected: (value) async {
+                                          onSelected: (value) {
                                             if (value == 'edit') {
-                                              _showEditCommentDialog(post.id, comment);
+                                              _showEditCommentDialog(comment);
                                             } else if (value == 'delete') {
-                                              await _deleteComment(post.id, comment.id);
+                                              _deleteComment(_currentPostId, comment.id);
                                             }
                                           },
-                                          itemBuilder: (BuildContext context) {
-                                            return {'edit', 'delete'}.map((String choice) {
-                                              return PopupMenuItem<String>(
-                                                value: choice,
-                                                child: Text(choice == 'edit' ? 'Chỉnh sửa' : 'Xóa'),
-                                              );
-                                            }).toList();
-                                          },
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text('Edit'),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text('Delete'),
+                                            ),
+                                          ],
                                         )
                                       : null,
                                 );
@@ -339,22 +359,42 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     },
                   ),
                 ),
-                Divider(),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          controller: _commentController,
-                          decoration: InputDecoration(
-                            hintText: 'Thêm bình luận...',
-                            border: OutlineInputBorder(),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 5.0,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _commentController,
+                            style: TextStyle(color: Colors.black),
+                            decoration: InputDecoration(
+                              hintText: 'Add a comment...',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              filled: true,
+                              fillColor: Colors.transparent,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                            ),
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.send),
+                        icon: Icon(Icons.send, color: Colors.blue),
                         onPressed: () {
                           if (_commentController.text.isNotEmpty) {
                             _addComment(post.id, _commentController.text);
@@ -373,18 +413,109 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget _buildReactionButton(String postId, String reactionType, IconData icon, int count) {
-    return Row(
-      children: [
-        IconButton(
-          icon: Icon(icon),
-          color: _userReaction?.type == reactionType ? Colors.blue : Colors.grey,
-          onPressed: () async {
-            await _addOrUpdateReaction(postId, reactionType);
-          },
-        ),
-        Text('$count'),
-      ],
+  void _showEditCommentDialog(CommentModel comment) {
+    final TextEditingController _editCommentController = TextEditingController(text: comment.content);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit Comment'),
+          content: TextField(
+            controller: _editCommentController,
+            decoration: InputDecoration(hintText: 'Enter your comment'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _editComment(_currentPostId, comment.id, _editCommentController.text);
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Widget _buildImage(String imageUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12.0),
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: Container(
+              width: 50,
+              height: 50,
+              child: SpinKitFadingCircle(
+                color: Colors.blue,
+                size: 50.0,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Center(child: Icon(Icons.error));
+        },
+      ),
+    );
+  }
+
+  Widget _buildImageIndicators(int imageCount) {
+    return Positioned(
+      bottom: 10,
+      left: 0,
+      right: 0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          imageCount,
+          (index) => Container(
+            width: 8.0,
+            height: 8.0,
+            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 3.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _currentImageIndex == index
+                  ? const Color.fromARGB(255, 20, 155, 24) // Active indicator color
+                  : Colors.grey, // Inactive indicator color
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReactionButton(String postId, String reactionType, IconData icon, int count) {
+    return GestureDetector(
+      onTap: () => _addOrUpdateReaction(postId, reactionType),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: _userReaction?.type == reactionType ? Colors.blue : Colors.grey,
+          ),
+          SizedBox(width: 4),
+          Text(count.toString()),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _commentController.dispose();
+    super.dispose();
   }
 }
