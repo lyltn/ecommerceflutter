@@ -15,7 +15,10 @@ class PostDetailPage extends StatefulWidget {
   final List<PostModel> posts;
   final int initialIndex;
 
-  PostDetailPage({required this.posts, required this.initialIndex, required PostModel post});
+  PostDetailPage(
+      {required this.posts,
+      required this.initialIndex,
+      required PostModel post});
 
   @override
   _PostDetailPageState createState() => _PostDetailPageState();
@@ -32,6 +35,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   late Future<UserModel?> _userProfileFuture;
   late Stream<DocumentSnapshot> _postStream;
   late Stream<List<CommentModel>> _commentsStream;
+  bool _showAllComments = false;
 
   @override
   void initState() {
@@ -51,8 +55,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   void _loadPostData(String postId) {
-    _userProfileFuture = AuthService().getUserProfile(widget.posts[widget.initialIndex].userId);
-    _postStream = FirebaseFirestore.instance.collection('posts').doc(postId).snapshots();
+    _userProfileFuture =
+        AuthService().getUserProfile(widget.posts[widget.initialIndex].userId);
+    _postStream =
+        FirebaseFirestore.instance.collection('posts').doc(postId).snapshots();
     _commentsStream = _commentService.getComments(postId);
   }
 
@@ -60,7 +66,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final comment = CommentModel(
-        id: FirebaseFirestore.instance.collection('posts').doc(postId).collection('comments').doc().id,
+        id: FirebaseFirestore.instance
+            .collection('posts')
+            .doc(postId)
+            .collection('comments')
+            .doc()
+            .id,
         postId: postId,
         userId: user.uid,
         content: content,
@@ -70,7 +81,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
-  Future<void> _editComment(String postId, String commentId, String newContent) async {
+  Future<void> _editComment(
+      String postId, String commentId, String newContent) async {
     await FirebaseFirestore.instance
         .collection('posts')
         .doc(postId)
@@ -140,19 +152,23 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
-  Future<void> _updateReactionCount(String postId, String reactionType, int change) async {
+  Future<void> _updateReactionCount(
+      String postId, String reactionType, int change) async {
     final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
     await postRef.update({
-      reactionType == 'like' ? 'likeCount' : 'dislikeCount': FieldValue.increment(change),
+      reactionType == 'like' ? 'likeCount' : 'dislikeCount':
+          FieldValue.increment(change),
     });
   }
+
   Future<UserModel?> _getUserData(String userId) async {
-  final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-  if (doc.exists) {
-    return UserModel.fromFirestore(doc);
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (doc.exists) {
+      return UserModel.fromFirestore(doc);
+    }
+    return null;
   }
-  return null;
-}
 
   String _formatDate(DateTime dateTime) {
     return DateFormat('hh:mm a, dd MMMM yyyy').format(dateTime);
@@ -162,8 +178,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Post Details', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        title: Text('Bài viết'),
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -177,235 +192,272 @@ class _PostDetailPageState extends State<PostDetailPage> {
         },
         itemBuilder: (context, index) {
           final post = widget.posts[index];
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 400, // Tăng chiều cao cho hình ảnh
-                  child: Stack(
-                    children: [
-                      PageView.builder(
-                        itemCount: post.imageUrls.length,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _currentImageIndex = index;
-                          });
-                        },
-                        itemBuilder: (context, imageIndex) {
-                          return _buildImage(post.imageUrls[imageIndex]);
-                        },
-                      ),
-                      _buildImageIndicators(post.imageUrls.length),
-                    ],
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 700, // Image container height
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          itemCount: post.imageUrls.length,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
+                          itemBuilder: (context, imageIndex) {
+                            return _buildImage(post.imageUrls[imageIndex]);
+                          },
+                        ),
+                        _buildImageIndicators(post.imageUrls.length),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 12),
-                FutureBuilder<UserModel?>(
-                  future: _getUserData(post.userId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return SpinKitFadingCircle(
-                        color: Colors.blue,
-                        size: 50.0,
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text('Error loading user data');
-                    } else if (snapshot.hasData && snapshot.data != null) {
-                      UserModel user = snapshot.data!;
+                  SizedBox(height: 12),
+                  FutureBuilder<UserModel?>(
+                    future: _getUserData(post.userId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return SpinKitFadingCircle(
+                            color: Colors.blue, size: 50.0);
+                      } else if (snapshot.hasError) {
+                        return Text('Error loading user data');
+                      } else if (snapshot.hasData && snapshot.data != null) {
+                        UserModel user = snapshot.data!;
+                        return Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: user.imgAvatar.isNotEmpty
+                                  ? NetworkImage(user.imgAvatar)
+                                  : AssetImage('assets/default_avatar.png')
+                                      as ImageProvider,
+                            ),
+                            SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.username.isNotEmpty
+                                      ? user.username
+                                      : 'Anonymous',
+                                  style: TextStyle(
+                                      fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  DateFormat('dd/MM/yyyy')
+                                      .format(post.createdDate),
+                                  style:
+                                      TextStyle(fontSize: 16, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Text('User not found');
+                      }
+                    },
+                  ),
+                  SizedBox(height: 8),
+                  Text(post.content, style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 8),
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: _postStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child:
+                              SpinKitFadingCircle(color: Colors.blue, size: 50.0),
+                        );
+                      }
+                      final postData = snapshot.data!;
+                      final likeCount = postData['likeCount'] ?? 0;
+                      final dislikeCount = postData['dislikeCount'] ?? 0;
+
                       return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: user.imgAvatar.isNotEmpty
-                                ? NetworkImage(user.imgAvatar)
-                                : AssetImage('assets/default_avatar.png') as ImageProvider,
-                          ),
-                          SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.username.isNotEmpty ? user.username : 'Anonymous',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                DateFormat('dd/MM/yyyy').format(post.createdDate),
-                                style: TextStyle(fontSize: 16, color: Colors.grey),
-                              ),
-                            ],
-                          ),
+                          _buildReactionButton(
+                              _currentPostId, 'like', Icons.thumb_up, likeCount),
+                          SizedBox(width: 16),
+                          _buildReactionButton(
+                              _currentPostId, 'dislike', Icons.thumb_down, dislikeCount),
                         ],
                       );
-                    } else {
-                      return Text('User not found');
-                    }
-                  },
-                ),
-                SizedBox(height: 8),
-                Text(post.content, style: TextStyle(fontSize: 16)),
-                SizedBox(height: 8),
-                StreamBuilder<DocumentSnapshot>(
-                  stream: _postStream,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: SpinKitFadingCircle(
-                          color: Colors.blue,
-                          size: 50.0,
-                        ),
-                      );
-                    }
-                    final postData = snapshot.data!;
-                    final likeCount = postData['likeCount'] ?? 0;
-                    final dislikeCount = postData['dislikeCount'] ?? 0;
-
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        _buildReactionButton(post.id, 'like', Icons.thumb_up, likeCount),
-                        SizedBox(width: 16),
-                        _buildReactionButton(post.id, 'dislike', Icons.thumb_down, dislikeCount),
-                      ],
-                    );
-                  },
-                ),
-                Divider(),
-                Expanded(
-                  child: StreamBuilder<List<CommentModel>>(
+                    },
+                  ),
+                  Divider(),
+                  StreamBuilder<List<CommentModel>>(
                     stream: _commentsStream,
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Center(
                           child: SpinKitFadingCircle(
-                            color: Colors.blue,
-                            size: 50.0,
-                          ),
+                              color: Colors.blue, size: 50.0),
                         );
                       }
                       final comments = snapshot.data!;
-                      return ListView.builder(
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final comment = comments[index];
-                          return FutureBuilder<UserModel?>(
-                            future: AuthService().getUserProfile(comment.userId),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return Center(
-                                  child: SpinKitFadingCircle(
-                                    color: Colors.blue,
-                                    size: 50.0,
-                                  ),
-                                );
-                              } else if (snapshot.hasError) {
-                                return Text('Error loading user data');
-                              } else if (snapshot.hasData && snapshot.data != null) {
-                                UserModel user = snapshot.data!;
-                                return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: user.imgAvatar.isNotEmpty
-                                        ? NetworkImage(user.imgAvatar)
-                                        : AssetImage('assets/default_avatar.png') as ImageProvider,
-                                  ),
-                                  title: Text(
-                                    user.username.isNotEmpty ? user.username : 'Anonymous',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        comment.content,
+                      final commentsToShow = _showAllComments
+                          ? comments
+                          : comments.take(2).toList();
+                      return Column(
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: commentsToShow.length,
+                            itemBuilder: (context, index) {
+                              final comment = commentsToShow[index];
+                              return FutureBuilder<UserModel?>(
+                                future: AuthService().getUserProfile(comment.userId),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                      child: SpinKitFadingCircle(
+                                          color: Colors.blue, size: 50.0),
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error loading user data');
+                                  } else if (snapshot.hasData &&
+                                      snapshot.data != null) {
+                                    UserModel user = snapshot.data!;
+                                    return ListTile(
+                                      leading: CircleAvatar(
+                                        backgroundImage: user.imgAvatar.isNotEmpty
+                                            ? NetworkImage(user.imgAvatar)
+                                            : AssetImage('assets/default_avatar.png')
+                                                as ImageProvider,
+                                      ),
+                                      title: Text(
+                                        user.username.isNotEmpty
+                                            ? user.username
+                                            : 'Anonymous',
                                         style: TextStyle(color: Colors.black),
                                       ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        _formatDate(comment.createdDate),
-                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            comment.content,
+                                            style: TextStyle(color: Colors.black),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            _formatDate(comment.createdDate),
+                                            style: TextStyle(
+                                                color: Colors.grey, fontSize: 12),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  trailing: comment.userId == FirebaseAuth.instance.currentUser!.uid
-                                      ? PopupMenuButton<String>(
-                                          onSelected: (value) {
-                                            if (value == 'edit') {
-                                              _showEditCommentDialog(comment);
-                                            } else if (value == 'delete') {
-                                              _deleteComment(_currentPostId, comment.id);
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem(
-                                              value: 'edit',
-                                              child: Text('Edit'),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'delete',
-                                              child: Text('Delete'),
-                                            ),
-                                          ],
-                                        )
-                                      : null,
-                                );
-                              } else {
-                                return Text('User not found');
-                              }
+                                      trailing: comment.userId ==
+                                              FirebaseAuth.instance.currentUser!.uid
+                                          ? PopupMenuButton<String>(
+                                              onSelected: (value) {
+                                                if (value == 'edit') {
+                                                  _showEditCommentDialog(comment);
+                                                } else if (value == 'delete') {
+                                                  _deleteComment(
+                                                      _currentPostId, comment.id);
+                                                }
+                                              },
+                                              itemBuilder: (context) => [
+                                                PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Text('Edit'),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Text('Delete'),
+                                                ),
+                                              ],
+                                            )
+                                          : null,
+                                    );
+                                  } else {
+                                    return Text('User not found');
+                                  }
+                                },
+                              );
                             },
-                          );
-                        },
+                          ),
+                          if (comments.length > 2 && !_showAllComments)
+                          TextButton(
+                          onPressed: () {
+                            setState(() {
+                            _showAllComments = true;
+                            });
+                          },
+                          child: Text('Thêm'),
+                          ),
+                        if (comments.length > 2 && _showAllComments)
+                          TextButton(
+                          onPressed: () {
+                            setState(() {
+                            _showAllComments = false;
+                            });
+                          },
+                          child: Text('Ẩn'),
+                          ),
+                        ],
                       );
                     },
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 5.0,
-                                offset: Offset(0, 2),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 5.0,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: _commentController,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                hintText: 'Viết bình luận ...',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                filled: true,
+                                fillColor: Colors.transparent,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 12.0, horizontal: 16.0),
                               ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _commentController,
-                            style: TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                              hintText: 'Add a comment...',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              filled: true,
-                              fillColor: Colors.transparent,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                             ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.send, color: Colors.blue),
-                        onPressed: () {
-                          if (_commentController.text.isNotEmpty) {
-                            _addComment(post.id, _commentController.text);
-                            _commentController.clear();
-                          }
-                        },
-                      ),
-                    ],
+                        IconButton(
+                          icon: Icon(Icons.send, color: Colors.blue),
+                          onPressed: () {
+                            if (_commentController.text.isNotEmpty) {
+                              _addComment(_currentPostId,
+                                  _commentController.text);
+                              _commentController.clear();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -414,7 +466,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   void _showEditCommentDialog(CommentModel comment) {
-    final TextEditingController _editCommentController = TextEditingController(text: comment.content);
+    final TextEditingController _editCommentController =
+        TextEditingController(text: comment.content);
     showDialog(
       context: context,
       builder: (context) {
@@ -433,7 +486,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
             ),
             TextButton(
               onPressed: () {
-                _editComment(_currentPostId, comment.id, _editCommentController.text);
+                _editComment(
+                    _currentPostId, comment.id, _editCommentController.text);
                 Navigator.of(context).pop();
               },
               child: Text('Save'),
@@ -487,7 +541,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: _currentImageIndex == index
-                  ? const Color.fromARGB(255, 20, 155, 24) // Active indicator color
+                  ? const Color.fromARGB(
+                      255, 20, 155, 24) // Active indicator color
                   : Colors.grey, // Inactive indicator color
             ),
           ),
@@ -496,14 +551,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget _buildReactionButton(String postId, String reactionType, IconData icon, int count) {
+  Widget _buildReactionButton(
+      String postId, String reactionType, IconData icon, int count) {
     return GestureDetector(
       onTap: () => _addOrUpdateReaction(postId, reactionType),
       child: Row(
         children: [
           Icon(
             icon,
-            color: _userReaction?.type == reactionType ? Colors.blue : Colors.grey,
+            color:
+                _userReaction?.type == reactionType ? Colors.blue : Colors.grey,
           ),
           SizedBox(width: 4),
           Text(count.toString()),
