@@ -3,6 +3,7 @@ import 'package:ecommercettl/models/CartModel.dart';
 import 'package:ecommercettl/models/OrderDetail.dart';
 import 'package:ecommercettl/models/OrderModel.dart';
 import 'package:ecommercettl/models/Product.dart';
+import 'package:ecommercettl/models/ReviewModel.dart';
 import 'package:ecommercettl/models/UserModel.dart';
 import 'package:ecommercettl/models/VoucherModel.dart';
 
@@ -132,6 +133,7 @@ class CustomerService {
       size: size,
       quantity: quantity,
       shopId: shopId,
+      reviews: 0,
       AdminPriceDiscount: AdminPriceDiscount
     );
      Map<String, dynamic> orderData = newOrder.toFirestore();
@@ -182,7 +184,7 @@ class CustomerService {
           .where('cusId', isEqualTo: cusId)
           .where('status', isEqualTo: query)
           .get();
-      print("cusidne: ${cusId}");
+      print("fetchthanhcongneeeeeeeeeeeeeeeeee: ${cusId}");
       List<OrderModel> orderList = querySnapshot.docs.map((doc) {
         return OrderModel.fromFirestore(doc.data() as Map<String, dynamic>);
       }).toList();
@@ -194,6 +196,31 @@ class CustomerService {
       return [];
     }
   }
+
+  Future<List<OrderDetail>?> fetchOrderDetailByOrderCode(String orderCode) async {
+    try {
+      CollectionReference ordersCollection = _firestore.collection('orderdetails');
+
+      QuerySnapshot querySnapshot = await ordersCollection
+          .where('orderCode', isEqualTo: orderCode)
+          .get();
+
+      print("Fetching orders for order code: $orderCode");
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.map((doc) {
+          return OrderDetail.fromFirestore(doc.data() as Map<String, dynamic>);
+        }).toList();
+      } else {
+        print('No orders found for order code: $orderCode');
+        return []; 
+      }
+    } catch (e) {
+      print('Error fetching orders: $e');
+      return null; // Return null on error
+    }
+  }
+
 
   Future<OrderDetail?> fetchOrderDetail(String orderCode) async {
     try {
@@ -367,6 +394,61 @@ class CustomerService {
       print("Lỗi khi lấy thông tin user với cusId: $cusId: $e");
     }
     return null;
-
   }
+
+  Future<void> updateStatus(String orderCode, String status) async {
+    try {
+      CollectionReference ordersRef = _firestore.collection('orders');
+
+      // Query to find documents where 'orderCode' is equal to the given orderCode
+      QuerySnapshot querySnapshot = await ordersRef.where('orderCode', isEqualTo: orderCode).get();
+
+      // Update each document that matches the query
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.update({
+          'status': status,
+        });
+      }
+
+      print('Order status updated successfully.');
+    } catch (e) {
+      print("Error updating order status: $e");
+    }
+  }
+  Future<void> updateOrderReviews(String orderCode) async {
+    try {
+      CollectionReference ordersRef = _firestore.collection('orders');
+      QuerySnapshot querySnapshot = await ordersRef.where('orderCode', isEqualTo: orderCode).get();
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.update({
+          'reviews': 1,
+        });
+      }
+
+      print('updated successfully.');
+    } catch (e) {
+      print("Error updating order reviews: $e");
+    }
+  }
+
+  Future<bool> deleteCartById(String cartId) async {
+    try {
+      CollectionReference  cartCollection = FirebaseFirestore.instance.collection('carts');
+      await cartCollection.doc(cartId).delete();
+      print("Đã xóa sản phẩm có cartId: $cartId");
+      return true;
+    } catch (e) {
+      print("Lỗi khi xóa sản phẩm: $e");
+      rethrow; // Bắn lại lỗi để xử lý phía trên nếu cần
+    }
+  }
+  
+  Future<List<ReviewModel>> getReviewsByShopId(String shopId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('reviews')
+        .where('shopId', isEqualTo: shopId)
+        .get();
+    return snapshot.docs.map((doc) => ReviewModel.fromFirestore(doc.data())).toList();
+  }
+
 }

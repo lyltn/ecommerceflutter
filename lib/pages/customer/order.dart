@@ -66,7 +66,11 @@ class _OrderState extends State<Order> {
   Future<void> _loadPreferences() async {
     prefs = await SharedPreferences.getInstance();
     setState(() {
-      cusId = prefs.getString('cusId'); 
+      if(prefs.getString('shopId')!=null){
+        cusId = prefs.getString('shopId');
+      }else{
+        cusId = prefs.getString('cusId');
+      }
     });
 
     if (cusId != null) {
@@ -146,6 +150,7 @@ class _OrderState extends State<Order> {
     switch (numberOfPage) {
       case 0:
         filteredOrders = listOrder.where((order) => order.status == "Đang đợi xét duyệt").toList();
+        print("ditocnemeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee${filteredOrders}");
         return OrderWaiting(listOrder: filteredOrders);
       case 1:
         filteredOrders = listOrder.where((order) => order.status == "Đã duyệt").toList();
@@ -154,8 +159,8 @@ class _OrderState extends State<Order> {
         filteredOrders = listOrder.where((order) => order.status == "Đang giao tới khách").toList();
         return ShopShipingPage(listOrder: filteredOrders);
       case 3:
-        filteredOrders = listOrder.where((order) => order.status == "Đã giao").toList();
-        return ShopDeliveredPage();
+        filteredOrders = listOrder.where((order) => order.status  == "Đã giao" && order.reviews == 0).toList();
+        return ShopDeliveredPage(listOrder: filteredOrders, cusId: cusId!,);
       case 4:
         filteredOrders = listOrder.where((order) => order.status == "Đã huỷ").toList();
         return ShopCanceledPage();

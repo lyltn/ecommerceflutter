@@ -2,12 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/pages/customer/component/ProductSellCard.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
+import 'package:ecommercettl/pages/customer/shopdetail.dart';
 import 'package:flutter/material.dart';
 
 class TopShopProduct extends StatelessWidget {
   final String userId;
+  final String shopName;
 
-  const TopShopProduct({Key? key, required this.userId}) : super(key: key);
+  const TopShopProduct({Key? key, required this.userId, required this.shopName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,10 @@ class TopShopProduct extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  // Add action for viewing all products
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ShopDetailPage(shopName: shopName)),
+                  );
                 },
                 child: const Text(
                   'Xem Tất Cả >',
@@ -63,19 +68,29 @@ class TopShopProduct extends StatelessWidget {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ProductSellCard(
-                      imagePath: product.imageUrls.isNotEmpty
-                          ? product.imageUrls[0]
-                          : 'images/dress.png',
-                      name: product.name,
-                      price: product.price,
-                      discountPercentage: 20, // Adjust as needed
-                      rating: 5.0, // Adjust as needed
-                      reviewCount: 4, // Adjust as needed
-                      width: 160, // Specify the width for a scaled-down version
-                      height: 240, // Specify the height for a scaled-down version
+                  return GestureDetector( // Wrap with GestureDetector
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Productdetail(newProduct: product),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ProductSellCard(
+                        imagePath: product.imageUrls.isNotEmpty
+                            ? product.imageUrls[0]
+                            : 'images/dress.png',
+                        name: product.name,
+                        price: product.price,
+                        discountPercentage: 20, // Adjust as needed
+                        rating: 5.0, // Adjust as needed
+                        reviewCount: 4, // Adjust as needed
+                        width: 160, // Specify the width for a scaled-down version
+                        height: 240, // Specify the height for a scaled-down version
+                      ),
                     ),
                   );
                 },

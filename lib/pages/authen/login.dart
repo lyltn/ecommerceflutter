@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
               MaterialPageRoute(builder: (context) => BottomNav()),
             );
           } else if (role == 'USER') {
-            await prefs.setString('cusId', userCredential.user!.uid);
+            await prefs.setString('shopId', uid);
             if (!mounted) return;
             Navigator.pushReplacement(
               context,

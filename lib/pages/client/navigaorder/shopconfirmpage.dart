@@ -3,6 +3,7 @@ import 'package:ecommercettl/pages/client/shoporderdetail.dart';
 import 'package:ecommercettl/services/order_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShopConfirmpage extends StatefulWidget {
   const ShopConfirmpage({super.key});
@@ -18,17 +19,20 @@ class _ShopConfirmpageState extends State<ShopConfirmpage> {
   @override
   void initState() {
     super.initState();
+    
 
     // Anonymous async function inside initState
     () async {
-      uid = (await FirebaseAuth.instance.currentUser) as String?;
-      print('User ID: $uid');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      uid =  prefs.getString('shopId');
+      print('User ID ở shop pageeeeeeeeeeeeeeeee: $uid');
       setState(() {}); // Update UI if necessary
     }();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("userIDDDneeeee");
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance

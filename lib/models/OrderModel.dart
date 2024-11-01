@@ -22,6 +22,7 @@ class OrderModel {
   String? color;
   String? size;
   int? quantity;
+  int reviews;
   double AdminPriceDiscount;
 
   OrderModel({
@@ -45,6 +46,7 @@ class OrderModel {
     this.color,
     this.size, 
     this.quantity,
+    required this.reviews,
     required this.AdminPriceDiscount,
   });
 
@@ -70,6 +72,7 @@ class OrderModel {
       color: data['color'] ?? '',
       size: data['size'] ?? '',
       quantity: data['quantity'] ?? 0,
+      reviews: data['reviews'] ?? 0,
       AdminPriceDiscount: data['adminPriceDiscount'] ?? 0
     );
   }
@@ -96,6 +99,7 @@ class OrderModel {
       'color' : color,
       'size' : size,
       'quantity' : quantity,
+      'reviews': reviews,
       'adminPriceDiscount': AdminPriceDiscount
     };
   }

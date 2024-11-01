@@ -120,6 +120,20 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
+  void handleDeleteChange(String cartId) async {
+    // Delete item from database
+    await CustomerService().deleteCartById(cartId);
+
+    // Remove item from local list and update UI
+    setState(() {
+      widget.cartList.removeWhere((item) => item.cartId == cartId);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Sản phẩm đã được xóa")),
+    );
+}
+
   @override
   Widget build(BuildContext context) {
     final shopGroups = <String, List<Cart>>{};
@@ -213,6 +227,7 @@ class _CartPageState extends State<CartPage> {
                               cart: cartItem,
                               onChanged: (isSelected) => onCartItemChanged(isSelected, cartItem),
                               onQuantityChanged: handleQuantityChange,
+                              onDelete: () => handleDeleteChange(cartItem.cartId),
                             );
                           }),
                           const SizedBox(height: 12),

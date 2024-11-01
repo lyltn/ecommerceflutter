@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
   final String imagePath;
@@ -69,9 +70,11 @@ class ProductCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'VNĐ$price',
-                          style: bodyStyle?.copyWith(
-                            decoration: TextDecoration.lineThrough,
+                          'VNĐ ${NumberFormat('#,###', 'vi_VN').format(price)}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.red.shade700,
+                            fontWeight: FontWeight.w700
                           ),
                         ),
                         SizedBox(width: contentPadding / 2),

@@ -3,6 +3,8 @@ import 'package:ecommercettl/models/OrderModel.dart';
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/pages/client/shoporderdetail.dart';
 import 'package:ecommercettl/pages/customer/OrderDetail.dart';
+import 'package:ecommercettl/pages/customer/bottomnav.dart';
+import 'package:ecommercettl/pages/customer/order.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -129,44 +131,61 @@ class _ShopShipingPageState extends State<ShopShipingPage> {
               ],
             ),
           ),
-          OverflowBar(
-            alignment: MainAxisAlignment.spaceBetween,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              GestureDetector(
-                onTap: onTap,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                                builder: (context) =>
-                                    SeeOrderDetail(orderId: orderCode),
-                      ),
-                    );
+                  GestureDetector(
+                    onTap: onTap,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                                    builder: (context) =>
+                                        SeeOrderDetail(orderId: orderCode),
+                          ),
+                        );
 
-                  }, // Can be empty if onTap is used
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.all(8.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
+                      }, 
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(8.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                      label: const Text(
+                        'xem chi tiết đơn hàng',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 46, 46, 46),
+                          fontSize: 12.0,
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.remove_red_eye,
+                        color: Color.fromARGB(255, 55, 54, 54),
+                        size: 15.0,
+                      ),
                     ),
                   ),
-                  label: const Text(
-                    'xem chi tiết đơn hàng',
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 46, 46, 46),
-                      fontSize: 12.0,
-                    ),
-                  ),
-                  icon: const Icon(
-                    Icons.remove_red_eye,
-                    color: Color.fromARGB(255, 55, 54, 54),
-                    size: 15.0,
-                  ),
+              ElevatedButton(
+                onPressed: () {
+                  CustomerService customerService = CustomerService();
+                  String status = "Đã giao";
+                  customerService.updateStatus(orderCode, status);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => BottomNav(tempIndex: 2,),),
+                    );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 189, 244, 94), // Set the background color to green
                 ),
-              ),
+                child: Text(
+                  'Đã nhận được hàng',
+                ),
+              )
             ],
-          ),
+          )
         ],
       ),
     );

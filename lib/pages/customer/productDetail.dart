@@ -257,7 +257,7 @@ class ProductdetailState extends State<Productdetail>
                         ],
                       ),
                     ),
-                    ProductReview(),
+                    ProductReview(productId: widget.newProduct.id,),
                     ShopPanel(
                       shopImg: _userModel?.imgAvatar ?? '',
                       shopName: _shopData?.shopName ?? 'Unknown Shop',
@@ -268,7 +268,7 @@ class ProductdetailState extends State<Productdetail>
                     Container(
                       child: Padding(
                         padding: EdgeInsets.all(4),
-                        child: TopShopProduct(userId: widget.newProduct.userid),
+                        child: TopShopProduct(userId: widget.newProduct.userid, shopName: _shopData?.shopName ??'Unknown Shop',),
                       ),
                     ),
 
