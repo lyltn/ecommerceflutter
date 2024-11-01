@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:ecommercettl/pages/customer/ImageSearchPage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Findbar extends StatefulWidget {
   final bool isEnabled;
@@ -63,7 +68,27 @@ class _FindbarState extends State<Findbar> {
                   hintText: 'Tìm kiếm...',
                   hintStyle: TextStyle(color: Colors.grey), // Customize hint text color
                   prefixIcon: Icon(Icons.search, color: Colors.black),
-                  suffixIcon: Icon(Icons.mic, color: Colors.black),
+                  suffixIcon: GestureDetector(
+                    onTap: () async {
+                      final picker = ImagePicker();
+                      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                      if (pickedFile != null) {
+                        // Read the image as bytes
+                        final bytes = await File(pickedFile.path).readAsBytes();
+                        // Convert bytes to base64 string
+                        final base64Image = base64Encode(bytes);
+
+                        // Navigate to ImageSearchPage with the base64 image
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageSearchPage(base64img: base64Image),
+                          ),
+                        );
+                      }
+                    },
+                    child: Icon(Icons.photo_camera, color: Colors.black),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,

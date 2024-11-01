@@ -6,9 +6,9 @@ import 'package:ecommercettl/pages/customer/bottomnav.dart';
 import 'package:ecommercettl/pages/customer/navigatiorder/shopcanceledpage.dart';
 import 'package:ecommercettl/pages/customer/navigatiorder/OrderWaiting.dart';
 import 'package:ecommercettl/pages/customer/navigatiorder/shopdeliveredpage.dart';
-import 'package:ecommercettl/pages/customer/navigatiorder/shopplacedpage.dart';
+import 'package:ecommercettl/pages/customer/navigatiorder/ShopPlaced.dart';
 import 'package:ecommercettl/pages/customer/navigatiorder/shopreturngoods.dart';
-import 'package:ecommercettl/pages/customer/navigatiorder/shopshippingpage.dart';
+import 'package:ecommercettl/pages/customer/navigatiorder/ShopShiping.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 
 import 'package:ecommercettl/widget/widget_support.dart';
@@ -139,18 +139,20 @@ class _OrderState extends State<Order> {
   }
 
   Future<Widget> _loadPage(int numberOfPage) async {
-
+    print("loadPAge:${numberOfPage}");
+    print("curentpage:${currentTabIndex}");
+    print("query:${query}");
 
     switch (numberOfPage) {
       case 0:
         filteredOrders = listOrder.where((order) => order.status == "Đang đợi xét duyệt").toList();
         return OrderWaiting(listOrder: filteredOrders);
       case 1:
-        filteredOrders = listOrder.where((order) => order.status == "Chờ lấy hàng").toList();
+        filteredOrders = listOrder.where((order) => order.status == "Đã duyệt").toList();
         return ShopPlacedPage(listOrder: filteredOrders);
       case 2:
-        filteredOrders = listOrder.where((order) => order.status == "Chờ giao hàng").toList();
-        return ShopShippingPage();
+        filteredOrders = listOrder.where((order) => order.status == "Đang giao tới khách").toList();
+        return ShopShipingPage(listOrder: filteredOrders);
       case 3:
         filteredOrders = listOrder.where((order) => order.status == "Đã giao").toList();
         return ShopDeliveredPage();
@@ -247,10 +249,10 @@ class _OrderState extends State<Order> {
               query = "Đang đợi xét duyệt";
               break;
             case 1:
-              query = "Chờ lấy hàng";
+              query = "Đã duyệt";
               break;
             case 2:
-              query = "Chờ giao hàng";
+              query = "Đang giao tới khách";
               break;
             case 3:
               query = "Đã giao";
