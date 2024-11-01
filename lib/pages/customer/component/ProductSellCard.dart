@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductSellCard extends StatelessWidget {
   final String imagePath;
   final String name;
   final double price;
+  final int discountPercentage;
   final double rating;
   final int reviewCount;
   final double? width;  // New parameter
   final double? height; // New parameter
 
-  const ProductCard({
+  const ProductSellCard({
     Key? key,
     required this.imagePath,
     required this.name,
     required this.price,
+    required this.discountPercentage,
     required this.rating,
     required this.reviewCount,
     this.width,
@@ -64,6 +66,13 @@ class ProductCard extends StatelessWidget {
                     ),
                     
                     SizedBox(height: contentPadding / 2),
+                    Text(
+                      'VNĐ${(price * (100 - discountPercentage) / 100).toStringAsFixed(0)}',
+                      style: titleStyle?.copyWith(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Row(
                       children: [
                         Text(
@@ -73,6 +82,21 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: contentPadding / 2),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: contentPadding / 2, vertical: contentPadding / 4),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 252, 237, 238),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$discountPercentage% OFF',
+                            style: TextStyle(
+                              color: Colors.red[800],
+                              fontSize: bodyStyle?.fontSize ?? 12,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: contentPadding / 2),

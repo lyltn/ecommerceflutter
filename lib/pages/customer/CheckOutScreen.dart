@@ -585,8 +585,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             customerService.addOrder(
               orderCode, 
               orderDate, 
-              shopVoucher ?? "", 
               adminVoucher ?? "", 
+              shopVoucher ?? "",
               total, 
               cusId, 
               name,
@@ -602,6 +602,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               widget.color ?? "",
               widget.size ?? "",
               widget.quantity,
+              adminDiscount,
               );
             
             customerService.addOrderDetails(

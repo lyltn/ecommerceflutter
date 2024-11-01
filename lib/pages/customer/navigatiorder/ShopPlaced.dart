@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OrderWaiting extends StatefulWidget {
+class ShopPlacedPage extends StatefulWidget {
   final List<OrderModel> listOrder;
-  const OrderWaiting({Key? key, required this.listOrder}) : super(key: key);
+  const ShopPlacedPage({Key? key, required this.listOrder}) : super(key: key);
 
   @override
-  State<OrderWaiting> createState() => _OrderWaitingState();
+  State<ShopPlacedPage> createState() => _ShopPlacedPageState();
 }
 
-class _OrderWaitingState extends State<OrderWaiting> {
+class _ShopPlacedPageState extends State<ShopPlacedPage> {
   @override
   void initState() {
     super.initState();
@@ -25,7 +25,7 @@ class _OrderWaitingState extends State<OrderWaiting> {
 
   @override
   Widget build(BuildContext context) {
-    print('Received listOrder in OrderWaiting: ${widget.listOrder}');
+    print('Received listOrder in _ShopPlacedPageState: ${widget.listOrder}');
     return Scaffold(
       body: ListView.builder(
         itemCount: widget.listOrder.length,

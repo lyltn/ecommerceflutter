@@ -2,20 +2,21 @@ import 'package:ecommercettl/models/OrderDetail.dart';
 import 'package:ecommercettl/models/OrderModel.dart';
 import 'package:ecommercettl/models/Product.dart';
 import 'package:ecommercettl/pages/client/shoporderdetail.dart';
+import 'package:ecommercettl/pages/customer/OrderDetail.dart';
 import 'package:ecommercettl/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ShopPlacedPage extends StatefulWidget {
+class ShopShipingPage extends StatefulWidget {
   final List<OrderModel> listOrder;
-  const ShopPlacedPage({Key? key, required this.listOrder}) : super(key: key);
+  const ShopShipingPage({Key? key, required this.listOrder}) : super(key: key);
 
   @override
-  State<ShopPlacedPage> createState() => _ShopPlacedPageState();
+  State<ShopShipingPage> createState() => _ShopShipingPageState();
 }
 
-class _ShopPlacedPageState extends State<ShopPlacedPage> {
+class _ShopShipingPageState extends State<ShopShipingPage> {
   @override
   void initState() {
     super.initState();
@@ -24,7 +25,7 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('Received listOrder in ShopPlacedPage: ${widget.listOrder}');
+    print('Received listOrder in ShopShipingPage: ${widget.listOrder}');
     return Scaffold(
       body: ListView.builder(
         itemCount: widget.listOrder.length,
@@ -36,12 +37,12 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
             child: buildOrder(
               imagePath: order.productImg!,
               title: order.productName!,
-              subtitle:
-                  'Màu ${order.detail!.color}+, size ${order.detail!.size}',
+              subtitle: 'Màu ${order.color}, size ${order.size}',
               price: NumberFormat("#,###", "vi_VN").format(order.productPrice!),
-              quantity: order.detail!.quantity,
+              quantity: order.quantity ?? 0,
               totalProduct: order.productCount,
               totalPrice: order.total,
+              orderCode: order.orderCode,
               onTap: () {
                 // Navigator.push(
                 //   context,
@@ -63,6 +64,7 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
     required int quantity,
     required totalProduct,
     required totalPrice,
+    required orderCode,
     required VoidCallback onTap,
   }) {
     return Card(
@@ -133,7 +135,16 @@ class _ShopPlacedPageState extends State<ShopPlacedPage> {
               GestureDetector(
                 onTap: onTap,
                 child: OutlinedButton.icon(
-                  onPressed: () {}, // Can be empty if onTap is used
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                                builder: (context) =>
+                                    SeeOrderDetail(orderId: orderCode),
+                      ),
+                    );
+
+                  }, // Can be empty if onTap is used
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.all(8.0),
                     shape: RoundedRectangleBorder(

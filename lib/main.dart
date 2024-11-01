@@ -14,6 +14,7 @@ import 'package:ecommercettl/pages/customer/component/SearchScreen.dart';
 import 'package:ecommercettl/pages/customer/component/ShopPanel.dart';
 import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:ecommercettl/pages/customer/component/searchProduct.dart';
+import 'package:ecommercettl/pages/customer/component/searchProductImg.dart';
 import 'package:ecommercettl/pages/customer/home.dart';
 import 'package:ecommercettl/pages/customer/productDetail.dart';
 import 'package:ecommercettl/pages/customer/component/TopShopProduct.dart';
