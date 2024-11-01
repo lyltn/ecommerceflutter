@@ -54,13 +54,13 @@ class _ShopreturngoodsState extends State<Shopreturngoods> {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: (data.containsKey('imageUrl') &&
-                              data['imageUrl'] != null)
+                      leading: (data.containsKey('productImg') &&
+                              data['productImg'] != null)
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.network(
-                                data['imageUrl']
-                                    [0], // Use actual image URL from Firestore
+                                data[
+                                    'productImg'], // Load image from Firebase URL
                                 width: 50,
                                 height: 50,
                                 fit: BoxFit.cover,

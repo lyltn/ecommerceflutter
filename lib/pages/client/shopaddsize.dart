@@ -102,12 +102,21 @@ class _ShopAddSizeState extends State<ShopAddSize> {
                       borderSide: BorderSide.none,
                     ),
                   ),
+                  isExpanded: true, // Ensures dropdown takes up the full width
                   value: productValue,
                   items: snapshot.data!.docs.map((doc) {
                     var data = doc.data() as Map<String, dynamic>;
                     return DropdownMenuItem(
-                      value: doc.id, // Assuming doc.id is the product ID
-                      child: Text(data['name']),
+                      value: doc.id, // Product ID
+                      child: Flexible(
+                        child: Text(
+                          data['name'],
+                          overflow: TextOverflow.ellipsis, // Prevents overflow
+                          maxLines: 1, // Limits to one line
+                          style: const TextStyle(
+                              fontSize: 14), // Optional: adjust font size
+                        ),
+                      ),
                     );
                   }).toList(),
                   onChanged: (value) {

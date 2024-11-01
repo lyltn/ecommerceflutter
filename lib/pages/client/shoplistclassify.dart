@@ -37,7 +37,8 @@ class _ShopListClassifyState extends State<ShopListClassify> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Danh sách sản phẩm', style: AppWiget.boldTextFeildStyle()),
+        title:
+            Text('Danh sách phân loại', style: AppWiget.boldTextFeildStyle()),
       ),
       body: Padding(
         padding: const EdgeInsets.only(top: 1.0, left: 20.0, right: 20.0),
@@ -67,12 +68,23 @@ class _ShopListClassifyState extends State<ShopListClassify> {
                             borderSide: BorderSide.none,
                           ),
                         ),
+                        isExpanded: true, // Ensures dropdown takes full width
                         value: productid.isEmpty ? null : productid,
                         items: snapshot.data!.docs.map((doc) {
                           var data = doc.data() as Map<String, dynamic>;
                           return DropdownMenuItem(
-                            value: doc.id, // Product ID
-                            child: Text(data['name']),
+                            value: doc.id,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width -
+                                      80), // Adjust max width if needed
+                              child: Text(
+                                data['name'],
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) {
