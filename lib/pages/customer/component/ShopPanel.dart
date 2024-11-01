@@ -1,3 +1,4 @@
+import 'package:ecommercettl/pages/customer/shopdetail.dart';
 import 'package:flutter/material.dart';
 
 class ShopPanel extends StatelessWidget {
@@ -18,7 +19,7 @@ class ShopPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(3.0),
-      color: Colors.grey[100], 
+      color: Colors.grey[100],
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
@@ -61,7 +62,8 @@ class ShopPanel extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                          const Icon(Icons.location_on,
+                              size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
                             shopAddress,
@@ -76,7 +78,17 @@ class ShopPanel extends StatelessWidget {
                   onPressed: () {
                     // Add action for "Xem Shop" button
                   },
-                  child: const Text('Xem Shop'),
+                  child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShopDetailPage(
+                                shopName: shopName), // Pass shopName here
+                          ),
+                        );
+                      },
+                      child: const Text('Xem Shop')),
                 ),
               ],
             ),
@@ -84,7 +96,9 @@ class ShopPanel extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ShopStat(label: 'sản phẩm', value: productCount.toString()), // Fixed here
+                ShopStat(
+                    label: 'sản phẩm',
+                    value: productCount.toString()), // Fixed here
                 const ShopStat(label: 'Đánh giá', value: '4.9'),
               ],
             ),
@@ -117,7 +131,9 @@ class ShopStat extends StatelessWidget {
             color: Colors.red,
           ),
         ),
-        SizedBox(width: 5,),
+        SizedBox(
+          width: 5,
+        ),
         Text(
           label,
           style: const TextStyle(color: Colors.grey),

@@ -56,4 +56,28 @@ class ShopService {
     User? user = FirebaseAuth.instance.currentUser;
     return user?.uid; // If user is null, return null; otherwise return uid
   }
+
+  static Future<String?> getUidByShopName(String shopName) async {
+    try {
+      // Query the Firestore collection to find the document with the given shopName
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('shopRequests')
+          .where('shopName', isEqualTo: shopName)
+          .limit(1) // Limit to 1 document to reduce unnecessary reads
+          .get();
+
+      // Check if we got any documents back
+      if (snapshot.docs.isNotEmpty) {
+        // Get the first document and retrieve the 'uid' field
+        String uid = snapshot.docs.first.get('uid');
+        return uid;
+      } else {
+        print('No shop found with the given name.');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching uid by shopName: $e');
+      return null;
+    }
+  }
 }
