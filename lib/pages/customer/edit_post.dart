@@ -155,12 +155,6 @@ class _EditPostPageState extends State<EditPostPage> {
                       filled: true,
                       fillColor: Colors.grey[200],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Vui lòng nhập link';
-                      }
-                      return null;
-                    },
                   ),
                 ),
               ),
