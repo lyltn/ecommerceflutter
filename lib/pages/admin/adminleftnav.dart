@@ -1,5 +1,6 @@
 import 'package:ecommercettl/main.dart';
 import 'package:ecommercettl/models/adminModel.dart';
+import 'package:ecommercettl/pages/admin/AdminReportPage.dart';
 import 'package:ecommercettl/pages/admin/admin_shop_requests.dart';
 import 'package:ecommercettl/pages/admin/adminhome.dart';
 import 'package:ecommercettl/pages/admin/update_profile.dart';
@@ -148,7 +149,7 @@ class _LeftNavigationState extends State<LeftNavigation> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyApp()),
+                  MaterialPageRoute(builder: (context) => AdminReportPage()),
                 );
               },
             ),
