@@ -12,39 +12,51 @@ class ImageSearchPage extends StatefulWidget {
 }
 
 class _ImageSearchPageState extends State<ImageSearchPage> {
+  List<String> productIds = [];
+
   Future<void> sendImageSearchRequest(String base64ImageString) async {
-    final url = Uri.parse('http://10.0.2.2:8000/image_search');
+    final url = Uri.parse('http://127.0.0.1:8000/image_search');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({'base64_image_string': base64ImageString});
+
     try {
       final response = await http.post(url, headers: headers, body: body);
-      print("ditconmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee${jsonDecode(response.body)}");
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+
+        // Ensure all IDs are converted to strings
+        setState(() {
+          productIds = List<String>.from(responseData['productDocId'].map((id) => id.toString()));
+        });
+
+        print("Product IDs: $productIds");
       } else {
-        print('Request failed with statusssssssssssssssssssss: ${response.statusCode}');
+        print('Request failed with status: ${response.statusCode}');
         print(response.body);
       }
     } catch (e) {
-      print('Errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: $e');
+      print('Error: $e');
     }
   }
+
   @override
   void initState() {
     super.initState();
-    print("base64:${widget.base64img}");
+    print("base64: ${widget.base64img}");
     sendImageSearchRequest(widget.base64img);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           Container(
-            child: SearchImageProduct(listProductId: []),
-          )
-        ]
+            child: productIds.isNotEmpty
+                ? SearchImageProduct(listProductId: productIds)
+                : Center(child: CircularProgressIndicator()), // Optional: show loading spinner
+          ),
+        ],
       ),
     );
   }
