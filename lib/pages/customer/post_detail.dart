@@ -2,6 +2,7 @@ import 'package:ecommercettl/models/CommentModel.dart';
 import 'package:ecommercettl/models/PostModel.dart';
 import 'package:ecommercettl/models/ReactionModel.dart';
 import 'package:ecommercettl/models/UserModel.dart';
+import 'package:ecommercettl/pages/customer/ReportCommentPage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -358,14 +359,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                       trailing: comment.userId ==
                                               FirebaseAuth.instance.currentUser!.uid
                                           ? PopupMenuButton<String>(
-                                              onSelected: (value) {
-                                                if (value == 'edit') {
-                                                  _showEditCommentDialog(comment);
-                                                } else if (value == 'delete') {
-                                                  _deleteComment(
-                                                      _currentPostId, comment.id);
-                                                }
-                                              },
                                               itemBuilder: (context) => [
                                                 PopupMenuItem(
                                                   value: 'edit',
@@ -376,6 +369,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                                   child: Text('Delete'),
                                                 ),
                                               ],
+                                              onSelected: (value) {
+                                                if (value == 'edit') {
+                                                  _showEditCommentDialog(comment);
+                                                } else if (value == 'delete') {
+                                                  _deleteComment(
+                                                      _currentPostId, comment.id);
+                                                }
+                                              },
                                             )
                                           : null,
                                     );
@@ -498,32 +499,68 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
+  
+
   Widget _buildImage(String imageUrl) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12.0),
-      child: Image.network(
-        imageUrl,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: Container(
-              width: 50,
-              height: 50,
-              child: SpinKitFadingCircle(
-                color: Colors.blue,
-                size: 50.0,
-              ),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Center(child: Icon(Icons.error));
-        },
+  return GestureDetector(
+    onLongPress: () {
+  showMenu(
+    context: context,
+    position: RelativeRect.fromLTRB(
+      MediaQuery.of(context).size.width / 2,
+      MediaQuery.of(context).size.height / 2,
+      MediaQuery.of(context).size.width / 2,
+      MediaQuery.of(context).size.height / 2,
+    ),
+    items: [
+      PopupMenuItem(
+        child: Text('Report'),
+        value: 'report',
       ),
-    );
-  }
+    ],
+  ).then((value) {
+    if (value == 'report') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReportCommentPage(
+            postId: _currentPostId,
+            commentId: '', // Replace with actual comment ID if available
+            postImageUrl: imageUrl,
+            postContent: widget.posts[widget.initialIndex].content,
+            reportedUserId: widget.posts[widget.initialIndex].userId,
+          ),
+        ),
+      );
+    }
+  });
+},
+child: ClipRRect(
+  borderRadius: BorderRadius.circular(12.0),
+  child: Image.network(
+    imageUrl,
+    fit: BoxFit.cover,
+    width: double.infinity,
+    loadingBuilder: (context, child, loadingProgress) {
+      if (loadingProgress == null) return child;
+      return Center(
+        child: Container(
+          width: 50,
+          height: 50,
+          child: SpinKitFadingCircle(
+            color: Colors.blue,
+            size: 50.0,
+          ),
+        ),
+      );
+    },
+    errorBuilder: (context, error, stackTrace) {
+      return Center(child: Icon(Icons.error));
+    },
+  ),
+),
+  );
+}
 
   Widget _buildImageIndicators(int imageCount) {
     return Positioned(
