@@ -34,7 +34,7 @@ class _ShopDeliveredPageState extends State<ShopDeliveredPage> {
         stream: FirebaseFirestore.instance
             .collection('orders')
             .where('shopId', isEqualTo: uid)
-            .where('status', isEqualTo: 'Đã nhận hàng đặt')
+            .where('status', isEqualTo: 'Đã giao')
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {

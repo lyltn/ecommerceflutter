@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserService {
-  final CollectionReference users =
+  static final CollectionReference users =
       FirebaseFirestore.instance.collection('users');
   final storage = FlutterSecureStorage();
 
@@ -79,6 +79,16 @@ class UserService {
     } catch (e) {
       print("Error getting user role: $e");
       return null; // Trả về null nếu có lỗi xảy ra
+    }
+  }
+
+  static Future<int> getUserCount() async {
+    try {
+      QuerySnapshot snapshot = await users.get();
+      return snapshot.size;
+    } catch (e) {
+      print("Error getting user count: $e");
+      return 0; // Trả về 0 nếu có lỗi xảy ra
     }
   }
 }
