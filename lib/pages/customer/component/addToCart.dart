@@ -272,8 +272,13 @@ class _AddToCartState extends State<AddToCart> {
                           CustomerService customerService = CustomerService();
                           String shopName = await customerService.fetchShopNameFromDatabase(widget.product.userid);
                           String shopImg = await customerService.fetchShopImgFromDatabase(widget.product.userid);
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String? cusId = prefs.getString('cusId');
+                          SharedPreferences prefs = await SharedPreferences.getInstance();                  
+                           String? cusId;
+                          if(prefs.getString('shopId')!=null){
+                            cusId = prefs.getString('shopId');
+                          }else{
+                            cusId = prefs.getString('cusId');
+                          }
                           if (cusId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

@@ -34,6 +34,7 @@ class _CartPageState extends State<CartPage> {
       shopSelectionStates[item.shopId] = false;
     }
     fetchProducts();
+    print("usermodelneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee${widget.customer}");
   }
 
 

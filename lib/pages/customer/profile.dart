@@ -40,11 +40,16 @@ class _ProfileState extends State<Profile> {
   Future<void> getCurrentUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     CustomerService customerService = CustomerService();
-    uid = prefs.getString('cusId');
+    if(prefs.getString('shopId')!=null){
+      uid = prefs.getString('shopId');
+    }else{
+      uid = prefs.getString('cusId');
+    }
+    
     if (uid != null) {
       print('Cus ID profile: $uid');
       userModel = await customerService.getCustomerInfo(uid!);
-      await fetchCart(uid!);
+      cartList = await customerService.fetchCartListByCusId(uid!);
     } else {
       print('No user is signed in.');
     }
@@ -188,11 +193,16 @@ class _ProfileState extends State<Profile> {
             MaterialPageRoute(builder: (context) => Settings()),
           );
         }),
-        _buildMenuItem(Icons.shopping_cart_outlined, 'Giỏ hàng', () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => CartPage(cartList: cartList!, customer: userModel!,)),
-          );
+       _buildMenuItem(Icons.shopping_cart_outlined, 'Giỏ hàng', () {
+          if (userModel != null && cartList != null) {
+            print("usermodelllllllll[ne]${userModel!}");
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => CartPage(cartList: cartList!, customer: userModel!)),
+            );
+          } else {
+            print("User model or cart list is null!");
+          }
         }),
         _buildMenuItem(Icons.support_agent_outlined, 'Hỗ trợ người dùng', () {
           Navigator.push(
