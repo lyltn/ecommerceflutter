@@ -50,7 +50,7 @@ dependencies:
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.3.3
   flutter_secure_storage: ^8.0.0
-  shared_preferences: '>= 2.3.2'
+  shared_preferences: '>= 2.3.1'
   mailer: ^5.0.0
   flutter_spinkit: ^5.1.0
 

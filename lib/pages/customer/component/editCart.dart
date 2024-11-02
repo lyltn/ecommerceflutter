@@ -267,7 +267,12 @@ class _EditCartState extends State<EditCart> {
                           CustomerService customerService = CustomerService();
                           String shopName = await customerService.fetchShopNameFromDatabase(widget.product.userid);
                           SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String? cusId = prefs.getString('cusId');
+                          String? cusId;
+                          if(prefs.getString('shopId')!=null){
+                            cusId = prefs.getString('shopId');
+                          }else{
+                            cusId = prefs.getString('cusId');
+                          }
                           if (cusId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
