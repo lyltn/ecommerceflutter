@@ -176,15 +176,15 @@ class CustomerService {
     }
   }
 
-  Future<List<OrderModel>> fetchOrder(String cusId, String query) async {
+  Future<List<OrderModel>> fetchOrder(String customerId, String query) async {
     try {
       CollectionReference ordersCollection = _firestore.collection('orders');
       
       QuerySnapshot querySnapshot = await ordersCollection
-          .where('cusId', isEqualTo: cusId)
+          .where('cusId', isEqualTo: customerId)
           .where('status', isEqualTo: query)
           .get();
-      print("fetchthanhcongneeeeeeeeeeeeeeeeee: ${cusId}");
+      print("fetchthanhcongneeeeeeeeeeeeeeeeee: ${customerId}");
       List<OrderModel> orderList = querySnapshot.docs.map((doc) {
         return OrderModel.fromFirestore(doc.data() as Map<String, dynamic>);
       }).toList();

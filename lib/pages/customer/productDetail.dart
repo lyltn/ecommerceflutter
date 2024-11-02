@@ -10,6 +10,7 @@ import 'package:ecommercettl/pages/customer/component/buyNow.dart';
 import 'package:ecommercettl/pages/customer/component/guarantee_card.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommercettl/models/Product.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Productdetail extends StatefulWidget {
   final Product newProduct;
@@ -124,7 +125,8 @@ class ProductdetailState extends State<Productdetail>
   }
 
   Future<void> _initializeUserData() async {
-    final userData = await getUser(widget.newProduct.userid.toString());
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userData = await getUser(widget.newProduct.userid);
     setState(() {
       _userModel = userData;
     });
@@ -263,6 +265,7 @@ class ProductdetailState extends State<Productdetail>
                       shopName: _shopData?.shopName ?? 'Unknown Shop',
                       shopAddress: _userModel?.address ?? 'Unknown Address',
                       productCount: _productCount,
+                      shopId: widget.newProduct.userid
                     ),
                     const Divider(),
                     Container(

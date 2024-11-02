@@ -24,9 +24,13 @@ class _HomeShopState extends State<HomeShop> {
     // Anonymous async function inside initState
     () async {
       uid = await ShopService.getCurrentUserId();
+      print("usseridShopHome${{uid}}");
       countOrder = (await OrderService.getOrderCountByShopId(uid!));
+      print("countOrder ${countOrder}");
       revenue = await OrderService.getTotalByShopIdAndStatus(uid!);
+      print("revunue ${revenue}");
       countOrderall = (await OrderService.getTotalByShopId(uid!));
+      print("countOrderall ${countOrder}");
       setState(() {}); // Update UI if necessary
     }();
   }
@@ -84,14 +88,17 @@ class _HomeShopState extends State<HomeShop> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                    child: _buildCircularIndicator(
-                        "Đã nhận hàng",
-                        (countOrderall ?? 0) / (countOrder ?? 1),
-                        Colors.green)),
+                  child: _buildCircularIndicator(
+                      "Đã nhận hàng",
+                      (countOrder != null && countOrder != 0)
+                          ? (countOrderall ?? 0) / countOrder!
+                          : 0.0, // Default to 0 if countOrder is zero or null
+                      Colors.green),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
-                    child: _buildCircularIndicator(
-                        "Bỏ giỏ hàng", 0.22, Colors.red)),
+                  child: _buildCircularIndicator("Bỏ giỏ hàng", 0.22, Colors.red),
+                ),
               ],
             ),
             const SizedBox(height: 16),

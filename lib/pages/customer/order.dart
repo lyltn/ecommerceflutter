@@ -10,8 +10,10 @@ import 'package:ecommercettl/pages/customer/navigatiorder/ShopPlaced.dart';
 import 'package:ecommercettl/pages/customer/navigatiorder/shopreturngoods.dart';
 import 'package:ecommercettl/pages/customer/navigatiorder/ShopShiping.dart';
 import 'package:ecommercettl/services/customer_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 
 import 'package:ecommercettl/widget/widget_support.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,19 +67,16 @@ class _OrderState extends State<Order> {
 
   Future<void> _loadPreferences() async {
     prefs = await SharedPreferences.getInstance();
-    setState(() {
-      if(prefs.getString('shopId')!=null){
-        cusId = prefs.getString('shopId');
-      }else{
-        cusId = prefs.getString('cusId');
-      }
-    });
+    ShopService shopService = ShopService();
+    cusId = FirebaseAuth.instance.currentUser!.uid;
+ 
 
     if (cusId != null) {
       await _loadOrder(currentTabIndex); 
-      print('cusId is null neee'); 
-    } else {
       print('Loaded cusId: ${prefs.getString('cusId')}');
+
+    } else {
+      print('cusId is null neee');       
     }
   }
 
@@ -100,7 +99,9 @@ class _OrderState extends State<Order> {
     });
 
     try {
+        print("CussidFecthne${cusId}");
       if (cusId != null) {
+        print("CussidFecthne${cusId}");
         listOrder = await customerService.fetchOrder(cusId!, query);
         // List<OrderModel> ordersWithDetails = [];
 
@@ -263,7 +264,7 @@ class _OrderState extends State<Order> {
               query = "Đã giao";
               break;
             case 4:
-              query = "Đã huỷ";
+              query = "Bị huỷ";
               break;
             case 5:
               query = "Trả hàng";

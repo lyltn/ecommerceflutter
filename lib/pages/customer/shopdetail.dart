@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 
 class ShopDetailPage extends StatefulWidget {
   final String shopName;
+  final String shopId;
 
-  ShopDetailPage({required this.shopName});
+  ShopDetailPage({required this.shopName, required this.shopId});
 
   @override
   _ShopDetailPageState createState() => _ShopDetailPageState();
@@ -18,36 +19,28 @@ class ShopDetailPage extends StatefulWidget {
 class _ShopDetailPageState extends State<ShopDetailPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String? uid;
-  String? shopid;
   List<Product>? productList;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _initializeUid();
     _fetchProductByShop();
   }
 
-  Future<void> _initializeUid() async {
-    uid = await ShopService.getCurrentUserId();
-    shopid = await ShopService.getUidByShopName(widget.shopName);
-    setState(() {}); // Update UI after UID is obtained
-    print("useriddddddddddddddd:${uid}");
-  }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  void _fetchProductByShop() async{
+  void _fetchProductByShop() async {
     CustomerService customerService = CustomerService();
-    uid = await ShopService.getCurrentUserId();
     try {
-      productList = await customerService.fetchProductByShopId(uid!);
-      print("productlist ${productList}");
+      var products = await customerService.fetchProductByShopId(widget.shopId);
+      setState(() {
+        productList = products;
+      });
     } catch (e) {
       print("Error fetching products: $e");
     }
@@ -90,14 +83,14 @@ class _ShopDetailPageState extends State<ShopDetailPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          shopid != null
-              ? ShopInfoTab(shopid: shopid!) // Add the new ShopInfoTab
+          widget.shopId != null
+              ? ShopInfoTab(shopid: widget.shopId!) // Add the new ShopInfoTab
               : Center(child: CircularProgressIndicator()),
-          shopid != null
-              ? ProductsTab(uid: shopid!, list: productList!,)
+          widget.shopId != null
+              ? ProductsTab(uid: widget.shopId!, list: productList!,)
               : Center(child: CircularProgressIndicator()),
-          shopid != null
-              ? CategoriesTab(shopid: shopid!)
+          widget.shopId != null
+              ? CategoriesTab(shopid: widget.shopId!)
               : Center(child: CircularProgressIndicator()),
         ],
       ),
@@ -119,7 +112,7 @@ class ProductsTab extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.6, // Adjust
+        childAspectRatio: 0.55, // Adjust
       ),
       itemCount: list.length,
       itemBuilder: (context, index) {

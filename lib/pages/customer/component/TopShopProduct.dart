@@ -28,7 +28,7 @@ class TopShopProduct extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ShopDetailPage(shopName: shopName)),
+                    MaterialPageRoute(builder: (context) => ShopDetailPage(shopName: shopName, shopId: userId,)),
                   );
                 },
                 child: const Text(

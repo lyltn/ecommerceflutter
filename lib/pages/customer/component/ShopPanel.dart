@@ -6,6 +6,7 @@ class ShopPanel extends StatelessWidget {
   final String shopName;
   final String shopAddress;
   final int productCount;
+  final String shopId;
 
   const ShopPanel({
     Key? key,
@@ -13,10 +14,14 @@ class ShopPanel extends StatelessWidget {
     required this.shopName,
     required this.shopAddress,
     required this.productCount,
+    required this.shopId
   }) : super(key: key);
+
+
 
   @override
   Widget build(BuildContext context) {
+    print("shopidd at shoppanel : ${shopId}");
     return Card(
       margin: const EdgeInsets.all(3.0),
       color: Colors.grey[100],
@@ -80,13 +85,20 @@ class ShopPanel extends StatelessWidget {
                   },
                   child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ShopDetailPage(
-                                shopName: shopName), // Pass shopName here
-                          ),
-                        );
+                        print("Navigating to ShopDetailPage with shopId: $shopId and shopName: $shopName");
+                        if (shopId != null && shopName.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ShopDetailPage(
+                                shopName: shopName,
+                                shopId: shopId,
+                              ),
+                            ),
+                          );
+                        } else {
+                          print("Error: shopId or shopName is null or empty.");
+                        }
                       },
                       child: const Text('Xem Shop')),
                 ),
