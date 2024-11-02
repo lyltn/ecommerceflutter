@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommercettl/services/order_service.dart';
+import 'package:ecommercettl/services/shop_service.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -9,6 +12,25 @@ class HomeShop extends StatefulWidget {
 }
 
 class _HomeShopState extends State<HomeShop> {
+  int? countOrder;
+  String? uid;
+  int? countOrderall;
+  double? revenue;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Anonymous async function inside initState
+    () async {
+      uid = await ShopService.getCurrentUserId();
+      countOrder = (await OrderService.getOrderCountByShopId(uid!));
+      revenue = await OrderService.getTotalByShopIdAndStatus(uid!);
+      countOrderall = (await OrderService.getTotalByShopId(uid!));
+      setState(() {}); // Update UI if necessary
+    }();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,13 +60,24 @@ class _HomeShopState extends State<HomeShop> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                    child: _buildInfoCard("250", "Đơn hàng", Colors.green)),
+                  child: _buildInfoCard(
+                    countOrder?.toString() ??
+                        "0", // Chuyển đổi countOrder thành chuỗi
+                    "Đơn hàng",
+                    Colors.green,
+                  ),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
-                    child: _buildInfoCard(
-                        "75,000 VNĐ", "Doanh thu", Colors.green)),
+                  child: _buildInfoCard(
+                    "${revenue?.toString() ?? "0"} đ", // Chuyển đổi revenue thành chuỗi và thêm đơn vị
+                    "Doanh thu",
+                    Colors.green,
+                  ),
+                ),
               ],
             ),
+
             const SizedBox(height: 16),
             // Vòng tròn phần trăm cho đặt hàng và bỏ giỏ hàng
             Row(
@@ -52,7 +85,9 @@ class _HomeShopState extends State<HomeShop> {
               children: [
                 Expanded(
                     child: _buildCircularIndicator(
-                        "Đặt hàng", 0.81, Colors.green)),
+                        "Đã nhận hàng",
+                        (countOrderall ?? 0) / (countOrder ?? 1),
+                        Colors.green)),
                 const SizedBox(width: 16),
                 Expanded(
                     child: _buildCircularIndicator(
@@ -96,7 +131,7 @@ class _HomeShopState extends State<HomeShop> {
           Text(
             value,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               color: color,
               fontWeight: FontWeight.bold,
             ),

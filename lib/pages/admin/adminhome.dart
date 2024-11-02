@@ -1,4 +1,6 @@
 import 'package:ecommercettl/pages/admin/adminleftnav.dart';
+import 'package:ecommercettl/services/order_service.dart';
+import 'package:ecommercettl/services/user_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -11,6 +13,20 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
+  int? countOrder;
+  int? countUser;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Anonymous async function inside initState
+    () async {
+      countOrder = await OrderService.getTotalOrderCount();
+      countUser = await UserService.getUserCount();
+    }();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,15 +69,18 @@ class _AdminHomeState extends State<AdminHome> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoCard("75", "Người dùng", Colors.green),
-                _buildInfoCard("250", "Đơn hàng", Colors.green),
+                _buildInfoCard(
+                    countUser?.toString() ?? '0', "Người dùng", Colors.green),
+                _buildInfoCard(
+                    countOrder?.toString() ?? '0', "Đơn hàng", Colors.green),
               ],
             ),
             SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildCircularIndicator("Đặt hàng", 0.81, Colors.green),
+                _buildCircularIndicator("Đặt hàng",
+                    (countOrder ?? 0) / (countUser ?? 1), Colors.green),
                 _buildCircularIndicator("Thêm giỏ hàng", 0.22, Colors.green),
                 _buildCircularIndicator("Tạo blog", 0.62, Colors.green),
               ],
@@ -148,10 +167,10 @@ class _AdminHomeState extends State<AdminHome> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildAnalyticsItem("Views", "39.7k", Colors.green),
-          _buildAnalyticsItem("New Members", "5.8k", Colors.green),
+          _buildAnalyticsItem("Views", "14", Colors.green),
+          _buildAnalyticsItem("New Members", "2", Colors.green),
           _buildAnalyticsItem("Avg Time", "250.1", Colors.green),
-          _buildAnalyticsItem("Total Visits", "150k", Colors.green),
+          _buildAnalyticsItem("Total Visits", "7", Colors.green),
         ],
       ),
     );
